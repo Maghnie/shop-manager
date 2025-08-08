@@ -13,8 +13,6 @@ import './App.css';
 axios.defaults.baseURL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api/v1/';
 
 const App: React.FC = () => {
-  console.info('MyComponent rendered!');
-  console.log('huh in app.tsx?');
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true); // TODO
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -41,7 +39,7 @@ const App: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div dir="rtl" className="min-h-screen flex items-center justify-center">
         <div className="text-xl text-gray-600">جاري التحميل...</div>
       </div>
     );

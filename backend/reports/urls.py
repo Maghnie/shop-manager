@@ -1,7 +1,6 @@
-
 from django.urls import path
-from . import views
+from .views import ReportsView
 
 urlpatterns = [
-    
+    path('', ReportsView.as_view(), name='reports-list'),
 ]

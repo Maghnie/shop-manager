@@ -25,7 +25,7 @@ class MaterialListView(generics.ListCreateAPIView):
     queryset = Material.objects.all()
     serializer_class = MaterialSerializer
 
-@api_view(['GET'])
+@api_view(['GET']) # TODO confirm not needed if reports app works
 def product_reports(request):
     try:
         total_products = Product.objects.count()

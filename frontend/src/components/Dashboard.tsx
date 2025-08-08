@@ -24,8 +24,8 @@ type Stats = {
 
 type Product = {
   id: number;
-  type_name: string;
-  brand_name: string | null;
+  type_name_ar: string;
+  brand_name_ar: string | null;
   cost_price: number;
   selling_price: number;
   profit: number;
@@ -33,41 +33,46 @@ type Product = {
 };
 
 const Dashboard: React.FC = () => {
-  const [stats, setStats] = useState<Stats | null>(null);
-  // const [recentProducts, setRecentProducts] = useState<Product[]>([]);
-  // const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<Stats>();
+  const [recentProducts, setRecentProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // useEffect(() => {
-  //   const fetchDashboardData = async () => {
-  //     try {
-  //       const [reportsResponse, productsResponse] = await Promise.all([
-  //         // axios.get('/reports/'), 
-  //         // axios.get('/products/?ordering=-created_at&limit=5'),
-  //         axios.get('/reports/'),
-  //         axios.get('/products/'),
-  //       ]);
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const [reportsResponse, productsResponse] = await Promise.all([
+          axios.get('reports/'),
+          axios.get('inventory/products/'),
+        ]);
+        // const [productsResponse] = await Promise.all([
+        //   axios.get('inventory/products/'),
+        // ]);
+        setStats(reportsResponse.data);
+        setRecentProducts(productsResponse.data.results);
+        // window.confirm(" Products length "+productsResponse.data.results.length)
+        // window.confirm("Recent products length "+recentProducts.length)        
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      } finally {        
+        setLoading(false);
+      }
+    };
 
-  //       setStats(reportsResponse.data);
-  //       setRecentProducts(productsResponse.data.results || []);
-  //     } catch (error) {
-  //       console.error('Error fetching dashboard data:', error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
+    fetchDashboardData();
+  }, []);
 
-  //   fetchDashboardData();
-  // }, []);
+  const formatCurrency = (amount: unknown) => {
+    const num = Number(amount);
+    return isNaN(num) ? '—' : num.toFixed(2);
+  };
 
-  const formatCurrency = (amount: number) => `${amount.toFixed(2)}`;
-
-  // if (loading) {
-  //   return (
-  //     <div className="min-h-screen flex items-center justify-center">
-  //       <p className="text-xl text-gray-600">جاري تحميل البيانات...</p>
-  //     </div>
-  //   );
-  // }
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-xl text-gray-600">جاري تحميل البيانات...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8" dir="rtl">
@@ -78,7 +83,7 @@ const Dashboard: React.FC = () => {
       </header>
 
       {/* Stats */}
-      {/* {stats && (
+      {stats && (
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           <StatCard
             title="إجمالي المنتجات"
@@ -109,7 +114,7 @@ const Dashboard: React.FC = () => {
             border="border-orange-500"
           />
         </section>
-      )} */}
+      )}
 
       {/* Quick Actions */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
@@ -122,7 +127,7 @@ const Dashboard: React.FC = () => {
         />
         <QuickAction
           title="إدارة المنتجات"
-          to="/products" // TODO FIXME
+          to="/products" 
           icon={<ClipboardList className="w-8 h-8 mx-auto mb-4" />}
           text="عرض وتحرير المنتجات الموجودة"
           gradient="from-green-500 to-teal-600"
@@ -135,7 +140,7 @@ const Dashboard: React.FC = () => {
           gradient="from-orange-500 to-red-600"
         />
       </section>
-
+       
       {/* Recent Products */}
       {/* {recentProducts.length > 0 && (
         <section className="bg-white rounded-xl shadow-lg p-6">
@@ -154,8 +159,8 @@ const Dashboard: React.FC = () => {
               <tbody>
                 {recentProducts.map((product) => (
                   <tr key={product.id} className="border-b hover:bg-gray-50 text-right">
-                    <td className="py-3 px-4">{product.type_name}</td>
-                    <td className="py-3 px-4">{product.brand_name || 'غير محدد'}</td>
+                    <td className="py-3 px-4">{product.type_name_ar}</td>
+                    <td className="py-3 px-4">{product.brand_name_ar || 'غير محدد'}</td>
                     <td className="py-3 px-4">{formatCurrency(product.cost_price)}</td>
                     <td className="py-3 px-4">{formatCurrency(product.selling_price)}</td>
                     <td className="py-3 px-4 text-green-600 font-semibold">
@@ -174,25 +179,25 @@ const Dashboard: React.FC = () => {
 
 export default Dashboard;
 
-// type StatCardProps = {
-//   title: string;
-//   value: string;
-//   icon: React.ReactNode;
-//   bg: string;
-//   border: string;
-// };
+type StatCardProps = {
+  title: string;
+  value: string;
+  icon: React.ReactNode;
+  bg: string;
+  border: string;
+};
 
-// const StatCard: React.FC<StatCardProps> = ({ title, value, icon, bg, border }) => (
-//   <div className={`bg-white rounded-xl shadow-lg p-6 border-r-4 ${border}`}>
-//     <div className="flex items-center">
-//       <div className={`p-3 rounded-full ${bg} ml-4`}>{icon}</div>
-//       <div>
-//         <p className="text-sm text-gray-600">{title}</p>
-//         <p className="text-3xl font-bold text-gray-800">{value}</p>
-//       </div>
-//     </div>
-//   </div>
-// );
+const StatCard: React.FC<StatCardProps> = ({ title, value, icon, bg, border }) => (
+  <div className={`bg-white rounded-xl shadow-lg p-6 border-r-4 ${border}`}>
+    <div className="flex items-center">
+      <div className={`p-3 rounded-full ${bg} ml-4`}>{icon}</div>
+      <div>
+        <p className="text-sm text-gray-600">{title}</p>
+        <p className="text-3xl font-bold text-gray-800">{value}</p>
+      </div>
+    </div>
+  </div>
+);
 
 type QuickActionProps = {
   title: string;

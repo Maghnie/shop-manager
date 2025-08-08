@@ -5,7 +5,7 @@
 /* Arabic font optimization */
 body {
   font-family: 'Segoe UI', 'Tahoma', 'Arial', 'Helvetica Neue', sans-serif;
-  direction: rtl;
+  direction: rtl; 
 }
 
 /* Custom scrollbar for RTL */
