@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 
 const ProductList = () => {
+  
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [productTypes, setProductTypes] = useState([]);
@@ -23,20 +24,21 @@ const ProductList = () => {
   useEffect(() => {
     applyFilters();
   }, [products, filters]);
-
-  const fetchData = async () => {
+  
+  const fetchData = async () => {    
     try {
+      
       const [productsRes, typesRes, brandsRes, materialsRes] = await Promise.all([
-        axios.get('/products/'),
-        axios.get('/product-types/'),
-        axios.get('/brands/'),
-        axios.get('/materials/')
+        axios.get('inventory/products/'),
+        axios.get('inventory/product-types/'),
+        axios.get('inventory/brands/'),
+        axios.get('inventory/materials/'),
       ]);
-
-      setProducts(productsRes.data.results || productsRes.data);
-      setProductTypes(typesRes.data);
-      setBrands(brandsRes.data);
-      setMaterials(materialsRes.data);
+      
+      setProducts(productsRes.data.results); // || productsRes.data);           
+      setProductTypes(typesRes.data.results);
+      setBrands(brandsRes.data.results);
+      setMaterials(materialsRes.data.results);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -45,7 +47,7 @@ const ProductList = () => {
   };
 
   const applyFilters = () => {
-    let filtered = products;
+    let filtered = products.reverse();
 
     if (filters.search) {
       filtered = filtered.filter(product =>
@@ -186,6 +188,7 @@ const ProductList = () => {
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
+                <th className="text-right py-4 px-6 font-semibold text-gray-700">رقم تعريفي</th>
                 <th className="text-right py-4 px-6 font-semibold text-gray-700">النوع</th>
                 <th className="text-right py-4 px-6 font-semibold text-gray-700">العلامة التجارية</th>
                 <th className="text-right py-4 px-6 font-semibold text-gray-700">الحجم</th>
@@ -206,8 +209,9 @@ const ProductList = () => {
               ) : (
                 filteredProducts.map((product) => (
                   <tr key={product.id} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-4 px-6 font-medium">{product.type_name}</td>
-                    <td className="py-4 px-6">{product.brand_name || 'غير محدد'}</td>
+                    <td className="py-4 px-6 font-medium">{product.id}</td>
+                    <td className="py-4 px-6 font-medium">{product.type_name_ar}</td>
+                    <td className="py-4 px-6">{product.brand_name_ar || 'غير محدد'}</td>
                     <td className="py-4 px-6">{product.size || 'غير محدد'}</td>
                     <td className="py-4 px-6">{formatCurrency(product.cost_price)}</td>
                     <td className="py-4 px-6">{formatCurrency(product.selling_price)}</td>

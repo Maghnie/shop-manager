@@ -219,11 +219,11 @@ For support and questions:
 1. venv/Scripts/activate
 1. py -m pip install Django
 1. pip install psycopg2-binary --only-binary :all:
-
+1. pip install python-dotenv
 1. django-admin startproject backend
 ### frontend setup
 1. cd frontend
-1.     npm install
+1. npm install
 1. npm run dev
 1. npm install -D vitest
 1. npm install lucide-react

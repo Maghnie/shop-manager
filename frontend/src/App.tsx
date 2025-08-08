@@ -10,9 +10,11 @@ import Navbar from './components/Navbar';
 import './App.css';
 
 // Configure axios defaults
-axios.defaults.baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+axios.defaults.baseURL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api/v1/';
 
 const App: React.FC = () => {
+  console.info('MyComponent rendered!');
+  console.log('huh in app.tsx?');
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true); // TODO
   const [loading, setLoading] = useState<boolean>(true);
 
