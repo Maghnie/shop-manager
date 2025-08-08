@@ -50,9 +50,12 @@ const ProductList = () => {
     let filtered = products.reverse();
 
     if (filters.search) {
+      // window.confirm("in search now")
       filtered = filtered.filter(product =>
-        product.type_name?.toLowerCase().includes(filters.search.toLowerCase()) ||
-        product.brand_name?.toLowerCase().includes(filters.search.toLowerCase()) ||
+        product.type_name_ar?.toLowerCase().includes(filters.search.toLowerCase()) ||
+        product.brand_name_ar?.toLowerCase().includes(filters.search.toLowerCase()) ||
+        product.type_name_en?.toLowerCase().includes(filters.search.toLowerCase()) ||
+        product.brand_name_en?.toLowerCase().includes(filters.search.toLowerCase()) ||
         product.tags?.toLowerCase().includes(filters.search.toLowerCase())
       );
     }
