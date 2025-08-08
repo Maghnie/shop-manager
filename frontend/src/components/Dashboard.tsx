@@ -83,7 +83,7 @@ const Dashboard: React.FC = () => {
       </header>
 
       {/* Stats */}
-      {stats && (
+      {/* {stats && (
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           <StatCard
             title="إجمالي المنتجات"
@@ -114,7 +114,7 @@ const Dashboard: React.FC = () => {
             border="border-orange-500"
           />
         </section>
-      )}
+      )} */}
 
       {/* Quick Actions */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">

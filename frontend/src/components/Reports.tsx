@@ -26,8 +26,19 @@ ChartJS.register(
   Legend
 );
 
+type Summary = {
+  avg_profit_usd: number;
+  avg_profit_pct: number;
+  max_profit_usd: number;
+};
+
+type Stats = {
+  total_products: number;
+  summary: Summary;
+};
+
 const Reports = () => {
-  const [reportData, setReportData] = useState(null);
+  const [reportData, setReportData] = useState<Stats>();
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('profit-usd');
   const chartRefs = {
@@ -42,7 +53,7 @@ const Reports = () => {
 
   const fetchReportData = async () => {
     try {
-      const response = await axios.get('/reports/');
+      const response = await axios.get('reports/');
       setReportData(response.data);
     } catch (error) {
       console.error('Error fetching report data:', error);
@@ -288,17 +299,17 @@ const Reports = () => {
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="h-96">
-                  <Bar
+                  {/* <Bar
                     ref={chartRefs.profitUsd}
-                    data={getChartData(reportData.top_profit_usd, 'profit')}
+                    data={getChartData(reportData.summary.max_profit_usd, 'profit')}
                     options={chartOptions}
-                  />
+                  /> */}
                 </div>
                 <div className="h-96">
-                  <Pie
-                    data={getChartData(reportData.top_profit_usd, 'profit')}
+                  {/* <Pie
+                    data={getChartData(reportData.summary.max_profit_usd, 'profit')}
                     options={pieOptions}
-                  />
+                  /> */}
                 </div>
               </div>
             </div>
@@ -316,14 +327,14 @@ const Reports = () => {
                 </button>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="h-96">
+                {/* <div className="h-96">
                   <Bar
                     ref={chartRefs.profitPct}
                     data={getChartData(reportData.top_profit_percentage, 'profit_percentage')}
                     options={chartOptions}
                   />
-                </div>
-                <div className="h-96">
+                </div> */}
+                {/* <div className="h-96">
                   <Line
                     data={{
                       ...getChartData(reportData.top_profit_percentage, 'profit_percentage'),
@@ -337,14 +348,14 @@ const Reports = () => {
                     }}
                     options={chartOptions}
                   />
-                </div>
+                </div> */}
               </div>
             </div>
           )}
 
           {activeTab === 'lowest-profit' && (
             <div>
-              <div className="flex justify-between items-center mb-6">
+              {/* <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xl font-semibold text-gray-800">المنتجات ذات أقل ربح</h3>
                 <button
                   onClick={() => downloadChart(chartRefs.lowestProfit, 'lowest-profit')}
@@ -352,8 +363,8 @@ const Reports = () => {
                 >
                   تحميل المخطط
                 </button>
-              </div>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              </div> */}
+              {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="h-96">
                   <Bar
                     ref={chartRefs.lowestProfit}
@@ -388,7 +399,7 @@ const Reports = () => {
                     </tbody>
                   </table>
                 </div>
-              </div>
+              </div> */}
             </div>
           )}
 
@@ -412,17 +423,17 @@ const Reports = () => {
                         <span className="text-gray-600">أعلى ربح:</span>
                         <span className="font-semibold text-green-600">{formatCurrency(reportData.summary.max_profit_usd)}</span>
                       </div>
-                      <div className="flex justify-between">
+                      {/* <div className="flex justify-between">
                         <span className="text-gray-600">أقل ربح:</span>
                         <span className="font-semibold text-red-600">{formatCurrency(reportData.summary.min_profit_usd)}</span>
-                      </div>
+                      </div> */}
                     </div>
                   </div>
 
-                  <div className="bg-blue-50 rounded-lg p-6">
+                  {/* <div className="bg-blue-50 rounded-lg p-6">
                     <h4 className="text-lg font-semibold text-gray-800 mb-4">أفضل 3 منتجات (الربح $)</h4>
                     <div className="space-y-3">
-                      {reportData.top_profit_usd.slice(0, 3).map((product, index) => (
+                      {reportData.summary.max_profit_usd.slice(0, 3).map((product, index) => (
                         <div key={index} className="flex justify-between items-center">
                           <div className="flex items-center">
                             <span className={`inline-block w-6 h-6 rounded-full text-white text-xs flex items-center justify-center mr-3 ${
@@ -436,14 +447,14 @@ const Reports = () => {
                         </div>
                       ))}
                     </div>
-                  </div>
+                  </div> */}
                 </div>
 
-                <div className="space-y-6">
+                {/* <div className="space-y-6">
                   <div className="bg-green-50 rounded-lg p-6">
                     <h4 className="text-lg font-semibold text-gray-800 mb-4">أفضل 3 منتجات (نسبة الربح %)</h4>
                     <div className="space-y-3">
-                      {reportData.top_profit_percentage.slice(0, 3).map((product, index) => (
+                      {reportData.summary.max_profit_percentage.slice(0, 3).map((product, index) => (
                         <div key={index} className="flex justify-between items-center">
                           <div className="flex items-center">
                             <span className={`inline-block w-6 h-6 rounded-full text-white text-xs flex items-center justify-center mr-3 ${
@@ -457,9 +468,9 @@ const Reports = () => {
                         </div>
                       ))}
                     </div>
-                  </div>
+                  </div> */}
 
-                  <div className="bg-red-50 rounded-lg p-6">
+                  {/* <div className="bg-red-50 rounded-lg p-6">
                     <h4 className="text-lg font-semibold text-gray-800 mb-4">المنتجات التي تحتاج مراجعة</h4>
                     <div className="space-y-3">
                       {reportData.lowest_profit.slice(0, 3).map((product, index) => (
@@ -472,8 +483,8 @@ const Reports = () => {
                         </div>
                       ))}
                     </div>
-                  </div>
-                </div>
+                  </div> */}
+                {/* </div> */}
               </div>
             </div>
           )}
