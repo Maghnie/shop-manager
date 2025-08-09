@@ -30,6 +30,7 @@ type Summary = {
   avg_profit_usd: number;
   avg_profit_pct: number;
   max_profit_usd: number;
+  min_profit_usd: number;
 };
 
 type Stats = {
@@ -299,11 +300,11 @@ const Reports = () => {
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="h-96">
-                  {/* <Bar
+                  <Bar
                     ref={chartRefs.profitUsd}
                     data={getChartData(reportData.summary.max_profit_usd, 'profit')}
                     options={chartOptions}
-                  /> */}
+                  />
                 </div>
                 <div className="h-96">
                   {/* <Pie
@@ -355,7 +356,7 @@ const Reports = () => {
 
           {activeTab === 'lowest-profit' && (
             <div>
-              {/* <div className="flex justify-between items-center mb-6">
+              <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xl font-semibold text-gray-800">المنتجات ذات أقل ربح</h3>
                 <button
                   onClick={() => downloadChart(chartRefs.lowestProfit, 'lowest-profit')}
@@ -363,13 +364,13 @@ const Reports = () => {
                 >
                   تحميل المخطط
                 </button>
-              </div> */}
-              {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="h-96">
                   <Bar
                     ref={chartRefs.lowestProfit}
                     data={{
-                      ...getChartData(reportData.lowest_profit, 'profit'),
+                      ...getChartData(reportData.summary.lowest_profit, 'profit'),
                       datasets: [{
                         ...getChartData(reportData.lowest_profit, 'profit').datasets[0],
                         backgroundColor: 'rgba(239, 68, 68, 0.8)',
@@ -391,7 +392,7 @@ const Reports = () => {
                     <tbody>
                       {reportData.lowest_profit.slice(0, 10).map((product, index) => (
                         <tr key={index} className="border-b hover:bg-gray-50">
-                          <td className="py-2">{product.type__name_ar}</td>
+                          <td className="py-2">{product.type_name_ar}</td>
                           <td className="py-2 text-red-600">{formatCurrency(product.profit)}</td>
                           <td className="py-2 text-red-600">{product.profit_percentage.toFixed(1)}%</td>
                         </tr>
@@ -399,7 +400,7 @@ const Reports = () => {
                     </tbody>
                   </table>
                 </div>
-              </div> */}
+              </div>
             </div>
           )}
 
@@ -423,10 +424,10 @@ const Reports = () => {
                         <span className="text-gray-600">أعلى ربح:</span>
                         <span className="font-semibold text-green-600">{formatCurrency(reportData.summary.max_profit_usd)}</span>
                       </div>
-                      {/* <div className="flex justify-between">
+                      <div className="flex justify-between">
                         <span className="text-gray-600">أقل ربح:</span>
                         <span className="font-semibold text-red-600">{formatCurrency(reportData.summary.min_profit_usd)}</span>
-                      </div> */}
+                      </div>
                     </div>
                   </div>
 
@@ -477,7 +478,7 @@ const Reports = () => {
                         <div key={index} className="flex justify-between items-center">
                           <div className="flex items-center">
                             <span className="inline-block w-2 h-2 rounded-full bg-red-500 mr-3"></span>
-                            <span className="text-sm">{product.type__name_ar}</span>
+                            <span className="text-sm">{product.type_name_ar}</span>
                           </div>
                           <span className="font-semibold text-red-600">{formatCurrency(product.profit)}</span>
                         </div>
