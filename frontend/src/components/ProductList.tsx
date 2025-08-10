@@ -196,7 +196,7 @@ const ProductList = () => {
                 <th className="text-right py-4 px-6 font-semibold text-gray-700">العلامة التجارية</th>
                 <th className="text-right py-4 px-6 font-semibold text-gray-700">الحجم</th>
                 <th className="text-right py-4 px-6 font-semibold text-gray-700">سعر التكلفة</th>
-                <th className="text-right py-4 px-6 font-semibold text-gray-700">سعر البيع</th>
+                <th className="text-right py-4 px-6 font-semibold text-gray-700 bg-yellow-200">سعر البيع</th>
                 <th className="text-right py-4 px-6 font-semibold text-gray-700">الربح</th>
                 <th className="text-right py-4 px-6 font-semibold text-gray-700">نسبة الربح</th>
                 <th className="text-center py-4 px-6 font-semibold text-gray-700">الإجراءات</th>
@@ -217,7 +217,7 @@ const ProductList = () => {
                     <td className="py-4 px-6">{product.brand_name_ar || 'غير محدد'}</td>
                     <td className="py-4 px-6">{product.size || 'غير محدد'}</td>
                     <td className="py-4 px-6">{formatCurrency(product.cost_price)}</td>
-                    <td className="py-4 px-6">{formatCurrency(product.selling_price)}</td>
+                    <td className="py-4 px-6 bg-yellow-100">{formatCurrency(product.selling_price)}</td>
                     <td className="py-4 px-6 text-green-600 font-semibold">
                       {formatCurrency(product.profit)}
                     </td>

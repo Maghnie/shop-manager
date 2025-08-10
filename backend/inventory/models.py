@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator
 from decimal import Decimal
 from typing import Optional
+# from backend.settings import AUTH_USER_MODEL
 
 class ProductType(models.Model):
     """Predefined product types"""

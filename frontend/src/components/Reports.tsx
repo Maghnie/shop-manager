@@ -33,13 +33,15 @@ type Summary = {
   min_profit_usd: number;
 };
 
-type Stats = {
+type Stats = { // TODO remove hardcoded structure of endpoint response
   total_products: number;
   summary: Summary;
 };
 
 const Reports = () => {
   const [reportData, setReportData] = useState<Stats>();
+  const [top10ProfitUsdData, settop10PRofitUsdData] = useState([]);
+  const [bottom10ProfitUsdData, setbottom10PRofitUsdData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('profit-usd');
   const chartRefs = {
@@ -54,8 +56,18 @@ const Reports = () => {
 
   const fetchReportData = async () => {
     try {
-      const response = await axios.get('reports/');
-      setReportData(response.data);
+      // const response = await axios.get('reports/');
+      // setReportData(response.data);
+      
+      const [reportDataRes, top10ProfitUsdRes, bottom10ProfitUsdRes] = await Promise.all([
+        axios.get('reports/'),
+        axios.get('reports/top-products/profit-usd/'),
+        axios.get('reports/bottom-products/profit-usd/'),
+      ]);
+            
+      setReportData(reportDataRes.data);          
+      settop10PRofitUsdData(top10ProfitUsdRes.data.top_products_by_profit_usd);
+      setbottom10PRofitUsdData(bottom10ProfitUsdRes.data.bottom_products_by_profit_usd);
     } catch (error) {
       console.error('Error fetching report data:', error);
     } finally {
@@ -63,7 +75,7 @@ const Reports = () => {
     }
   };
 
-  const formatCurrency = (amount) => `$${parseFloat(amount).toFixed(2)}`;
+  const formatCurrency = (amount: string) => `$${parseFloat(amount).toFixed(2)}`;
 
   const downloadChart = (chartRef, filename) => {
     if (chartRef.current) {
@@ -74,14 +86,14 @@ const Reports = () => {
     }
   };
 
-  const getChartData = (data, valueKey, labelKey = 'type__name_ar') => {
+  const getChartData = (data, valueKey, labelKey = 'type') => {
     const top10 = data.slice(0, 10);
     
     return {
-      labels: top10.map(item => item[labelKey] || 'غير محدد'),
+      labels: top10.map(item => item['type']+' '+item[labelKey]+' رقم '+item['id'] || 'غير محدد'),
       datasets: [
         {
-          label: valueKey === 'profit' ? 'الربح ($)' : 
+          label: valueKey === 'profit_usd' ? 'الربح ($)' : 
                  valueKey === 'profit_percentage' ? 'نسبة الربح (%)' : 'القيمة',
           data: top10.map(item => parseFloat(item[valueKey] || 0)),
           backgroundColor: [
@@ -172,7 +184,8 @@ const Reports = () => {
             family: 'system-ui, -apple-system, sans-serif',
           },
           padding: 20,
-        }
+        },
+        padding: 20,
       },
       tooltip: {
         rtl: true,
@@ -210,7 +223,7 @@ const Reports = () => {
 
   const tabs = [
     { id: 'profit-usd', label: 'أعلى ربح ($)', icon: '💰' },
-    { id: 'profit-pct', label: 'أعلى نسبة ربح (%)', icon: '📈' },
+    // { id: 'profit-pct', label: 'أعلى نسبة ربح (%)', icon: '📈' },
     { id: 'lowest-profit', label: 'أقل ربح', icon: '📉' },
     { id: 'summary', label: 'الملخص', icon: '📊' }
   ];
@@ -302,21 +315,21 @@ const Reports = () => {
                 <div className="h-96">
                   <Bar
                     ref={chartRefs.profitUsd}
-                    data={getChartData(reportData.summary.max_profit_usd, 'profit')}
+                    data={getChartData(top10ProfitUsdData, 'profit_usd', 'brand')}
                     options={chartOptions}
                   />
                 </div>
-                <div className="h-96">
-                  {/* <Pie
-                    data={getChartData(reportData.summary.max_profit_usd, 'profit')}
+                <div className="h-100 gap-20">
+                  <Pie
+                    data={getChartData(top10ProfitUsdData, 'profit_usd', 'brand')}
                     options={pieOptions}
-                  /> */}
+                  />
                 </div>
               </div>
             </div>
           )}
 
-          {activeTab === 'profit-pct' && (
+          {/* {activeTab === 'profit-pct' && (
             <div>
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xl font-semibold text-gray-800">المنتجات ذات أعلى نسبة ربح</h3>
@@ -328,14 +341,14 @@ const Reports = () => {
                 </button>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* <div className="h-96">
+                <div className="h-96">
                   <Bar
                     ref={chartRefs.profitPct}
                     data={getChartData(reportData.top_profit_percentage, 'profit_percentage')}
                     options={chartOptions}
                   />
-                </div> */}
-                {/* <div className="h-96">
+                </div>
+                <div className="h-96">
                   <Line
                     data={{
                       ...getChartData(reportData.top_profit_percentage, 'profit_percentage'),
@@ -349,10 +362,10 @@ const Reports = () => {
                     }}
                     options={chartOptions}
                   />
-                </div> */}
+                </div>
               </div>
             </div>
-          )}
+          )} */}
 
           {activeTab === 'lowest-profit' && (
             <div>
@@ -370,9 +383,9 @@ const Reports = () => {
                   <Bar
                     ref={chartRefs.lowestProfit}
                     data={{
-                      ...getChartData(reportData.summary.lowest_profit, 'profit'),
+                      ...getChartData(bottom10ProfitUsdData, 'profit_usd', 'brand'),
                       datasets: [{
-                        ...getChartData(reportData.lowest_profit, 'profit').datasets[0],
+                        ...getChartData(bottom10ProfitUsdData, 'profit_usd', 'brand').datasets[0],
                         backgroundColor: 'rgba(239, 68, 68, 0.8)',
                         borderColor: 'rgba(239, 68, 68, 1)',
                       }]
@@ -386,15 +399,15 @@ const Reports = () => {
                       <tr className="border-b">
                         <th className="text-right py-2">المنتج</th>
                         <th className="text-right py-2">الربح</th>
-                        <th className="text-right py-2">نسبة الربح</th>
+                        {/* <th className="text-right py-2">نسبة الربح</th> */}
                       </tr>
                     </thead>
                     <tbody>
-                      {reportData.lowest_profit.slice(0, 10).map((product, index) => (
+                      {bottom10ProfitUsdData.slice(0, 10).map((product, index) => (
                         <tr key={index} className="border-b hover:bg-gray-50">
-                          <td className="py-2">{product.type_name_ar}</td>
-                          <td className="py-2 text-red-600">{formatCurrency(product.profit)}</td>
-                          <td className="py-2 text-red-600">{product.profit_percentage.toFixed(1)}%</td>
+                          <td className="py-2">{product.type+' '+product.brand+' رقم '+product.id}</td>
+                          <td className="py-2 text-red-600">{formatCurrency(product.profit_usd)}</td>
+                          {/* <td className="py-2 text-red-600">{product.profit_percentage.toFixed(1)}%</td> */}
                         </tr>
                       ))}
                     </tbody>
@@ -431,10 +444,10 @@ const Reports = () => {
                     </div>
                   </div>
 
-                  {/* <div className="bg-blue-50 rounded-lg p-6">
+                  <div className="bg-blue-50 rounded-lg p-6">
                     <h4 className="text-lg font-semibold text-gray-800 mb-4">أفضل 3 منتجات (الربح $)</h4>
                     <div className="space-y-3">
-                      {reportData.summary.max_profit_usd.slice(0, 3).map((product, index) => (
+                      {top10ProfitUsdData.slice(0, 3).map((product, index) => (
                         <div key={index} className="flex justify-between items-center">
                           <div className="flex items-center">
                             <span className={`inline-block w-6 h-6 rounded-full text-white text-xs flex items-center justify-center mr-3 ${
@@ -442,20 +455,21 @@ const Reports = () => {
                             }`}>
                               {index + 1}
                             </span>
-                            <span className="text-sm">{product.type__name_ar}</span>
+                            <span className="text-sm">{product.type+' '+product.brand+' رقم '+product.id}</span>
                           </div>
-                          <span className="font-semibold text-green-600">{formatCurrency(product.profit)}</span>
+                          <span className="font-semibold text-green-600">{formatCurrency(product.profit_usd)}</span>
                         </div>
                       ))}
                     </div>
-                  </div> */}
+                  </div>
                 </div>
 
-                {/* <div className="space-y-6">
-                  <div className="bg-green-50 rounded-lg p-6">
+                <div className="space-y-6"> 
+                  
+                  {false && <div className="bg-green-50 rounded-lg p-6"> {/* FIXME */}
                     <h4 className="text-lg font-semibold text-gray-800 mb-4">أفضل 3 منتجات (نسبة الربح %)</h4>
                     <div className="space-y-3">
-                      {reportData.summary.max_profit_percentage.slice(0, 3).map((product, index) => (
+                      {top10ProfitUsdData.slice(0, 3).map((product, index) => ( /* FIXME */
                         <div key={index} className="flex justify-between items-center">
                           <div className="flex items-center">
                             <span className={`inline-block w-6 h-6 rounded-full text-white text-xs flex items-center justify-center mr-3 ${
@@ -463,29 +477,30 @@ const Reports = () => {
                             }`}>
                               {index + 1}
                             </span>
-                            <span className="text-sm">{product.type__name_ar}</span>
+                            <span className="text-sm">{product.type}</span>
                           </div>
                           <span className="font-semibold text-green-600">{product.profit_percentage.toFixed(1)}%</span>
                         </div>
                       ))}
                     </div>
-                  </div> */}
-
-                  {/* <div className="bg-red-50 rounded-lg p-6">
+                  </div> 
+                  }               
+                  
+                  <div className="bg-red-50 rounded-lg p-6">
                     <h4 className="text-lg font-semibold text-gray-800 mb-4">المنتجات التي تحتاج مراجعة</h4>
                     <div className="space-y-3">
-                      {reportData.lowest_profit.slice(0, 3).map((product, index) => (
+                      {bottom10ProfitUsdData.slice(0, 3).map((product, index) => ( /* FIXME */
                         <div key={index} className="flex justify-between items-center">
                           <div className="flex items-center">
                             <span className="inline-block w-2 h-2 rounded-full bg-red-500 mr-3"></span>
-                            <span className="text-sm">{product.type_name_ar}</span>
+                            <span className="text-sm">{product.type+' '+product.brand+' رقم '+product.id}</span>
                           </div>
-                          <span className="font-semibold text-red-600">{formatCurrency(product.profit)}</span>
+                          <span className="font-semibold text-red-600">{formatCurrency(product.profit_usd)}</span>
                         </div>
                       ))}
                     </div>
-                  </div> */}
-                {/* </div> */}
+                  </div>
+                </div>
               </div>
             </div>
           )}

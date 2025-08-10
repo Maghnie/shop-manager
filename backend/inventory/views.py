@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from django.db.models import Avg, Sum, Count
 from .models import Product, ProductType, Brand, Material
 from .serializers import ProductSerializer, ProductTypeSerializer, BrandSerializer, MaterialSerializer
+from rest_framework.permissions import AllowAny
 
 class ProductListCreateView(generics.ListCreateAPIView):
     queryset = Product.objects.all()
@@ -12,6 +13,7 @@ class ProductListCreateView(generics.ListCreateAPIView):
 class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    permission_classes = [AllowAny]  # FIXME just for testing because everyone can POST/PUT/GET/DELETE
 
 class ProductTypeListView(generics.ListCreateAPIView):
     queryset = ProductType.objects.all()

@@ -57,6 +57,8 @@ api_v1_patterns = [
     
     # Authentication endpoints
     path('auth/token/', obtain_auth_token, name='api_v1_token_auth'),
+    # path('auth/', include('dj_rest_auth.urls')), # login, logout, password reset
+    # path('auth/registration/', include('dj_rest_auth.registration.urls')), # register
 ]
 
 urlpatterns = [

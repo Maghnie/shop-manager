@@ -37,15 +37,15 @@ const ProductForm = () => {
   const fetchOptions = async () => {
     try {
       const [typesRes, brandsRes, materialsRes] = await Promise.all([
-        axios.get('/product-types/'),
-        axios.get('/brands/'),
-        axios.get('/materials/')
+        axios.get('/inventory/product-types/'),
+        axios.get('/inventory/brands/'),
+        axios.get('/inventory/materials/')
       ]);
 
       setOptions({
-        productTypes: typesRes.data,
-        brands: brandsRes.data,
-        materials: materialsRes.data
+        productTypes: typesRes.data.results,
+        brands: brandsRes.data.results,
+        materials: materialsRes.data.results
       });
     } catch (error) {
       console.error('Error fetching options:', error);
@@ -54,7 +54,7 @@ const ProductForm = () => {
 
   const fetchProduct = async () => {
     try {
-      const response = await axios.get(`/products/${id}/`);
+      const response = await axios.get(`/inventory/products/${id}/`);
       const product = response.data;
       
       setFormData({
@@ -69,7 +69,7 @@ const ProductForm = () => {
       });
     } catch (error) {
       console.error('Error fetching product:', error);
-      navigate('/products');
+      navigate('/inventory/products');
     }
   };
 
@@ -96,7 +96,7 @@ const ProductForm = () => {
     if (!formData.cost_price || parseFloat(formData.cost_price) <= 0) {
       newErrors.cost_price = 'سعر التكلفة يجب أن يكون أكبر من صفر';
     }
-    if (!formData.selling_price || parseFloat(formData.selling_price) <= 0) {
+    if (parseFloat(formData.selling_price) <= parseFloat(0)) {
       newErrors.selling_price = 'سعر البيع يجب أن يكون أكبر من صفر';
     }
     if (parseFloat(formData.selling_price) <= parseFloat(formData.cost_price)) {
@@ -125,12 +125,12 @@ const ProductForm = () => {
       };
 
       if (isEditing) {
-        await axios.put(`/products/${id}/`, payload);
+        await axios.put(`/inventory/products/${id}/`, payload);
       } else {
-        await axios.post('/products/', payload);
+        await axios.post('/inventory/products/', payload);
       }
 
-      navigate('/products');
+      navigate('/inventory/products');
     } catch (error) {
       console.error('Error saving product:', error);
       if (error.response?.data) {
@@ -345,7 +345,7 @@ const ProductForm = () => {
         <div className="mt-8 flex justify-end space-x-4 space-x-reverse">
           <button
             type="button"
-            onClick={() => navigate('/products')}
+            onClick={() => navigate('/inventory/products')}
             className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition duration-200"
           >
             إلغاء

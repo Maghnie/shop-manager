@@ -16,6 +16,7 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', '*']
 
 # Application definition
 INSTALLED_APPS = [
+    # 'users',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -26,7 +27,12 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'corsheaders',
     'inventory',
-    'reports',
+    'reports', 
+    # 'dj_rest_auth',
+    # 'dj_rest_auth.registration',
+    # 'allauth',
+    # 'allauth.account',  
+    # 'allauth.socialaccount', 
 ]
 
 MIDDLEWARE = [
@@ -38,9 +44,12 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # 'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'backend.urls'
+
+# AUTH_USER_MODEL = 'users.User'
 
 TEMPLATES = [
     {
