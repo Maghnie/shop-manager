@@ -38,10 +38,130 @@ type Stats = { // TODO remove hardcoded structure of endpoint response
   summary: Summary;
 };
 
+type ColorName = "green" | "purple" | "orange" | "blue" | "red";
+
+interface StatCardProps {
+  color: ColorName;
+  label: string;
+  value: string | number;
+  icon: string;
+}
+
+const colorClasses: Record<ColorName, { from: string; to: string; text: string }> = {
+  green: {
+    from: "from-green-500",
+    to: "to-green-600",
+    text: "text-green-100",
+  },
+  purple: {
+    from: "from-purple-500",
+    to: "to-purple-600",
+    text: "text-purple-100",
+  },
+  orange: {
+    from: "from-orange-500",
+    to: "to-orange-600",
+    text: "text-orange-100",
+  },
+  blue: {
+    from: "from-blue-500",
+    to: "to-blue-600",
+    text: "text-blue-100",
+  },
+  red: {
+    from: "from-red-500",
+    to: "to-red-600",
+    text: "text-red-100",
+  },
+};
+
+export const StatCard: React.FC<StatCardProps> = ({ color, label, value, icon }) => {
+  const { from, to, text } = colorClasses[color];
+
+  return (
+    <div className={`bg-gradient-to-br ${from} ${to} text-white rounded-xl shadow-lg p-6`}>
+      <div className="flex items-center justify-between">
+        <div>
+          <p className={`${text} text-sm`}>{label}</p>
+          <p className="text-3xl font-bold">{value}</p>
+        </div>
+        <span className="text-4xl opacity-80">{icon}</span>
+      </div>
+    </div>
+  );
+};
+
+interface SummaryCardProps {
+  title: string;
+  bgColorClass: string;
+  children: React.ReactNode;
+}
+
+const SummaryCard: React.FC<SummaryCardProps> = ({ title, bgColorClass, children }) => (
+  <div className={`${bgColorClass} rounded-lg p-6`}>
+    <h4 className="text-lg font-semibold text-gray-800 mb-4">{title}</h4>
+    {children}
+  </div>
+);
+
+
+interface StatRowProps {
+  label: string;
+  value: React.ReactNode;
+}
+
+const StatRow: React.FC<StatRowProps> = ({ label, value }) => (
+  <div className="flex justify-between">
+    <span className="text-gray-600">{label}</span>
+    <span className="font-semibold">{value}</span>
+  </div>
+);
+
+interface Product {
+  type: string;
+  brand: string;
+  id: number;
+  profit_usd?: number;
+  profit_percentage?: number;
+}
+
+interface ProductListProps {
+  data: Product[];
+  valueFormatter: (product: Product) => string;
+  showRank?: boolean;
+}
+
+const rankColors = ["bg-yellow-500", "bg-gray-400", "bg-orange-600"];
+
+const ProductList: React.FC<ProductListProps> = ({ data, valueFormatter, showRank = true }) => (
+  <div className="space-y-3">
+    {data.slice(0, 3).map((product, index) => (
+      <div key={index} className="flex justify-between items-center">
+        <div className="flex items-center">
+          {showRank ? (
+            <span
+              className={`inline-block w-6 h-6 rounded-full text-white text-xs flex items-center justify-center mr-3 ${rankColors[index] || ""}`}
+            >
+              {index + 1}
+            </span>
+          ) : (
+            <span className="inline-block w-2 h-2 rounded-full bg-red-500 mr-3"></span>
+          )}
+          <span className="text-sm">{`${product.type} ${product.brand} رقم ${product.id}`}</span>
+        </div>
+        <span className={`font-semibold ${showRank ? "text-green-600" : "text-red-600"}`}>
+          {valueFormatter(product)}
+        </span>
+      </div>
+    ))}
+  </div>
+);
+
 const Reports = () => {
   const [reportData, setReportData] = useState<Stats>();
-  const [top10ProfitUsdData, settop10PRofitUsdData] = useState([]);
-  const [bottom10ProfitUsdData, setbottom10PRofitUsdData] = useState([]);
+  const [top10ProfitUsdData, settop10ProfitUsdData] = useState([]);
+  const [top10ProfitPctData, settop10ProfitPctData] = useState([]);
+  const [bottom10ProfitUsdData, setbottom10ProfitUsdData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('profit-usd');
   const chartRefs = {
@@ -59,15 +179,17 @@ const Reports = () => {
       // const response = await axios.get('reports/');
       // setReportData(response.data);
       
-      const [reportDataRes, top10ProfitUsdRes, bottom10ProfitUsdRes] = await Promise.all([
-        axios.get('reports/'),
+      const [reportDataRes, top10ProfitUsdRes, top10ProfitPctRes, bottom10ProfitUsdRes] = await Promise.all([
+        axios.get('reports/'), // TODO remove hardcoded api endpoints
         axios.get('reports/top-products/profit-usd/'),
+        axios.get('reports/top-products/profit-percentage/'),
         axios.get('reports/bottom-products/profit-usd/'),
       ]);
             
       setReportData(reportDataRes.data);          
-      settop10PRofitUsdData(top10ProfitUsdRes.data.top_products_by_profit_usd);
-      setbottom10PRofitUsdData(bottom10ProfitUsdRes.data.bottom_products_by_profit_usd);
+      settop10ProfitUsdData(top10ProfitUsdRes.data.top_products_by_profit_usd);
+      settop10ProfitPctData(top10ProfitPctRes.data.top_products_by_profit_percentage);
+      setbottom10ProfitUsdData(bottom10ProfitUsdRes.data.bottom_products_by_profit_usd);
     } catch (error) {
       console.error('Error fetching report data:', error);
     } finally {
@@ -75,7 +197,10 @@ const Reports = () => {
     }
   };
 
-  const formatCurrency = (amount: string) => `$${parseFloat(amount).toFixed(2)}`;
+  const formatCurrency = (amount: unknown) => {
+    const num = Number(amount);
+    return isNaN(num) ? '—' : num.toFixed(2);
+  };
 
   const downloadChart = (chartRef, filename) => {
     if (chartRef.current) {
@@ -236,46 +361,31 @@ const Reports = () => {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl shadow-lg p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-blue-100 text-sm">إجمالي المنتجات</p>
-              <p className="text-3xl font-bold">{reportData.total_products}</p>
-            </div>
-            <span className="text-4xl opacity-80">📦</span>
-          </div>
-        </div>
-
-        <div className="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-xl shadow-lg p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-green-100 text-sm">متوسط الربح</p>
-              <p className="text-3xl font-bold">{formatCurrency(reportData.summary.avg_profit_usd)}</p>
-            </div>
-            <span className="text-4xl opacity-80">💰</span>
-          </div>
-        </div>
-
-        <div className="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl shadow-lg p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-purple-100 text-sm">متوسط نسبة الربح</p>
-              <p className="text-3xl font-bold">{reportData.summary.avg_profit_pct.toFixed(1)}%</p>
-            </div>
-            <span className="text-4xl opacity-80">📈</span>
-          </div>
-        </div>
-
-        <div className="bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-xl shadow-lg p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-orange-100 text-sm">أعلى ربح</p>
-              <p className="text-3xl font-bold">{formatCurrency(reportData.summary.max_profit_usd)}</p>
-            </div>
-            <span className="text-4xl opacity-80">🎯</span>
-          </div>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">        
+        <StatCard
+          color="blue"
+          label="إجمالي المنتجات"
+          value={`${reportData.total_products}`}
+          icon="📦"
+        />
+        <StatCard
+          color="green"
+          label="متوسط الربح"
+          value={formatCurrency(reportData.summary.avg_profit_usd)}
+          icon="💰"
+        />
+        <StatCard
+          color="purple"
+          label="متوسط نسبة الربح"
+          value={`${reportData.summary.avg_profit_pct.toFixed(1)}%`}
+          icon="📈"
+        />
+        <StatCard
+          color="orange"
+          label="أعلى ربح"
+          value={formatCurrency(reportData.summary.max_profit_usd)}
+          icon="🎯"
+        />
       </div>
 
       {/* Tabs */}
@@ -417,93 +527,49 @@ const Reports = () => {
             </div>
           )}
 
-          {activeTab === 'summary' && (
+          {activeTab === "summary" && (
             <div>
               <h3 className="text-xl font-semibold text-gray-800 mb-6">ملخص شامل للأرباح</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-6">
-                  <div className="bg-gray-50 rounded-lg p-6">
-                    <h4 className="text-lg font-semibold text-gray-800 mb-4">إحصائيات الأرباح</h4>
+                  
+                  <SummaryCard title="إحصائيات الأرباح" bgColorClass="bg-gray-50">
                     <div className="space-y-3">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">متوسط الربح:</span>
-                        <span className="font-semibold">{formatCurrency(reportData.summary.avg_profit_usd)}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">متوسط نسبة الربح:</span>
-                        <span className="font-semibold">{reportData.summary.avg_profit_pct.toFixed(1)}%</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">أعلى ربح:</span>
-                        <span className="font-semibold text-green-600">{formatCurrency(reportData.summary.max_profit_usd)}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">أقل ربح:</span>
-                        <span className="font-semibold text-red-600">{formatCurrency(reportData.summary.min_profit_usd)}</span>
-                      </div>
+                      <StatRow label="متوسط الربح:" value={formatCurrency(reportData.summary.avg_profit_usd)} />
+                      <StatRow label="متوسط نسبة الربح:" value={`${reportData.summary.avg_profit_pct.toFixed(1)}%`} />
+                      <StatRow label="أعلى ربح:" value={<span className="text-green-600">{formatCurrency(reportData.summary.max_profit_usd)}</span>} />
+                      <StatRow label="أقل ربح:" value={<span className="text-red-600">{formatCurrency(reportData.summary.min_profit_usd)}</span>} />
                     </div>
-                  </div>
+                  </SummaryCard>
 
-                  <div className="bg-blue-50 rounded-lg p-6">
-                    <h4 className="text-lg font-semibold text-gray-800 mb-4">أفضل 3 منتجات (الربح $)</h4>
-                    <div className="space-y-3">
-                      {top10ProfitUsdData.slice(0, 3).map((product, index) => (
-                        <div key={index} className="flex justify-between items-center">
-                          <div className="flex items-center">
-                            <span className={`inline-block w-6 h-6 rounded-full text-white text-xs flex items-center justify-center mr-3 ${
-                              index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-400' : 'bg-orange-600'
-                            }`}>
-                              {index + 1}
-                            </span>
-                            <span className="text-sm">{product.type+' '+product.brand+' رقم '+product.id}</span>
-                          </div>
-                          <span className="font-semibold text-green-600">{formatCurrency(product.profit_usd)}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  <SummaryCard title="أفضل 3 منتجات (الربح $)" bgColorClass="bg-blue-50">
+                    <ProductList
+                      data={top10ProfitUsdData}
+                      valueFormatter={(p) => formatCurrency(p.profit_usd!)}
+                    />
+                  </SummaryCard>
                 </div>
 
-                <div className="space-y-6"> 
-                  
-                  {false && <div className="bg-green-50 rounded-lg p-6"> {/* FIXME */}
-                    <h4 className="text-lg font-semibold text-gray-800 mb-4">أفضل 3 منتجات (نسبة الربح %)</h4>
-                    <div className="space-y-3">
-                      {top10ProfitUsdData.slice(0, 3).map((product, index) => ( /* FIXME */
-                        <div key={index} className="flex justify-between items-center">
-                          <div className="flex items-center">
-                            <span className={`inline-block w-6 h-6 rounded-full text-white text-xs flex items-center justify-center mr-3 ${
-                              index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-400' : 'bg-orange-600'
-                            }`}>
-                              {index + 1}
-                            </span>
-                            <span className="text-sm">{product.type}</span>
-                          </div>
-                          <span className="font-semibold text-green-600">{product.profit_percentage.toFixed(1)}%</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div> 
-                  }               
-                  
-                  <div className="bg-red-50 rounded-lg p-6">
-                    <h4 className="text-lg font-semibold text-gray-800 mb-4">المنتجات التي تحتاج مراجعة</h4>
-                    <div className="space-y-3">
-                      {bottom10ProfitUsdData.slice(0, 3).map((product, index) => ( /* FIXME */
-                        <div key={index} className="flex justify-between items-center">
-                          <div className="flex items-center">
-                            <span className="inline-block w-2 h-2 rounded-full bg-red-500 mr-3"></span>
-                            <span className="text-sm">{product.type+' '+product.brand+' رقم '+product.id}</span>
-                          </div>
-                          <span className="font-semibold text-red-600">{formatCurrency(product.profit_usd)}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                <div className="space-y-6">
+                  <SummaryCard title="أفضل 3 منتجات (نسبة الربح %)" bgColorClass="bg-green-50">
+                    <ProductList
+                      data={top10ProfitPctData}
+                      valueFormatter={(p) => `${p.profit_percentage!.toFixed(1)}%`}
+                    />
+                  </SummaryCard>
+
+                  <SummaryCard title="المنتجات التي تحتاج مراجعة" bgColorClass="bg-red-50">
+                    <ProductList
+                      data={bottom10ProfitUsdData}
+                      valueFormatter={(p) => formatCurrency(p.profit_usd!)}
+                      showRank={false}
+                    />
+                  </SummaryCard>
                 </div>
               </div>
             </div>
           )}
+
         </div>
       </div>
     </div>

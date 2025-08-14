@@ -186,7 +186,8 @@ class TopProductsByProfitPercentageView(APIView):
             for product in top_products:
                 products_data.append({
                     'id': product.id,
-                    'name': product.name,
+                    'type': product.type.name_ar,
+                    'brand': product.brand.name_ar,
                     'profit_percentage': round(float(product.profit_percentage), 2) if product.profit_percentage else 0.0,
                     'cost_price': round(float(product.cost_price), 2) if product.cost_price else 0.0,
                     'selling_price': round(float(product.selling_price), 2) if product.selling_price else 0.0,
@@ -209,7 +210,8 @@ class TopProductsByProfitPercentageView(APIView):
                 
                 products_with_profit_pct.append({
                     'id': product.id,
-                    'name': product.name,
+                    'type': product.type.name_ar,
+                    'brand': product.brand.name_ar,
                     'profit_percentage': round(profit_pct, 2),
                     'cost_price': round(cost, 2),
                     'selling_price': round(sell, 2),
@@ -246,8 +248,8 @@ class TopProductsByProfitPercentageView(APIView):
                 del product['calculated_profit_pct']
 
             data = {
-                "total_products": total_products,
-                "limit": limit,
+                # "total_products": total_products,
+                # "limit": limit,
                 "top_products_by_profit_percentage": products_data
             }
             return Response(data, status=status.HTTP_200_OK)
