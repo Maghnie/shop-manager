@@ -348,7 +348,7 @@ const Reports = () => {
 
   const tabs = [
     { id: 'profit-usd', label: 'أعلى ربح ($)', icon: '💰' },
-    // { id: 'profit-pct', label: 'أعلى نسبة ربح (%)', icon: '📈' },
+    { id: 'profit-pct', label: 'أعلى نسبة ربح (%)', icon: '📈' },
     { id: 'lowest-profit', label: 'أقل ربح', icon: '📉' },
     { id: 'summary', label: 'الملخص', icon: '📊' }
   ];
@@ -439,7 +439,7 @@ const Reports = () => {
             </div>
           )}
 
-          {/* {activeTab === 'profit-pct' && (
+          {activeTab === 'profit-pct' && (
             <div>
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xl font-semibold text-gray-800">المنتجات ذات أعلى نسبة ربح</h3>
@@ -451,19 +451,19 @@ const Reports = () => {
                 </button>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="h-96">
+                {/* <div className="h-96">
                   <Bar
                     ref={chartRefs.profitPct}
-                    data={getChartData(reportData.top_profit_percentage, 'profit_percentage')}
+                    data={getChartData(top10ProfitPctData, 'profit_percentage', 'brand')}
                     options={chartOptions}
                   />
-                </div>
+                </div> */}
                 <div className="h-96">
                   <Line
                     data={{
-                      ...getChartData(reportData.top_profit_percentage, 'profit_percentage'),
+                      ...getChartData(top10ProfitPctData, 'profit_percentage', 'brand'),
                       datasets: [{
-                        ...getChartData(reportData.top_profit_percentage, 'profit_percentage').datasets[0],
+                        ...getChartData(top10ProfitPctData, 'profit_percentage', 'brand').datasets[0],
                         fill: false,
                         borderColor: 'rgb(34, 197, 94)',
                         backgroundColor: 'rgba(34, 197, 94, 0.2)',
@@ -475,7 +475,7 @@ const Reports = () => {
                 </div>
               </div>
             </div>
-          )} */}
+          )}
 
           {activeTab === 'lowest-profit' && (
             <div>
