@@ -44,13 +44,8 @@ const Dashboard: React.FC = () => {
           axios.get('reports/'),
           axios.get('inventory/products/'),
         ]);
-        // const [productsResponse] = await Promise.all([
-        //   axios.get('inventory/products/'),
-        // ]);
         setStats(reportsResponse.data);
-        setRecentProducts(productsResponse.data.results);
-        // window.confirm(" Products length "+productsResponse.data.results.length)
-        // window.confirm("Recent products length "+recentProducts.length)        
+        setRecentProducts(productsResponse.data.results);     
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
       } finally {        
