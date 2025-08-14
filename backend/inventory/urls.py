@@ -8,5 +8,4 @@ urlpatterns = [
     path('product-types/', views.ProductTypeListView.as_view(), name='product-types'),
     path('brands/', views.BrandListView.as_view(), name='brands'),
     path('materials/', views.MaterialListView.as_view(), name='materials'),
-    # path('reports/', views.product_reports, name='product-reports'), # TODO confirm not needed if report/views.py works
 ]
