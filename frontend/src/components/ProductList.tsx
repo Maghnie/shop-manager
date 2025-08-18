@@ -82,7 +82,7 @@ const ProductList = () => {
   const handleDelete = async (productId) => {
     if (window.confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
       try {
-        await axios.delete(`/products/${productId}/`);
+        await axios.delete(`/inventory/products/${productId}/`);
         setProducts(products.filter(p => p.id !== productId));
       } catch (error) {
         alert('حدث خطأ أثناء حذف المنتج');
