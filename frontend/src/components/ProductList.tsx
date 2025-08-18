@@ -40,6 +40,7 @@ type Filters = {
 };
 
 const ProductList: React.FC = () => {  
+  const [adminView, setAdminView] = useState<boolean>(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [productTypes, setProductTypes] = useState<ProductType[]>([]);
@@ -147,13 +148,23 @@ const ProductList: React.FC = () => {
             إجمالي المنتجات: {filteredProducts.length} من {products.length}
           </p>
         </div>
-        <Link
-          to="/products/new"
-          className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition duration-200 font-semibold"
-        >
-          إضافة منتج جديد +
-        </Link>
+        <div className="justify-between items-center mb-8">
+          <button
+            onClick={() => setAdminView(!adminView)}
+            className="mb-4 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
+          >
+            {adminView ? '📖' : '📘'}
+          </button>
+          <Link
+            to="/products/new"
+            className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition duration-200 font-semibold"
+          >
+            إضافة منتج جديد +
+          </Link>
+        </div>
       </div>
+
+      
 
       {/* Filters */}
       <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
@@ -238,7 +249,9 @@ const ProductList: React.FC = () => {
                 <th className="text-right py-4 px-6 font-semibold text-gray-700">الربح</th>
                 <th className="text-right py-4 px-6 font-semibold text-gray-700">نسبة الربح</th>
                 <th className="text-right py-4 px-6 font-semibold text-gray-700">الوسوم</th>
-                <th className="text-center py-4 px-6 font-semibold text-gray-700">الإجراءات</th>
+                {adminView && (
+                  <th className="text-center py-4 px-6 font-semibold text-gray-700">الإجراءات</th>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -293,22 +306,24 @@ const ProductList: React.FC = () => {
                         )}
                       </div>
                     </td>
-                    <td className="py-4 px-6">
-                      <div className="flex justify-center space-x-2 space-x-reverse">
-                        <Link
-                          to={`/products/${product.id}/edit`}
-                          className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition duration-200"
-                        >
-                          تحرير
-                        </Link>
-                        <button
-                          onClick={() => handleDelete(product.id)}
-                          className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition duration-200"
-                        >
-                          حذف
-                        </button>
-                      </div>
-                    </td>
+                    {adminView && (
+                      <td className="py-4 px-6">
+                        <div className="flex justify-center space-x-2 space-x-reverse">
+                          <Link
+                            to={`/products/${product.id}/edit`}
+                            className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition duration-200"
+                          >
+                            تحرير
+                          </Link>
+                          <button
+                            onClick={() => handleDelete(product.id)}
+                            className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition duration-200"
+                          >
+                            حذف
+                          </button>
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 ))
               )}
