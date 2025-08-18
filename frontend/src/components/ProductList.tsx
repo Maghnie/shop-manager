@@ -13,7 +13,7 @@ interface Product {
   selling_price: number;
   profit: number;
   profit_percentage: number;
-  tags: string[];
+  tags: string[] | null;
 }
 
 interface ProductMaterial {
@@ -38,8 +38,7 @@ type Filters = {
   material: string;  
 };
 
-const ProductList = () => {
-  
+const ProductList: React.FC = () => {  
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [productTypes, setProductTypes] = useState<ProductType[]>([]);
@@ -82,39 +81,39 @@ const ProductList = () => {
   };
 
   const applyFilters = () => {
-    let filtered = products.reverse();
+    let filtered = [...products].reverse();
 
     if (filters.search) {
-      // window.confirm("in search now")
       filtered = filtered.filter(product =>
         product.type_name_ar?.toLowerCase().includes(filters.search.toLowerCase()) ||
         product.brand_name_ar?.toLowerCase().includes(filters.search.toLowerCase()) ||
         product.type_name_en?.toLowerCase().includes(filters.search.toLowerCase()) ||
         product.brand_name_en?.toLowerCase().includes(filters.search.toLowerCase()) ||
-        product.tags?.toLowerCase().includes(filters.search.toLowerCase())
+        (Array.isArray(product.tags) 
+          && product.tags.join(' ').toLowerCase().includes(filters.search.toLowerCase()))
       );
     }
 
     if (filters.type) {
-      filtered = filtered.filter(product => product.type === parseInt(filters.type));
+      filtered = filtered.filter(product => (product as any).type === parseInt(filters.type));
     }
 
     if (filters.brand) {
-      filtered = filtered.filter(product => product.brand === parseInt(filters.brand));
+      filtered = filtered.filter(product => (product as any).brand === parseInt(filters.brand));
     }
 
     if (filters.material) {
-      filtered = filtered.filter(product => product.material === parseInt(filters.material));
+      filtered = filtered.filter(product => (product as any).material === parseInt(filters.material));
     }
 
     setFilteredProducts(filtered);
   };
 
-  const handleFilterChange = (key, value) => {
+  const handleFilterChange = <K extends keyof Filters>(key: K, value: Filters[K]) => {
     setFilters(prev => ({ ...prev, [key]: value }));
   };
 
-  const handleDelete = async (productId) => {
+  const handleDelete = async (productId: number) => {
     if (window.confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
       try {
         await axios.delete(`/inventory/products/${productId}/`);
@@ -243,7 +242,7 @@ const ProductList = () => {
             <tbody>
               {filteredProducts.length === 0 ? (
                 <tr>
-                  <td colSpan="8" className="text-center py-8 text-gray-500">
+                  <td colSpan={9} className="text-center py-8 text-gray-500">
                     لا توجد منتجات مطابقة للبحث
                   </td>
                 </tr>
