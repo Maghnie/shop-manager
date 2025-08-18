@@ -13,21 +13,6 @@ import {
   LineElement,
 } from 'chart.js';
 import { Bar, Pie, Line } from 'react-chartjs-2';
-import {
-  SummaryCard,
-  ProductList,
-  StatRow
-} from "@/apps/report/components";
-
-import {
-  SUMMARY_CARD_BG,
-  VALUE_COLORS
-} from "@/constants";
-
-import {
-  formatCurrency,
-  formatPercentage
-} from "@/utils";
 
 ChartJS.register(
   CategoryScale,
