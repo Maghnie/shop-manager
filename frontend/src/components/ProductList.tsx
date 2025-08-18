@@ -13,7 +13,7 @@ interface Product {
   selling_price: number;
   profit: number;
   profit_percentage: number;
-  tags: string[] | null;
+  tags_list: string[];
 }
 
 interface ProductMaterial {
@@ -89,8 +89,8 @@ const ProductList: React.FC = () => {
         product.brand_name_ar?.toLowerCase().includes(filters.search.toLowerCase()) ||
         product.type_name_en?.toLowerCase().includes(filters.search.toLowerCase()) ||
         product.brand_name_en?.toLowerCase().includes(filters.search.toLowerCase()) ||
-        (Array.isArray(product.tags) 
-          && product.tags.join(' ').toLowerCase().includes(filters.search.toLowerCase()))
+        (Array.isArray(product.tags_list) 
+          && product.tags_list.join(' ').toLowerCase().includes(filters.search.toLowerCase()))
       );
     }
 
@@ -236,13 +236,14 @@ const ProductList: React.FC = () => {
                 <th className="text-right py-4 px-6 font-semibold text-gray-700 bg-yellow-200">سعر البيع</th>
                 <th className="text-right py-4 px-6 font-semibold text-gray-700">الربح</th>
                 <th className="text-right py-4 px-6 font-semibold text-gray-700">نسبة الربح</th>
+                <th className="text-right py-4 px-6 font-semibold text-gray-700">الوسوم</th>
                 <th className="text-center py-4 px-6 font-semibold text-gray-700">الإجراءات</th>
               </tr>
             </thead>
             <tbody>
               {filteredProducts.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="text-center py-8 text-gray-500">
+                  <td colSpan={10} className="text-center py-8 text-gray-500">
                     لا توجد منتجات مطابقة للبحث
                   </td>
                 </tr>
@@ -260,6 +261,26 @@ const ProductList: React.FC = () => {
                     </td>
                     <td className="py-4 px-6 text-green-600 font-semibold">
                       {product.profit_percentage.toFixed(1)}%
+                    </td>
+                    <td className="py-4 px-6">
+                      <div className="flex flex-wrap gap-1">
+                        {Array.isArray(product.tags_list) && product.tags_list.slice(0, 3).map((tag, idx) => (
+                          <span
+                            key={idx}
+                            className="bg-gray-200 text-gray-700 text-xs px-2 py-1 rounded-full"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                        {product.tags_list.length > 3 && (
+                          <span
+                            className="text-xs text-gray-500 cursor-pointer"
+                            title={Array.isArray(product.tags_list)? product.tags_list.join(', ') : ''}
+                          >
+                            +{product.tags_list.length - 3}
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="py-4 px-6">
                       <div className="flex justify-center space-x-2 space-x-reverse">
