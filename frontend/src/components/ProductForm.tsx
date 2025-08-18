@@ -69,7 +69,7 @@ const ProductForm = () => {
       });
     } catch (error) {
       console.error('Error fetching product:', error);
-      navigate('/inventory/products');
+      navigate('/products/');
     }
   };
 
@@ -130,7 +130,7 @@ const ProductForm = () => {
         await axios.post('/inventory/products/', payload);
       }
 
-      navigate('/inventory/products');
+      navigate('/products');
     } catch (error) {
       console.error('Error saving product:', error);
       if (error.response?.data) {
@@ -345,7 +345,7 @@ const ProductForm = () => {
         <div className="mt-8 flex justify-end space-x-4 space-x-reverse">
           <button
             type="button"
-            onClick={() => navigate('/inventory/products')}
+            onClick={() => navigate('/products')}
             className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition duration-200"
           >
             إلغاء
