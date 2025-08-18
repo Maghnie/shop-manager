@@ -11,6 +11,8 @@ import {
   Legend,
   PointElement,
   LineElement,
+  type ChartData,
+  type ChartOptions,
 } from 'chart.js';
 import { Bar, Pie, Line } from 'react-chartjs-2';
 
@@ -202,7 +204,7 @@ const Reports = () => {
     return isNaN(num) ? '—' : num.toFixed(2);
   };
 
-  const downloadChart = (chartRef, filename) => {
+  const downloadChart = (chartRef: React.RefObject<any>, filename: string) => {
     if (chartRef.current) {
       const link = document.createElement('a');
       link.download = `${filename}.png`;
@@ -211,16 +213,16 @@ const Reports = () => {
     }
   };
 
-  const getChartData = (data, valueKey, labelKey = 'type') => {
+  const getChartData = (data: Product[], valueKey: keyof Product, labelKey: keyof Product = 'type') => {
     const top10 = data.slice(0, 10);
     
     return {
-      labels: top10.map(item => item['type']+' '+item[labelKey]+' رقم '+item['id'] || 'غير محدد'),
+      labels: top10.map(item => `${item.type} ${item[labelKey]} رقم ${item.id}` || 'غير محدد'),
       datasets: [
         {
           label: valueKey === 'profit_usd' ? 'الربح ($)' : 
                  valueKey === 'profit_percentage' ? 'نسبة الربح (%)' : 'القيمة',
-          data: top10.map(item => parseFloat(item[valueKey] || 0)),
+          data: top10.map(item => parseFloat(String(item[valueKey] || 0))),
           backgroundColor: [
             'rgba(59, 130, 246, 0.8)',
             'rgba(16, 185, 129, 0.8)',
@@ -251,7 +253,7 @@ const Reports = () => {
     };
   };
 
-  const chartOptions = {
+  const chartOptions: ChartOptions<'bar' | 'line'> = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -297,7 +299,7 @@ const Reports = () => {
     },
   };
 
-  const pieOptions = {
+  const pieOptions: ChartOptions<'pie'> = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -310,15 +312,14 @@ const Reports = () => {
           },
           padding: 20,
         },
-        padding: 20,
       },
       tooltip: {
         rtl: true,
         callbacks: {
           label: function(context) {
             const label = context.label || '';
-            const value = context.parsed;
-            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+            const value = context.parsed as number;
+            const total = (context.dataset.data as number[]).reduce((a, b) => a + b, 0);
             const percentage = ((value / total) * 100).toFixed(1);
             return `${label}: ${formatCurrency(value)} (${percentage}%)`;
           }
@@ -513,7 +514,7 @@ const Reports = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {bottom10ProfitUsdData.slice(0, 10).map((product, index) => (
+                      {bottom10ProfitUsdData.slice(0, 10).map((product: Product, index) => (
                         <tr key={index} className="border-b hover:bg-gray-50">
                           <td className="py-2">{product.type+' '+product.brand+' رقم '+product.id}</td>
                           <td className="py-2 text-red-600">{formatCurrency(product.profit_usd)}</td>
