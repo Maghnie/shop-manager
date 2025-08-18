@@ -201,7 +201,7 @@ const Reports = () => {
 
   const formatCurrency = (amount: unknown) => {
     const num = Number(amount);
-    return isNaN(num) ? '—' : num.toFixed(2);
+    return isNaN(num) ? '—' : `$${num.toFixed(2)}`;
   };
 
   const downloadChart = (chartRef: React.RefObject<any>, filename: string) => {

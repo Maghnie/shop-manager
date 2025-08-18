@@ -2,15 +2,51 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 
+interface Product {
+  type_name_ar: string;
+  type_name_en: string;
+  brand_name_ar: string;
+  brand_name_en: string;
+  size: string;
+  id: number;
+  cost_price: number;
+  selling_price: number;
+  profit: number;
+  profit_percentage: number;
+  tags: string[];
+}
+
+interface ProductMaterial {
+  id: number;
+  name_ar: string;
+}
+
+interface ProductBrand {
+  id: number;
+  name_ar: string;
+}
+
+interface ProductType {
+  id: number;
+  name_ar: string;
+}
+
+type Filters = {
+  search: string;
+  type: string;
+  brand: string;
+  material: string;  
+};
+
 const ProductList = () => {
   
-  const [products, setProducts] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
-  const [productTypes, setProductTypes] = useState([]);
-  const [brands, setBrands] = useState([]);
-  const [materials, setMaterials] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState({
+  const [products, setProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [productTypes, setProductTypes] = useState<ProductType[]>([]);
+  const [brands, setBrands] = useState<ProductBrand[]>([]);
+  const [materials, setMaterials] = useState<ProductMaterial[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [filters, setFilters] = useState<Filters>({
     search: '',
     type: '',
     brand: '',
@@ -26,8 +62,7 @@ const ProductList = () => {
   }, [products, filters]);
   
   const fetchData = async () => {    
-    try {
-      
+    try {      
       const [productsRes, typesRes, brandsRes, materialsRes] = await Promise.all([
         axios.get('inventory/products/'),
         axios.get('inventory/product-types/'),
@@ -35,7 +70,7 @@ const ProductList = () => {
         axios.get('inventory/materials/'),
       ]);
       
-      setProducts(productsRes.data.results); // || productsRes.data);           
+      setProducts(productsRes.data.results);     
       setProductTypes(typesRes.data.results);
       setBrands(brandsRes.data.results);
       setMaterials(materialsRes.data.results);
@@ -90,7 +125,10 @@ const ProductList = () => {
     }
   };
 
-  const formatCurrency = (amount) => `$${parseFloat(amount).toFixed(2)}`;
+  const formatCurrency = (amount: unknown) => {
+    const num = Number(amount);
+    return isNaN(num) ? '—' : `$${num.toFixed(2)}`;
+  };
 
   if (loading) {
     return (
