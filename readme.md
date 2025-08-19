@@ -227,4 +227,5 @@ For support and questions:
 1. npm run dev
 1. npm install -D vitest
 1. npm install lucide-react
+1. npm install @types/node --save-dev
 
