@@ -9,7 +9,7 @@ export interface Product {
   selling_price: number;
   profit: number;
   profit_percentage: number;
-  tags: string[];
+  tags_list: string[];
 }
 
 export interface ProductType {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Product, ProductType, ProductBrand, ProductMaterial, Filters } from "@/types/product";
+import type { Product, ProductType, ProductBrand, ProductMaterial, Filters } from "@/types/product";
 import { fetchProducts, fetchTypes, fetchBrands, fetchMaterials } from "@/services/productService";
 
 export const useProducts = () => {
@@ -40,7 +40,7 @@ export const useProducts = () => {
 
     if (filters.search) {
       filtered = filtered.filter(p =>
-        [p.type_name_ar, p.type_name_en, p.brand_name_ar, p.brand_name_en, p.tags?.join(" ")]
+        [p.type_name_ar, p.type_name_en, p.brand_name_ar, p.brand_name_en, p.tags_list.join(" ")]
           .some(val => val?.toLowerCase().includes(filters.search.toLowerCase()))
       );
     }
