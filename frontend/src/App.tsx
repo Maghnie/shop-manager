@@ -4,7 +4,7 @@ import axios from 'axios';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 // import ProductList from './components/ProductList';
-import ProductList from './pages/ProductList';
+import ProductList from './pages/ProductOverview';
 import ProductForm from './components/ProductForm';
 import Reports from './components/Reports';
 import Navbar from './components/Navbar';

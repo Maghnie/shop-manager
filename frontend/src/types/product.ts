@@ -2,9 +2,9 @@ export interface Product {
   id: number;
   type_name_ar: string;
   type_name_en: string;
-  brand_name_ar: string;
-  brand_name_en: string;
-  size: string;
+  brand_name_ar: string | null;
+  brand_name_en: string | null;
+  size: string | null;
   cost_price: number;
   selling_price: number;
   profit: number;

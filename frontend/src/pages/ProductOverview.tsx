@@ -5,7 +5,7 @@ import ProductFilters from "@/components/products/ProductFilters";
 import ProductTable from "@/components/products/ProductTable";
 import { deleteProduct } from "@/services/productService";
 
-const ProductListPage: React.FC = () => {
+const ProductOverview: React.FC = () => {
   const { products, filteredProducts, productTypes, brands, materials, loading, filters, setFilters, setProducts } = useProducts();
   const [adminView, setAdminView] = useState(false);
 
@@ -65,4 +65,4 @@ const ProductListPage: React.FC = () => {
   );
 };
 
-export default ProductListPage;
+export default ProductOverview;

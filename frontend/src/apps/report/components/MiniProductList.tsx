@@ -1,5 +1,5 @@
 import React from "react";
-import { RANK_COLORS, VALUE_COLORS } from "../constants/colors";
+import { RANK_COLORS, VALUE_COLORS } from "../../../constants/colors";
 
 interface Product {
   type: string;

@@ -7,12 +7,12 @@ import {
 import {
   SUMMARY_CARD_BG,
   VALUE_COLORS
-} from "../constants/colors";
+} from "../../../constants/colors";
 
 import {
   formatCurrency,
   formatPercentage
-} from "../utils/formatters";
+} from "../../../utils/formatters";
 
 import {
     reportData,
