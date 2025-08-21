@@ -1,29 +1,49 @@
 // __tests__/setup.ts
-import { beforeAll, afterEach, afterAll } from 'vitest';
+import { beforeAll, afterEach } from 'vitest';
 import { cleanup } from '@testing-library/react';
-import * as matchers from '@testing-library/jest-dom/matchers';
-import { expect } from 'vitest';
-
-// Extend Vitest's expect with testing-library matchers
-expect.extend(matchers);
+import '@testing-library/jest-dom'; // This auto-extends expect in newer versions
 
 // Setup
 beforeAll(() => {
   // Mock IntersectionObserver
-  global.IntersectionObserver = class IntersectionObserver {
-    constructor() {}
-    disconnect() {}
-    observe() {}
-    unobserve() {}
-  };
+  Object.defineProperty(global, 'IntersectionObserver', {
+    writable: true,
+    value: class IntersectionObserver {
+      constructor(callback: IntersectionObserverCallback, options?: IntersectionObserverInit) {}
+      disconnect = vi.fn()
+      observe = vi.fn()
+      unobserve = vi.fn()
+      readonly root = null
+      readonly rootMargin = '0px'
+      readonly thresholds = [0]
+    }
+  });
 
   // Mock ResizeObserver
-  global.ResizeObserver = class ResizeObserver {
-    constructor(cb: any) {}
-    observe() {}
-    unobserve() {}
-    disconnect() {}
-  };
+  Object.defineProperty(global, 'ResizeObserver', {
+    writable: true,
+    value: class ResizeObserver {
+      constructor(callback: ResizeObserverCallback) {}
+      observe = vi.fn()
+      unobserve = vi.fn()
+      disconnect = vi.fn()
+    }
+  });
+
+  // Mock matchMedia
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: vi.fn().mockImplementation(query => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(), // deprecated
+      removeListener: vi.fn(), // deprecated
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+  });
 });
 
 // Cleanup after each test

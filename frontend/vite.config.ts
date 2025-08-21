@@ -19,14 +19,24 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/__tests__/setup.ts'],
     coverage: {
+      enabled: true,
+      provider: 'v8', 
       reporter: ['text', 'json', 'html'],
+      reportsDirectory: './coverage',
+      // Keep coverage files when tests complete
+      cleanOnRerun: false,
+      // Include source files even if not tested
+      all: true,
       exclude: [
         'node_modules/',
-        'src/__tests__/',
+        'src/__tests__/setup.ts',
+        'src/__tests__/handlers.ts',
         '**/*.d.ts',
-        '**/*.config.*',
+        '**/*.config.ts',
         'dist/',
         'coverage/',
+        'public/',
+        'src/main.tsx'
       ],
       thresholds: {
         global: {

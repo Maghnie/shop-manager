@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import { http, HttpResponse } from 'msw';
 import userEvent from '@testing-library/user-event';
 import { server } from '../mocks/server';
 import ProductListPage from '../../components/ProductList';
@@ -53,8 +54,11 @@ describe('Product Management Integration Tests', () => {
   it('should handle error states gracefully', async () => {
     // Mock API error by intercepting the request
     server.use(
-      rest.get('/api/inventory/products/', (req, res, ctx) => {
-        return res(ctx.status(500), ctx.json({ error: 'Server error' }));
+      http.get('/api/inventory/products/', () => {
+        return HttpResponse.json(
+          { error: 'Server error' }, 
+          { status: 500 }
+        );
       })
     );
 

@@ -1,11 +1,9 @@
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 
 export const handlers = [
   // Products endpoints
-  rest.get('/api/inventory/products/', (req, res, ctx) => {
-    return res(
-      ctx.status(200),
-      ctx.json({
+  http.get('/api/inventory/products/', () => {  
+    return HttpResponse.json({
         results: [
           {
             id: 1,
@@ -24,52 +22,46 @@ export const handlers = [
             material: 1
           }
         ]
-      })
-    );
+    });
   }),
 
-  rest.get('/api/inventory/product-types/', (req, res, ctx) => {
-    return res(
-      ctx.status(200),
-      ctx.json({
+  http.get('/api/inventory/product-types/', () => {
+    return HttpResponse.json({
         results: [
           { id: 1, name_ar: 'كرسي' },
           { id: 2, name_ar: 'طاولة' }
         ]
-      })
-    );
+    });
   }),
 
-  rest.get('/api/inventory/brands/', (req, res, ctx) => {
-    return res(
-      ctx.status(200),
-      ctx.json({
+  http.get('/api/inventory/brands/', () => {
+    return HttpResponse.json({
         results: [
           { id: 1, name_ar: 'ايكيا' },
           { id: 2, name_ar: 'هوم سنتر' }
         ]
-      })
-    );
+    });
   }),
 
-  rest.get('/api/inventory/materials/', (req, res, ctx) => {
-    return res(
-      ctx.status(200),
-      ctx.json({
+  http.get('/api/inventory/materials/', () => {
+    return HttpResponse.json({
         results: [
           { id: 1, name_ar: 'خشب' },
           { id: 2, name_ar: 'معدن' }
         ]
-      })
-    );
+    });
   }),
 
-  rest.delete('/api/inventory/products/:id/', (req, res, ctx) => {
-    return res(ctx.status(204));
+  // DELETE handler - returns empty response with 204 status
+  http.delete('/api/inventory/products/:id/', ({ params }) => {
+  return new HttpResponse(null, { status: 204 });
   }),
-
-  // Error handlers for testing error scenarios
-  rest.get('/api/inventory/products/error', (req, res, ctx) => {
-    return res(ctx.status(500), ctx.json({ error: 'Server error' }));
+  
+  // Error handler - returns 500 with JSON error
+  http.get('/api/inventory/products/error', () => {
+  return HttpResponse.json(
+      { error: 'Server error' }, 
+      { status: 500 }
+  );
   }),
 ];
