@@ -17,26 +17,29 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: ['./src/__tests__/setup.ts'],
+    setupFiles: ['./src/setup.ts'],
     coverage: {
       enabled: true,
       provider: 'v8', 
       reporter: ['text', 'json', 'html'],
       reportsDirectory: './coverage',
+      reportOnFailure: true,
       // Keep coverage files when tests complete
       cleanOnRerun: false,
       // Include source files even if not tested
       all: true,
       exclude: [
         'node_modules/',
-        'src/__tests__/setup.ts',
+        'src/setup.ts',
         'src/__tests__/handlers.ts',
         '**/*.d.ts',
         '**/*.config.ts',
+        '**/*.config.js',
         'dist/',
         'coverage/',
         'public/',
-        'src/main.tsx'
+        'src/main.tsx',
+        '**/index.tsx',
       ],
       thresholds: {
         global: {
@@ -47,7 +50,8 @@ export default defineConfig({
         }
       }
     },
-    include: ['src/**/*.{test,spec}.{js,jsx,ts,tsx}'],
-    exclude: ['node_modules/', 'dist/']
+    include: [
+      'src/**/*.{test,spec}.{js,jsx,ts,tsx}',
+    ]
   },
 })
