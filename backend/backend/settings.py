@@ -6,11 +6,12 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Load environment variables from the root .env file
-load_dotenv(BASE_DIR.parent / '.env')
+env_file_loaded = load_dotenv(BASE_DIR.parent / '.env')
+if not env_file_loaded:
+    print("Did not find env file - using default values.")
 
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-change-this-key-in-production')
 DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
-# DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', '*']
 
@@ -58,7 +59,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
-                'django.template.context_processors.debug',
+                # 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -140,29 +141,14 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Internationalization
-LANGUAGE_CODE = 'ar'
+LANGUAGE_CODE = 'en'
 TIME_ZONE = 'Asia/Beirut'
 USE_I18N = True
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images) - FIXED
+# Static files - Simple development configuration
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-
-# For Django admin styling
-STATICFILES_DIRS = []
-
-# Only add frontend static files if building for production
-if not DEBUG:
-    STATICFILES_DIRS = [
-        BASE_DIR.parent / 'frontend/dist/static',
-    ]
-# # Development static file serving # this causes errors?
-# if DEBUG:
-#     import os
-#     STATICFILES_DIRS = [
-#         os.path.join(BASE_DIR, 'staticfiles'),
-#     ]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
