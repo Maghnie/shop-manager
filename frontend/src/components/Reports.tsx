@@ -11,7 +11,6 @@ import {
   Legend,
   PointElement,
   LineElement,
-  type ChartData,
   type ChartOptions,
 } from 'chart.js';
 import { Bar, Pie, Line } from 'react-chartjs-2';
