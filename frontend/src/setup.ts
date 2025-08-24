@@ -9,7 +9,7 @@ beforeAll(() => {
   Object.defineProperty(global, 'IntersectionObserver', {
     writable: true,
     value: class IntersectionObserver {
-      constructor(callback: IntersectionObserverCallback, options?: IntersectionObserverInit) {}
+      constructor(_callback: IntersectionObserverCallback, _options?: IntersectionObserverInit) {}
       disconnect = vi.fn()
       observe = vi.fn()
       unobserve = vi.fn()
@@ -23,7 +23,7 @@ beforeAll(() => {
   Object.defineProperty(global, 'ResizeObserver', {
     writable: true,
     value: class ResizeObserver {
-      constructor(callback: ResizeObserverCallback) {}
+      constructor(_callback: ResizeObserverCallback) {}
       observe = vi.fn()
       unobserve = vi.fn()
       disconnect = vi.fn()
