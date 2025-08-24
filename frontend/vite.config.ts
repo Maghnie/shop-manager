@@ -21,7 +21,7 @@ export default defineConfig({
     coverage: {
       enabled: true,
       provider: 'v8', 
-      reporter: ['text', 'json', 'html'],
+      reporter: ['text', 'json', 'html', 'json-summary'],
       reportsDirectory: './coverage',
       reportOnFailure: true,
       // Keep coverage files when tests complete

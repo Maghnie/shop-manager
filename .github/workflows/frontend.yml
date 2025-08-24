@@ -135,3 +135,50 @@ jobs:
         name: build-files
         path: ./frontend/dist/
         retention-days: 30
+  
+  # Generate dynamic project badges for the readme
+  generate-badges:
+    name: Generate Project Badges
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    needs: [test, code-quality, security]
+    defaults:
+      run:
+        working-directory: ./frontend
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Generate all badges
+      run: |
+        mkdir -p badges
+        
+        # Coverage badge (assuming coverage report exists)
+        if [ -f "coverage/coverage-summary.json" ]; then
+          COVERAGE=$(node -e "
+            const coverage = JSON.parse(require('fs').readFileSync('./coverage/coverage-summary.json', 'utf8'));
+            console.log(Math.round(coverage.total.lines.pct));
+          ")
+          COLOR=$([ $COVERAGE -ge 80 ] && echo "brightgreen" || ([ $COVERAGE -ge 60 ] && echo "yellow" || echo "red"))
+          echo "{\"schemaVersion\":1,\"label\":\"coverage\",\"message\":\"${COVERAGE}%\",\"color\":\"${COLOR}\"}" > badges/coverage.json
+        fi
+        
+        # Tests badge
+        echo "{\"schemaVersion\":1,\"label\":\"tests\",\"message\":\"passing\",\"color\":\"brightgreen\"}" > badges/tests.json
+        
+        # Build badge  
+        echo "{\"schemaVersion\":1,\"label\":\"build\",\"message\":\"passing\",\"color\":\"brightgreen\"}" > badges/build.json
+        
+        # Node version badge (from package.json)
+        if [ -f "package.json" ]; then
+          NODE_VERSION=$(node -e "console.log(JSON.parse(require('fs').readFileSync('./package.json', 'utf8')).engines?.node || 'unknown')")
+          echo "{\"schemaVersion\":1,\"label\":\"node\",\"message\":\"${NODE_VERSION}\",\"color\":\"blue\"}" > badges/node.json
+        fi
+
+    - name: Deploy badges to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./frontend/badges
+        destination_dir: badges
+        keep_files: true
