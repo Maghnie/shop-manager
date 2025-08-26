@@ -237,4 +237,16 @@ For support and questions:
 1. npm run dev
 1. npm install -D vitest
 1. npm install lucide-react
+1. npm install @types/node --save-dev
+1. npm install -D @playwright/test
+1. npx playwright install
+1. Install MSW CLI globally for easier setup: npm install -g msw
+1. After installing MSW, you'll need to initialize it for browser mocking: npx msw init public/ --save
+
+# For power  users
+
+## Run tests
+
+1. `cd frontend`
+1. `npm run tests`
 

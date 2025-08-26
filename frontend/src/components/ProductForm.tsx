@@ -1,13 +1,65 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, type ChangeEvent, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 
-const ProductForm = () => {
-  const { id } = useParams();
+// Type definitions
+interface ProductType {
+  id: number;
+  name_ar: string;
+}
+
+interface Brand {
+  id: number;
+  name_ar: string;
+}
+
+interface Material {
+  id: number;
+  name_ar: string;
+}
+
+interface FormData {
+  type: string;
+  brand: string;
+  cost_price: string;
+  selling_price: string;
+  size: string;
+  weight: string;
+  material: string;
+  tags: string;
+}
+
+interface Options {
+  productTypes: ProductType[];
+  brands: Brand[];
+  materials: Material[];
+}
+
+interface ValidationErrors {
+  [key: string]: string;
+}
+
+interface ProductPayload {
+  type: string;
+  brand: string | null;
+  cost_price: number;
+  selling_price: number;
+  size: string;
+  weight: number | null;
+  material: string | null;
+  tags: string;
+}
+
+interface ApiErrorResponse {
+  [key: string]: string | string[];
+}
+
+const ProductForm: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isEditing = Boolean(id);
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     type: '',
     brand: '',
     cost_price: '',
@@ -18,28 +70,28 @@ const ProductForm = () => {
     tags: ''
   });
 
-  const [options, setOptions] = useState({
+  const [options, setOptions] = useState<Options>({
     productTypes: [],
     brands: [],
     materials: []
   });
 
-  const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState<boolean>(false);
+  const [errors, setErrors] = useState<ValidationErrors>({});
 
   useEffect(() => {
     fetchOptions();
-    if (isEditing) {
+    if (isEditing && id) {
       fetchProduct();
     }
-  }, [id]);
+  }, [id, isEditing]);
 
-  const fetchOptions = async () => {
+  const fetchOptions = async (): Promise<void> => {
     try {
       const [typesRes, brandsRes, materialsRes] = await Promise.all([
-        axios.get('/inventory/product-types/'),
-        axios.get('/inventory/brands/'),
-        axios.get('/inventory/materials/')
+        axios.get<{ results: ProductType[] }>('/inventory/product-types/'),
+        axios.get<{ results: Brand[] }>('/inventory/brands/'),
+        axios.get<{ results: Material[] }>('/inventory/materials/')
       ]);
 
       setOptions({
@@ -52,19 +104,21 @@ const ProductForm = () => {
     }
   };
 
-  const fetchProduct = async () => {
+  const fetchProduct = async (): Promise<void> => {
+    if (!id) return;
+    
     try {
       const response = await axios.get(`/inventory/products/${id}/`);
       const product = response.data;
       
       setFormData({
-        type: product.type || '',
-        brand: product.brand || '',
-        cost_price: product.cost_price || '',
-        selling_price: product.selling_price || '',
+        type: product.type?.toString() || '',
+        brand: product.brand?.toString() || '',
+        cost_price: product.cost_price?.toString() || '',
+        selling_price: product.selling_price?.toString() || '',
         size: product.size || '',
-        weight: product.weight || '',
-        material: product.material || '',
+        weight: product.weight?.toString() || '',
+        material: product.material?.toString() || '',
         tags: product.tags || ''
       });
     } catch (error) {
@@ -73,7 +127,7 @@ const ProductForm = () => {
     }
   };
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -89,17 +143,28 @@ const ProductForm = () => {
     }
   };
 
-  const validateForm = () => {
-    const newErrors = {};
+  const validateForm = (): boolean => {
+    const newErrors: ValidationErrors = {};
 
-    if (!formData.type) newErrors.type = 'نوع المنتج مطلوب';
-    if (!formData.cost_price || parseFloat(formData.cost_price) <= 0) {
+    // Type validation - required field
+    if (!formData.type || formData.type.trim() === '') {
+      newErrors.type = 'نوع المنتج مطلوب';
+    }
+
+    // Cost price validation
+    const costPrice = parseFloat(formData.cost_price);
+    if (!formData.cost_price || isNaN(costPrice) || costPrice <= 0) {
       newErrors.cost_price = 'سعر التكلفة يجب أن يكون أكبر من صفر';
     }
-    if (parseFloat(formData.selling_price) <= parseFloat(0)) {
+
+    // Selling price validation
+    const sellingPrice = parseFloat(formData.selling_price);
+    if (!formData.selling_price || isNaN(sellingPrice) || sellingPrice <= 0) {
       newErrors.selling_price = 'سعر البيع يجب أن يكون أكبر من صفر';
     }
-    if (parseFloat(formData.selling_price) <= parseFloat(formData.cost_price)) {
+
+    // Compare selling price with cost price only if both are valid numbers
+    if (!isNaN(costPrice) && !isNaN(sellingPrice) && sellingPrice <= costPrice) {
       newErrors.selling_price = 'سعر البيع يجب أن يكون أكبر من سعر التكلفة';
     }
 
@@ -107,7 +172,7 @@ const ProductForm = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     
     if (!validateForm()) return;
@@ -115,16 +180,18 @@ const ProductForm = () => {
     setLoading(true);
     
     try {
-      const payload = {
-        ...formData,
+      const payload: ProductPayload = {
+        type: formData.type,
+        brand: formData.brand || null,
         cost_price: parseFloat(formData.cost_price),
         selling_price: parseFloat(formData.selling_price),
+        size: formData.size,
         weight: formData.weight ? parseFloat(formData.weight) : null,
-        brand: formData.brand || null,
-        material: formData.material || null
+        material: formData.material || null,
+        tags: formData.tags
       };
 
-      if (isEditing) {
+      if (isEditing && id) {
         await axios.put(`/inventory/products/${id}/`, payload);
       } else {
         await axios.post('/inventory/products/', payload);
@@ -133,12 +200,16 @@ const ProductForm = () => {
       navigate('/products');
     } catch (error) {
       console.error('Error saving product:', error);
-      if (error.response?.data) {
-        const serverErrors = {};
-        Object.keys(error.response.data).forEach(key => {
-          serverErrors[key] = Array.isArray(error.response.data[key]) 
-            ? error.response.data[key][0] 
-            : error.response.data[key];
+      
+      // Handle API validation errors
+      const axiosError = error as AxiosError<ApiErrorResponse>;
+      if (axiosError.response?.data) {
+        const serverErrors: ValidationErrors = {};
+        Object.keys(axiosError.response.data).forEach(key => {
+          const errorValue = axiosError.response!.data[key];
+          serverErrors[key] = Array.isArray(errorValue) 
+            ? errorValue[0] 
+            : errorValue;
         });
         setErrors(serverErrors);
       }
@@ -147,7 +218,7 @@ const ProductForm = () => {
     }
   };
 
-  const calculateProfit = () => {
+  const calculateProfit = (): { profit: number; profitPct: number } => {
     const cost = parseFloat(formData.cost_price) || 0;
     const selling = parseFloat(formData.selling_price) || 0;
     const profit = selling - cost;

@@ -11,9 +11,23 @@ import {
   Legend,
   PointElement,
   LineElement,
-  type ChartOptions,
 } from 'chart.js';
 import { Bar, Pie, Line } from 'react-chartjs-2';
+import {
+  SummaryCard,
+  ProductList,
+  StatRow
+} from "@/apps/report/components";
+
+import {
+  SUMMARY_CARD_BG,
+  VALUE_COLORS
+} from "@/constants";
+
+import {
+  formatCurrency,
+  formatPercentage
+} from "@/utils";
 
 ChartJS.register(
   CategoryScale,
@@ -200,10 +214,10 @@ const Reports = () => {
 
   const formatCurrency = (amount: unknown) => {
     const num = Number(amount);
-    return isNaN(num) ? '—' : `$${num.toFixed(2)}`;
+    return isNaN(num) ? '—' : num.toFixed(2);
   };
 
-  const downloadChart = (chartRef: React.RefObject<any>, filename: string) => {
+  const downloadChart = (chartRef, filename) => {
     if (chartRef.current) {
       const link = document.createElement('a');
       link.download = `${filename}.png`;
@@ -212,16 +226,16 @@ const Reports = () => {
     }
   };
 
-  const getChartData = (data: Product[], valueKey: keyof Product, labelKey: keyof Product = 'type') => {
+  const getChartData = (data, valueKey, labelKey = 'type') => {
     const top10 = data.slice(0, 10);
     
     return {
-      labels: top10.map(item => `${item.type} ${item[labelKey]} رقم ${item.id}` || 'غير محدد'),
+      labels: top10.map(item => item['type']+' '+item[labelKey]+' رقم '+item['id'] || 'غير محدد'),
       datasets: [
         {
           label: valueKey === 'profit_usd' ? 'الربح ($)' : 
                  valueKey === 'profit_percentage' ? 'نسبة الربح (%)' : 'القيمة',
-          data: top10.map(item => parseFloat(String(item[valueKey] || 0))),
+          data: top10.map(item => parseFloat(item[valueKey] || 0)),
           backgroundColor: [
             'rgba(59, 130, 246, 0.8)',
             'rgba(16, 185, 129, 0.8)',
@@ -252,7 +266,7 @@ const Reports = () => {
     };
   };
 
-  const chartOptions: ChartOptions<'bar' | 'line'> = {
+  const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -298,7 +312,7 @@ const Reports = () => {
     },
   };
 
-  const pieOptions: ChartOptions<'pie'> = {
+  const pieOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -311,14 +325,15 @@ const Reports = () => {
           },
           padding: 20,
         },
+        padding: 20,
       },
       tooltip: {
         rtl: true,
         callbacks: {
           label: function(context) {
             const label = context.label || '';
-            const value = context.parsed as number;
-            const total = (context.dataset.data as number[]).reduce((a, b) => a + b, 0);
+            const value = context.parsed;
+            const total = context.dataset.data.reduce((a, b) => a + b, 0);
             const percentage = ((value / total) * 100).toFixed(1);
             return `${label}: ${formatCurrency(value)} (${percentage}%)`;
           }
@@ -348,7 +363,7 @@ const Reports = () => {
 
   const tabs = [
     { id: 'profit-usd', label: 'أعلى ربح ($)', icon: '💰' },
-    { id: 'profit-pct', label: 'أعلى نسبة ربح (%)', icon: '📈' },
+    // { id: 'profit-pct', label: 'أعلى نسبة ربح (%)', icon: '📈' },
     { id: 'lowest-profit', label: 'أقل ربح', icon: '📉' },
     { id: 'summary', label: 'الملخص', icon: '📊' }
   ];
@@ -439,7 +454,7 @@ const Reports = () => {
             </div>
           )}
 
-          {activeTab === 'profit-pct' && (
+          {/* {activeTab === 'profit-pct' && (
             <div>
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xl font-semibold text-gray-800">المنتجات ذات أعلى نسبة ربح</h3>
@@ -451,19 +466,19 @@ const Reports = () => {
                 </button>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* <div className="h-96">
+                <div className="h-96">
                   <Bar
                     ref={chartRefs.profitPct}
-                    data={getChartData(top10ProfitPctData, 'profit_percentage', 'brand')}
+                    data={getChartData(reportData.top_profit_percentage, 'profit_percentage')}
                     options={chartOptions}
                   />
-                </div> */}
+                </div>
                 <div className="h-96">
                   <Line
                     data={{
-                      ...getChartData(top10ProfitPctData, 'profit_percentage', 'brand'),
+                      ...getChartData(reportData.top_profit_percentage, 'profit_percentage'),
                       datasets: [{
-                        ...getChartData(top10ProfitPctData, 'profit_percentage', 'brand').datasets[0],
+                        ...getChartData(reportData.top_profit_percentage, 'profit_percentage').datasets[0],
                         fill: false,
                         borderColor: 'rgb(34, 197, 94)',
                         backgroundColor: 'rgba(34, 197, 94, 0.2)',
@@ -475,7 +490,7 @@ const Reports = () => {
                 </div>
               </div>
             </div>
-          )}
+          )} */}
 
           {activeTab === 'lowest-profit' && (
             <div>
@@ -513,7 +528,7 @@ const Reports = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {bottom10ProfitUsdData.slice(0, 10).map((product: Product, index) => (
+                      {bottom10ProfitUsdData.slice(0, 10).map((product, index) => (
                         <tr key={index} className="border-b hover:bg-gray-50">
                           <td className="py-2">{product.type+' '+product.brand+' رقم '+product.id}</td>
                           <td className="py-2 text-red-600">{formatCurrency(product.profit_usd)}</td>

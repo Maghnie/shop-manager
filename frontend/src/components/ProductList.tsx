@@ -1,16 +1,53 @@
 import React, { useState, useEffect } from 'react';
+import { Info } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 
-const ProductList = () => {
-  
-  const [products, setProducts] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
-  const [productTypes, setProductTypes] = useState([]);
-  const [brands, setBrands] = useState([]);
-  const [materials, setMaterials] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState({
+interface Product {
+  type_name_ar: string;
+  type_name_en: string;
+  brand_name_ar: string;
+  brand_name_en: string;
+  size: string;
+  id: number;
+  cost_price: number;
+  selling_price: number;
+  profit: number;
+  profit_percentage: number;
+  tags_list: string[];
+}
+
+interface ProductMaterial {
+  id: number;
+  name_ar: string;
+}
+
+interface ProductBrand {
+  id: number;
+  name_ar: string;
+}
+
+interface ProductType {
+  id: number;
+  name_ar: string;
+}
+
+type Filters = {
+  search: string;
+  type: string;
+  brand: string;
+  material: string;  
+};
+
+const ProductList: React.FC = () => {  
+  const [adminView, setAdminView] = useState<boolean>(false);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [productTypes, setProductTypes] = useState<ProductType[]>([]);
+  const [brands, setBrands] = useState<ProductBrand[]>([]);
+  const [materials, setMaterials] = useState<ProductMaterial[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [filters, setFilters] = useState<Filters>({
     search: '',
     type: '',
     brand: '',
@@ -26,8 +63,7 @@ const ProductList = () => {
   }, [products, filters]);
   
   const fetchData = async () => {    
-    try {
-      
+    try {      
       const [productsRes, typesRes, brandsRes, materialsRes] = await Promise.all([
         axios.get('inventory/products/'),
         axios.get('inventory/product-types/'),
@@ -35,7 +71,7 @@ const ProductList = () => {
         axios.get('inventory/materials/'),
       ]);
       
-      setProducts(productsRes.data.results); // || productsRes.data);           
+      setProducts(productsRes.data.results);     
       setProductTypes(typesRes.data.results);
       setBrands(brandsRes.data.results);
       setMaterials(materialsRes.data.results);
@@ -47,42 +83,42 @@ const ProductList = () => {
   };
 
   const applyFilters = () => {
-    let filtered = products.reverse();
+    let filtered = [...products].reverse();
 
     if (filters.search) {
-      // window.confirm("in search now")
       filtered = filtered.filter(product =>
         product.type_name_ar?.toLowerCase().includes(filters.search.toLowerCase()) ||
         product.brand_name_ar?.toLowerCase().includes(filters.search.toLowerCase()) ||
         product.type_name_en?.toLowerCase().includes(filters.search.toLowerCase()) ||
         product.brand_name_en?.toLowerCase().includes(filters.search.toLowerCase()) ||
-        product.tags?.toLowerCase().includes(filters.search.toLowerCase())
+        (Array.isArray(product.tags_list) 
+          && product.tags_list.join(' ').toLowerCase().includes(filters.search.toLowerCase()))
       );
     }
 
     if (filters.type) {
-      filtered = filtered.filter(product => product.type === parseInt(filters.type));
+      filtered = filtered.filter(product => (product as any).type === parseInt(filters.type));
     }
 
     if (filters.brand) {
-      filtered = filtered.filter(product => product.brand === parseInt(filters.brand));
+      filtered = filtered.filter(product => (product as any).brand === parseInt(filters.brand));
     }
 
     if (filters.material) {
-      filtered = filtered.filter(product => product.material === parseInt(filters.material));
+      filtered = filtered.filter(product => (product as any).material === parseInt(filters.material));
     }
 
     setFilteredProducts(filtered);
   };
 
-  const handleFilterChange = (key, value) => {
+  const handleFilterChange = <K extends keyof Filters>(key: K, value: Filters[K]) => {
     setFilters(prev => ({ ...prev, [key]: value }));
   };
 
-  const handleDelete = async (productId) => {
+  const handleDelete = async (productId: number) => {
     if (window.confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
       try {
-        await axios.delete(`/products/${productId}/`);
+        await axios.delete(`/inventory/products/${productId}/`);
         setProducts(products.filter(p => p.id !== productId));
       } catch (error) {
         alert('حدث خطأ أثناء حذف المنتج');
@@ -90,7 +126,10 @@ const ProductList = () => {
     }
   };
 
-  const formatCurrency = (amount) => `$${parseFloat(amount).toFixed(2)}`;
+  const formatCurrency = (amount: unknown) => {
+    const num = Number(amount);
+    return isNaN(num) ? '—' : `$${num.toFixed(2)}`;
+  };
 
   if (loading) {
     return (
@@ -109,13 +148,23 @@ const ProductList = () => {
             إجمالي المنتجات: {filteredProducts.length} من {products.length}
           </p>
         </div>
-        <Link
-          to="/products/new"
-          className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition duration-200 font-semibold"
-        >
-          إضافة منتج جديد +
-        </Link>
+        <div className="justify-between items-center mb-8">
+          <button
+            onClick={() => setAdminView(!adminView)}
+            className="mb-4 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
+          >
+            {adminView ? '📖' : '📘'}
+          </button>
+          <Link
+            to="/products/new"
+            className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition duration-200 font-semibold"
+          >
+            إضافة منتج جديد +
+          </Link>
+        </div>
       </div>
+
+      
 
       {/* Filters */}
       <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
@@ -199,13 +248,16 @@ const ProductList = () => {
                 <th className="text-right py-4 px-6 font-semibold text-gray-700 bg-yellow-200">سعر البيع</th>
                 <th className="text-right py-4 px-6 font-semibold text-gray-700">الربح</th>
                 <th className="text-right py-4 px-6 font-semibold text-gray-700">نسبة الربح</th>
-                <th className="text-center py-4 px-6 font-semibold text-gray-700">الإجراءات</th>
+                <th className="text-right py-4 px-6 font-semibold text-gray-700">الوسوم</th>
+                {adminView && (
+                  <th className="text-center py-4 px-6 font-semibold text-gray-700">الإجراءات</th>
+                )}
               </tr>
             </thead>
             <tbody>
               {filteredProducts.length === 0 ? (
                 <tr>
-                  <td colSpan="8" className="text-center py-8 text-gray-500">
+                  <td colSpan={10} className="text-center py-8 text-gray-500">
                     لا توجد منتجات مطابقة للبحث
                   </td>
                 </tr>
@@ -225,21 +277,53 @@ const ProductList = () => {
                       {product.profit_percentage.toFixed(1)}%
                     </td>
                     <td className="py-4 px-6">
-                      <div className="flex justify-center space-x-2 space-x-reverse">
-                        <Link
-                          to={`/products/${product.id}/edit`}
-                          className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition duration-200"
-                        >
-                          تحرير
-                        </Link>
-                        <button
-                          onClick={() => handleDelete(product.id)}
-                          className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition duration-200"
-                        >
-                          حذف
-                        </button>
+                      <div className="flex flex-wrap gap-1">
+                        {Array.isArray(product.tags_list) && product.tags_list.slice(0, 3).map((tag, idx) => (
+                          <span
+                            key={idx}
+                            className="bg-gray-200 text-gray-700 text-xs px-2 py-1 rounded-full"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                        {product.tags_list.length > 3 && (
+                          <div className="relative group inline-block">
+                            <span className="text-xs text-gray-500 cursor-pointer flex items-center gap-1">
+                              +{product.tags_list.length - 3}
+                              <Info size={12} className="text-gray-400" />
+                            </span>
+                            <div className="absolute z-10 hidden group-hover:flex flex-wrap bg-white shadow-lg rounded-lg p-2 text-xs text-gray-700 w-48 bottom-full mb-2">
+                              {product.tags_list.map((tag, idx) => (
+                                <span
+                                  key={idx}
+                                  className="inline-block bg-gray-100 text-gray-800 px-2 py-1 rounded-full m-1"
+                                >
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </td>
+                    {adminView && (
+                      <td className="py-4 px-6">
+                        <div className="flex justify-center space-x-2 space-x-reverse">
+                          <Link
+                            to={`/products/${product.id}/edit`}
+                            className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition duration-200"
+                          >
+                            تحرير
+                          </Link>
+                          <button
+                            onClick={() => handleDelete(product.id)}
+                            className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition duration-200"
+                          >
+                            حذف
+                          </button>
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 ))
               )}
