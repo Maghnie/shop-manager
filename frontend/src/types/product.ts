@@ -22,6 +22,8 @@ export interface Product {
   created_at: string;
   updated_at: string;
   created_by: number;
+  available_stock: number;
+  is_low_stock: boolean;
 }
 
 export interface ProductType {
@@ -144,17 +146,6 @@ export interface InvoiceListItem {
   customer_name: string;
   final_total: number;
   is_printed: boolean;
-}
-
-export interface AvailableProduct {
-  id: number;
-  name: string;
-  type_ar: string;
-  brand_ar: string;
-  selling_price: number;
-  available_stock: number;
-  size: string;
-  is_low_stock: boolean;
 }
 
 export interface SalesStats {

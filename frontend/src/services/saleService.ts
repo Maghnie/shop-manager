@@ -4,7 +4,7 @@ import type {
   SaleListItem,
   Invoice,
   InvoiceListItem,
-  AvailableProduct,
+  Product,
   SalesStats,
   QuickSaleResponse,
   Inventory,
@@ -58,7 +58,7 @@ export class SalesService {
     return response.data;
   }
 
-  static async getAvailableProducts(): Promise<AvailableProduct[]> {
+  static async getAvailableProducts(): Promise<Product[]> {
     const response = await axios.get('inventory/products/available/');
     return response.data.products;
   }

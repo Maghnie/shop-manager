@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { SalesService } from '@/services/saleService';
-import type { SaleListItem, Sale, SalesFilters, AvailableProduct, SalesStats } from '@/types/product';
+import type { SaleListItem, Sale, SalesFilters, Product, SalesStats } from '@/types/product';
 
 export const useSales = () => {
   const [sales, setSales] = useState<SaleListItem[]>([]);
@@ -73,7 +73,7 @@ export const useSale = (id?: number) => {
 };
 
 export const useAvailableProducts = () => {
-  const [products, setProducts] = useState<AvailableProduct[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
