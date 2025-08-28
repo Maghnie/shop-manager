@@ -19,12 +19,12 @@ urlpatterns = [
     path('inventory/', views.InventoryListView.as_view(), name='inventory-list'),
     path('inventory/<int:pk>/', views.InventoryDetailView.as_view(), name='inventory-detail'),
     
-    # Sales and invoice URLs (using router)
-    path('', include(router.urls)),
-    
     # Additional sales endpoints
     path('sales/stats/', views.SaleStatsView.as_view(), name='sales-stats'),
     path('sales/quick/', views.quick_sale, name='quick-sale'),
     path('sellers/dashboard/', views.sellers_dashboard, name='sellers-dashboard'),
     path('products/available/', views.available_products, name='available-products'),
+
+    # Last catch-all
+    path('', include(router.urls)),
 ]

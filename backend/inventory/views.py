@@ -1,18 +1,24 @@
+# views.py — replace imports with:
 from datetime import datetime, timedelta
+from decimal import Decimal
 
-from django.db import models as db_models 
+from django.db import models, transaction
+from django.db.models import Sum, Count, Avg, F
+from django.db.models.functions import TruncDate
 from django.utils import timezone
 
 from rest_framework import generics, status, filters
 from rest_framework.decorators import api_view, action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from django_filters.rest_framework import DjangoFilterBackend
 
-# models & serializers
-from .models import Product, ProductType, Brand, Material, Sale, SaleItem, Invoice, Inventory
+from .models import (
+    Product, ProductType, Brand, Material,
+    Sale, SaleItem, Invoice, Inventory
+)
 from .serializers import (
     ProductSerializer, ProductTypeSerializer, BrandSerializer, MaterialSerializer,
     SaleSerializer, SaleListSerializer, SaleItemSerializer,
@@ -137,11 +143,11 @@ class SaleStatsView(generics.GenericAPIView):
         # Basic stats
         total_sales = Sale.objects.filter(status='completed').count()
         total_revenue = Sale.objects.filter(status='completed').aggregate(
-            total=db_models.Sum('final_total')
+            total=Sum('final_total')
         )['total'] or 0
         
         total_profit = Sale.objects.filter(status='completed').aggregate(
-            total=db_models.Sum('net_profit')
+            total=Sum('net_profit')
         )['total'] or 0
         
         # Today's stats
@@ -150,8 +156,8 @@ class SaleStatsView(generics.GenericAPIView):
             sale_date__date=today
         )
         
-        today_revenue = today_sales.aggregate(total=db_models.Sum('final_total'))['total'] or 0
-        today_profit = today_sales.aggregate(total=db_models.Sum('net_profit'))['total'] or 0
+        today_revenue = today_sales.aggregate(total=Sum('final_total'))['total'] or 0
+        today_profit = today_sales.aggregate(total=Sum('net_profit'))['total'] or 0
         today_count = today_sales.count()
         
         # This week's stats
@@ -160,8 +166,8 @@ class SaleStatsView(generics.GenericAPIView):
             sale_date__date__gte=week_ago
         )
         
-        week_revenue = week_sales.aggregate(total=db_models.Sum('final_total'))['total'] or 0
-        week_profit = week_sales.aggregate(total=db_models.Sum('net_profit'))['total'] or 0
+        week_revenue = week_sales.aggregate(total=Sum('final_total'))['total'] or 0
+        week_profit = week_sales.aggregate(total=Sum('net_profit'))['total'] or 0
         week_count = week_sales.count()
         
         # This month's stats
@@ -170,8 +176,8 @@ class SaleStatsView(generics.GenericAPIView):
             sale_date__date__gte=month_ago
         )
         
-        month_revenue = month_sales.aggregate(total=db_models.Sum('final_total'))['total'] or 0
-        month_profit = month_sales.aggregate(total=db_models.Sum('net_profit'))['total'] or 0
+        month_revenue = month_sales.aggregate(total=Sum('final_total'))['total'] or 0
+        month_profit = month_sales.aggregate(total=Sum('net_profit'))['total'] or 0
         month_count = month_sales.count()
         
         # Top selling products
@@ -182,14 +188,14 @@ class SaleStatsView(generics.GenericAPIView):
             'product__type__name_ar',
             'product__brand__name_ar'
         ).annotate(
-            total_quantity=db_models.Sum('quantity'),
-            total_revenue=db_models.Sum('total_price'),
-            total_profit=db_models.Sum('total_profit')
+            total_quantity=Sum('quantity'),
+            total_revenue=Sum('total_price'),
+            total_profit=Sum('total_profit')
         ).order_by('-total_quantity')[:5]
         
         # Low stock alerts
         low_stock_items = Inventory.objects.filter(
-            quantity_in_stock__lte=db_models.F('minimum_stock_level')
+            quantity_in_stock__lte=F('minimum_stock_level')
         ).count()
         
         return Response({
@@ -297,9 +303,9 @@ def sellers_dashboard(request):
     
     # Aggregate statistics
     total_sales = sales_queryset.count()
-    total_revenue = sales_queryset.aggregate(db_models.Sum('final_total'))['final_total__sum'] or 0
-    total_cost = sales_queryset.aggregate(db_models.Sum('total_cost'))['total_cost__sum'] or 0
-    total_profit = sales_queryset.aggregate(db_models.Sum('net_profit'))['net_profit__sum'] or 0
+    total_revenue = sales_queryset.aggregate(Sum('final_total'))['final_total__sum'] or 0
+    total_cost = sales_queryset.aggregate(Sum('total_cost'))['total_cost__sum'] or 0
+    total_profit = sales_queryset.aggregate(Sum('net_profit'))['net_profit__sum'] or 0
     
     average_profit_margin = 0
     if total_cost > 0:
@@ -311,19 +317,19 @@ def sellers_dashboard(request):
         'created_by__first_name',
         'created_by__last_name'
     ).annotate(
-        sales_count=db_models.Count('id'),
-        total_revenue=db_models.Sum('final_total'),
-        total_profit=db_models.Sum('net_profit'),
-        avg_sale_value=db_models.Avg('final_total')
+        sales_count=Count('id'),
+        total_revenue=Sum('final_total'),
+        total_profit=Sum('net_profit'),
+        avg_sale_value=Avg('final_total')
     ).order_by('-total_profit')
     
     # Daily sales trend
     daily_sales = sales_queryset.extra(
         select={'sale_date_only': 'DATE(sale_date)'}
     ).values('sale_date_only').annotate(
-        daily_count=db_models.Count('id'),
-        daily_revenue=db_models.Sum('final_total'),
-        daily_profit=db_models.Sum('net_profit')
+        daily_count=Count('id'),
+        daily_revenue=Sum('final_total'),
+        daily_profit=Sum('net_profit')
     ).order_by('sale_date_only')
     
     # Most profitable products
@@ -336,10 +342,10 @@ def sellers_dashboard(request):
         'product__brand__name_ar',
         'product__id'
     ).annotate(
-        total_quantity_sold=db_models.Sum('quantity'),
-        total_revenue=db_models.Sum('total_price'),
-        total_profit=db_models.Sum('total_profit'),
-        avg_profit_margin=db_models.Avg('profit_percentage')
+        total_quantity_sold=Sum('quantity'),
+        total_revenue=Sum('total_price'),
+        total_profit=Sum('total_profit'),
+        avg_profit_margin=Avg('profit_percentage')
     ).order_by('-total_profit')[:10]
     
     return Response({
