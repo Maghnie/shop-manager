@@ -3,8 +3,10 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 
 from django.db import models, transaction
-from django.db.models import Sum, Count, Avg, F
-from django.db.models.functions import TruncDate
+from django.db.models import (
+    Sum, F, DecimalField, ExpressionWrapper, Value, Count, Avg
+)
+from django.db.models.functions import TruncDate, Coalesce
 from django.utils import timezone
 
 from rest_framework import generics, status, filters
@@ -24,6 +26,7 @@ from .serializers import (
     SaleSerializer, SaleListSerializer, SaleItemSerializer,
     InvoiceSerializer, InvoiceListSerializer, InventorySerializer
 )
+
 
 class ProductListCreateView(generics.ListCreateAPIView):
     queryset = Product.objects.all()
@@ -131,101 +134,174 @@ class SaleViewSet(ModelViewSet):
         return Response({'message': 'تم إلغاء البيعة وإرجاع المخزون'})
 
 class SaleStatsView(generics.GenericAPIView):
-    """Get sales statistics and analytics"""
+    """Get sales statistics and analytics (all DB-side, efficient)."""
     permission_classes = [AllowAny]
-    
+
+    # helper to compute aggregates for a Sale queryset
+    def _compute_sales_aggregates(self, sales_qs):
+        """
+        Given a queryset of Sale objects (already filtered, e.g. by date and status),
+        returns (total_revenue_decimal, total_cost_decimal, total_sales_count)
+        where:
+            total_revenue = SUM( subtotal - discount + tax )
+            subtotal per sale = SUM(items.quantity * items.unit_price)
+            total_cost     = SUM(items.quantity * product.cost_price)
+        Uses Coalesce to avoid NULLs.
+        """
+        # Subtotal per sale (sum of item quantity * unit_price)
+        subtotal_per_sale = Sum(
+            F('items__quantity') * F('items__unit_price'),
+            output_field=DecimalField(max_digits=18, decimal_places=2)
+        )
+
+        # Total cost per sale (sum of item quantity * product.cost_price)
+        cost_per_sale = Sum(
+            F('items__quantity') * F('items__product__cost_price'),
+            output_field=DecimalField(max_digits=18, decimal_places=2)
+        )
+
+        # Annotate each sale with its subtotal and cost (these are per-sale aggregates)
+        sales_with_annots = sales_qs.annotate(
+            subtotal=Coalesce(subtotal_per_sale, Value(0), output_field=DecimalField(max_digits=18, decimal_places=2)),
+            total_cost_per_sale=Coalesce(cost_per_sale, Value(0), output_field=DecimalField(max_digits=18, decimal_places=2))
+        )
+
+        # revenue expression per sale: subtotal - discount + tax_amount
+        # where tax_amount = (subtotal - discount) * tax_percentage / 100
+        revenue_expr_per_sale = ExpressionWrapper(
+            F('subtotal') - F('discount_amount') +
+            ((F('subtotal') - F('discount_amount')) * F('tax_percentage') / Value(100)),
+            output_field=DecimalField(max_digits=18, decimal_places=2)
+        )
+
+        # Aggregate over all annotated sales
+        agg = sales_with_annots.aggregate(
+            total_revenue=Coalesce(Sum(revenue_expr_per_sale), Value(0), output_field=DecimalField(max_digits=18, decimal_places=2)),
+            total_cost=Coalesce(Sum('total_cost_per_sale'), Value(0), output_field=DecimalField(max_digits=18, decimal_places=2)),
+            total_sales=Coalesce(Count('id'), Value(0))
+        )
+
+        return agg['total_revenue'], agg['total_cost'], agg['total_sales']
+
     def get(self, request):
         # Date filtering
         today = timezone.now().date()
         week_ago = today - timedelta(days=7)
         month_ago = today - timedelta(days=30)
-        
-        # Basic stats
-        total_sales = Sale.objects.filter(status='completed').count()
-        total_revenue = Sale.objects.filter(status='completed').aggregate(
-            total=Sum('final_total')
-        )['total'] or 0
-        
-        total_profit = Sale.objects.filter(status='completed').aggregate(
-            total=Sum('net_profit')
-        )['total'] or 0
-        
-        # Today's stats
-        today_sales = Sale.objects.filter(
-            status='completed',
-            sale_date__date=today
+
+        # Base queryset: completed sales
+        completed_qs = Sale.objects.filter(status='completed')
+
+        # --- OVERALL (all-time completed)
+        total_sales = completed_qs.count()
+        total_revenue_dec, total_cost_dec, _ = self._compute_sales_aggregates(completed_qs)
+        total_profit_dec = (total_revenue_dec or 0) - (total_cost_dec or 0)
+
+        # --- TODAY
+        today_qs = completed_qs.filter(sale_date__date=today)
+        today_revenue_dec, today_cost_dec, today_count = self._compute_sales_aggregates(today_qs)
+        today_profit_dec = (today_revenue_dec or 0) - (today_cost_dec or 0)
+
+        # --- THIS WEEK
+        week_qs = completed_qs.filter(sale_date__date__gte=week_ago)
+        week_revenue_dec, week_cost_dec, week_count = self._compute_sales_aggregates(week_qs)
+        week_profit_dec = (week_revenue_dec or 0) - (week_cost_dec or 0)
+
+        # --- THIS MONTH
+        month_qs = completed_qs.filter(sale_date__date__gte=month_ago)
+        month_revenue_dec, month_cost_dec, month_count = self._compute_sales_aggregates(month_qs)
+        month_profit_dec = (month_revenue_dec or 0) - (month_cost_dec or 0)
+
+        # --- TOP SELLING PRODUCTS (last 30 days)
+        # Note: SaleItem.total_price and .total_profit are @property — compute via expressions
+        top_products_qs = (
+            SaleItem.objects
+            .filter(sale__status='completed', sale__sale_date__date__gte=month_ago)
+            .values(
+                'product__id',
+                'product__type__name_ar',
+                'product__brand__name_ar',
+                'product__type',     # optional ids if you want to link
+                'product__brand'
+            )
+            .annotate(
+                total_quantity=Coalesce(Sum('quantity'), Value(0)),
+                total_revenue=Coalesce(
+                    Sum(
+                        ExpressionWrapper(
+                            F('quantity') * F('unit_price'),
+                            output_field=DecimalField(max_digits=18, decimal_places=2)
+                        )
+                    ),
+                    Value(0),
+                    output_field=DecimalField(max_digits=18, decimal_places=2)
+                ),
+                total_profit=Coalesce(
+                    Sum(
+                        ExpressionWrapper(
+                            F('quantity') * (F('unit_price') - F('product__cost_price')),
+                            output_field=DecimalField(max_digits=18, decimal_places=2)
+                        )
+                    ),
+                    Value(0),
+                    output_field=DecimalField(max_digits=18, decimal_places=2)
+                )
+            )
+            .order_by('-total_quantity')[:5]
         )
-        
-        today_revenue = today_sales.aggregate(total=Sum('final_total'))['total'] or 0
-        today_profit = today_sales.aggregate(total=Sum('net_profit'))['total'] or 0
-        today_count = today_sales.count()
-        
-        # This week's stats
-        week_sales = Sale.objects.filter(
-            status='completed',
-            sale_date__date__gte=week_ago
-        )
-        
-        week_revenue = week_sales.aggregate(total=Sum('final_total'))['total'] or 0
-        week_profit = week_sales.aggregate(total=Sum('net_profit'))['total'] or 0
-        week_count = week_sales.count()
-        
-        # This month's stats
-        month_sales = Sale.objects.filter(
-            status='completed',
-            sale_date__date__gte=month_ago
-        )
-        
-        month_revenue = month_sales.aggregate(total=Sum('final_total'))['total'] or 0
-        month_profit = month_sales.aggregate(total=Sum('net_profit'))['total'] or 0
-        month_count = month_sales.count()
-        
-        # Top selling products
-        top_products = SaleItem.objects.filter(
-            sale__status='completed',
-            sale__sale_date__date__gte=month_ago
-        ).values(
-            'product__type__name_ar',
-            'product__brand__name_ar'
-        ).annotate(
-            total_quantity=Sum('quantity'),
-            total_revenue=Sum('total_price'),
-            total_profit=Sum('total_profit')
-        ).order_by('-total_quantity')[:5]
-        
-        # Low stock alerts
-        low_stock_items = Inventory.objects.filter(
-            quantity_in_stock__lte=F('minimum_stock_level')
-        ).count()
-        
+
+        # Convert top_products queryset to clean list with numeric types
+        top_products = []
+        for p in top_products_qs:
+            tr = p.get('total_revenue') or 0
+            tp = p.get('total_profit') or 0
+            top_products.append({
+                'product_id': p.get('product__id'),
+                'type_name_ar': p.get('product__type__name_ar'),
+                'brand_name_ar': p.get('product__brand__name_ar'),
+                'total_quantity': int(p.get('total_quantity') or 0),
+                'total_revenue': float(tr),
+                'total_profit': float(tp),
+            })
+
+        # --- LOW STOCK
+        low_stock_items = Inventory.objects.filter(quantity_in_stock__lte=F('minimum_stock_level')).count()
+
+        # Build response (floats as you requested in the original)
+        def pct(profit, revenue):
+            try:
+                return round((float(profit) / float(revenue) * 100), 2) if revenue and float(revenue) != 0 else 0
+            except Exception:
+                return 0
+
         return Response({
             'overview': {
-                'total_sales': total_sales,
-                'total_revenue': float(total_revenue),
-                'total_profit': float(total_profit),
-                'profit_margin': (float(total_profit) / float(total_revenue) * 100) if total_revenue > 0 else 0,
-                'low_stock_alerts': low_stock_items,
+                'total_sales': int(total_sales),
+                'total_revenue': float(total_revenue_dec or 0),
+                'total_profit': float(total_profit_dec or 0),
+                'profit_margin': pct(total_profit_dec, total_revenue_dec),
+                'low_stock_alerts': int(low_stock_items),
             },
             'today': {
-                'sales_count': today_count,
-                'revenue': float(today_revenue),
-                'profit': float(today_profit),
-                'profit_margin': (float(today_profit) / float(today_revenue) * 100) if today_revenue > 0 else 0,
+                'sales_count': int(today_count),
+                'revenue': float(today_revenue_dec or 0),
+                'profit': float(today_profit_dec or 0),
+                'profit_margin': pct(today_profit_dec, today_revenue_dec),
             },
             'this_week': {
-                'sales_count': week_count,
-                'revenue': float(week_revenue),
-                'profit': float(week_profit),
-                'profit_margin': (float(week_profit) / float(week_revenue) * 100) if week_revenue > 0 else 0,
+                'sales_count': int(week_count),
+                'revenue': float(week_revenue_dec or 0),
+                'profit': float(week_profit_dec or 0),
+                'profit_margin': pct(week_profit_dec, week_revenue_dec),
             },
             'this_month': {
-                'sales_count': month_count,
-                'revenue': float(month_revenue),
-                'profit': float(month_profit),
-                'profit_margin': (float(month_profit) / float(month_revenue) * 100) if month_revenue > 0 else 0,
+                'sales_count': int(month_count),
+                'revenue': float(month_revenue_dec or 0),
+                'profit': float(month_profit_dec or 0),
+                'profit_margin': pct(month_profit_dec, month_revenue_dec),
             },
-            'top_products': list(top_products)
-        })
+            'top_products': top_products
+        }, status=status.HTTP_200_OK)
 
 class InvoiceViewSet(ModelViewSet):
     """CRUD operations for invoices"""
