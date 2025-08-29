@@ -27,6 +27,27 @@ const SalesList: React.FC = () => {
     date_to: ''
   });
 
+  const [dateError, setDateError] = useState('');
+  
+  const validateDateRange = (fromDate: string, toDate: string) => {
+    if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
+      setDateError('تاريخ البداية يجب أن يكون قبل تاريخ النهاية');
+      return false;
+    }
+    setDateError('');
+    return true;
+  };
+
+  const handleDateFromChange = (value: string) => {
+    setFilters(prev => ({ ...prev, date_from: value }));
+    validateDateRange(value, filters.date_to);
+  };
+
+  const handleDateToChange = (value: string) => {
+    setFilters(prev => ({ ...prev, date_to: value }));
+    validateDateRange(filters.date_from, value);
+  };
+
   useEffect(() => {
     fetchSales();
   }, [filters]);
@@ -37,6 +58,8 @@ const SalesList: React.FC = () => {
       if (filters.search) params.append('search', filters.search);
       if (filters.status) params.append('status', filters.status);
       if (filters.payment_method) params.append('payment_method', filters.payment_method);
+      if (filters.date_from) params.append('date_from', filters.date_from);
+      if (filters.date_to) params.append('date_to', filters.date_to);
       
       const response = await axios.get(`inventory/sales/?${params.toString()}`);
       setSales(response.data.results || response.data);
@@ -86,6 +109,18 @@ const SalesList: React.FC = () => {
     });
   };
 
+  const filteredSales = sales.filter(sale => {
+    const saleDate = new Date(sale.sale_date);
+    
+    const matchesFromDate = !filters.date_from || 
+      saleDate >= new Date(filters.date_from);
+    
+    const matchesToDate = !filters.date_to || 
+      saleDate <= new Date(filters.date_to + 'T23:59:59');
+    
+    return matchesFromDate && matchesToDate;
+  });
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -100,7 +135,7 @@ const SalesList: React.FC = () => {
         <div>
           <h1 className="text-3xl font-bold text-gray-800 mb-2">إدارة المبيعات</h1>
           <p className="text-gray-600">
-            إجمالي المبيعات: {sales.length}
+            إجمالي المبيعات: {filteredSales.length}
           </p>
         </div>
         <div className="flex space-x-4 space-x-reverse">
@@ -170,28 +205,33 @@ const SalesList: React.FC = () => {
             </select>
           </div>
 
+          {/* From Date */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              من تاريخ
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">من تاريخ</label>
             <input
               type="date"
               value={filters.date_from}
-              onChange={(e) => handleFilterChange('date_from', e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              onChange={(e) => handleDateFromChange(e.target.value)}
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                dateError ? 'border-red-300' : 'border-gray-300'
+              }`}
             />
           </div>
 
+          {/* To Date */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              إلى تاريخ
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">إلى تاريخ</label>
             <input
               type="date"
               value={filters.date_to}
-              onChange={(e) => handleFilterChange('date_to', e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              onChange={(e) => handleDateToChange(e.target.value)}
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                dateError ? 'border-red-300' : 'border-gray-300'
+              }`}
             />
+            {dateError && (
+              <p className="text-red-500 text-sm mt-1">{dateError}</p>
+            )}
           </div>
         </div>
       </div>
@@ -216,14 +256,14 @@ const SalesList: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {sales.length === 0 ? (
+              {filteredSales.length === 0 ? (
                 <tr>
                   <td colSpan={11} className="text-center py-8 text-gray-500">
                     لا توجد مبيعات مطابقة للبحث
                   </td>
                 </tr>
               ) : (
-                sales.map((sale) => (
+                filteredSales.map((sale) => (
                   <tr key={sale.id} className="border-b border-gray-100 hover:bg-gray-50">
                     <td className="py-4 px-6 font-medium">{sale.sale_number}</td>
                     <td className="py-4 px-6">{formatDate(sale.sale_date)}</td>
