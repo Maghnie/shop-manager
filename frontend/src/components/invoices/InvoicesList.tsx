@@ -16,6 +16,27 @@ const InvoicesList: React.FC = () => {
     date_to: ''
   });
 
+  const [dateError, setDateError] = useState('');
+
+  const validateDateRange = (fromDate: string, toDate: string) => {
+    if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
+      setDateError('تاريخ البداية يجب أن يكون قبل تاريخ النهاية');
+      return false;
+    }
+    setDateError('');
+    return true;
+  };
+
+  const handleDateFromChange = (value: string) => {
+    setFilters(prev => ({ ...prev, date_from: value }));
+    validateDateRange(value, filters.date_to);
+  };
+
+  const handleDateToChange = (value: string) => {
+    setFilters(prev => ({ ...prev, date_to: value }));
+    validateDateRange(filters.date_from, value);
+  };
+
   const filteredInvoices = invoices.filter(invoice => {
     const matchesSearch = !filters.search || 
       invoice.invoice_number.toLowerCase().includes(filters.search.toLowerCase()) ||
@@ -92,8 +113,10 @@ const InvoicesList: React.FC = () => {
             <input
               type="date"
               value={filters.date_from}
-              onChange={(e) => setFilters(prev => ({ ...prev, date_from: e.target.value }))}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              onChange={(e) => handleDateFromChange(e.target.value)}
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                dateError ? 'border-red-300' : 'border-gray-300'
+              }`}
             />
           </div>
 
@@ -103,9 +126,14 @@ const InvoicesList: React.FC = () => {
             <input
               type="date"
               value={filters.date_to}
-              onChange={(e) => setFilters(prev => ({ ...prev, date_to: e.target.value }))}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              onChange={(e) => handleDateToChange(e.target.value)}
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                dateError ? 'border-red-300' : 'border-gray-300'
+              }`}
             />
+            {dateError && (
+              <p className="text-red-500 text-sm mt-1">{dateError}</p>
+            )}
           </div>
         </div>
       </div>
