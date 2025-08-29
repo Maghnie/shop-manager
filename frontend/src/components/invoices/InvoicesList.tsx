@@ -11,7 +11,9 @@ const InvoicesList: React.FC = () => {
   const { invoices, loading } = useInvoices();
   const [filters, setFilters] = useState({
     search: '',
-    is_printed: ''
+    is_printed: '',
+    date_from: '',
+    date_to: ''
   });
 
   const filteredInvoices = invoices.filter(invoice => {
@@ -19,7 +21,15 @@ const InvoicesList: React.FC = () => {
       invoice.invoice_number.toLowerCase().includes(filters.search.toLowerCase()) ||
       (invoice.customer_name || '').toLowerCase().includes(filters.search.toLowerCase());
     
-    return matchesSearch;
+    const invoiceDate = new Date(invoice.invoice_date);
+    
+    const matchesFromDate = !filters.date_from || 
+      invoiceDate >= new Date(filters.date_from);
+    
+    const matchesToDate = !filters.date_to || 
+      invoiceDate <= new Date(filters.date_to + 'T23:59:59');
+    
+    return matchesSearch && matchesFromDate && matchesToDate;
   });
 
   const formatCurrency = (amount: unknown) => {
@@ -58,17 +68,45 @@ const InvoicesList: React.FC = () => {
         </Link>
       </div>
 
-      {/* Simple Search */}
+      {/* Enhanced Search and Date Filters */}
       <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-        <div className="relative">
-          <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-          <input
-            type="text"
-            value={filters.search}
-            onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-            placeholder="البحث في الفواتير..."
-            className="w-full pr-10 pl-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Search */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">البحث</label>
+            <div className="relative">
+              <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                value={filters.search}
+                onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+                placeholder="البحث في الفواتير..."
+                className="w-full pr-10 pl-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+          </div>
+
+          {/* From Date */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">من تاريخ</label>
+            <input
+              type="date"
+              value={filters.date_from}
+              onChange={(e) => setFilters(prev => ({ ...prev, date_from: e.target.value }))}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+
+          {/* To Date */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">إلى تاريخ</label>
+            <input
+              type="date"
+              value={filters.date_to}
+              onChange={(e) => setFilters(prev => ({ ...prev, date_to: e.target.value }))}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
         </div>
       </div>
 
