@@ -14,10 +14,11 @@ const InvoiceDetail: React.FC = () => {
 
   // Load invoice by sale ID if provided
   React.useEffect(() => {
-    if (saleIdNum && !invoiceId) {
+    // Only fetch if we have a saleId, no invoiceId, and no invoice data yet
+    if (saleIdNum && !invoiceId && !invoice && !loading) {
       fetchBySale(saleIdNum);
     }
-  }, [saleIdNum, invoiceId, fetchBySale]);
+  }, [saleIdNum, invoiceId, fetchBySale, invoice, loading]);
 
   const handlePrint = async () => {
     if (!invoice) return;
@@ -208,7 +209,7 @@ const InvoiceDetail: React.FC = () => {
   };
   
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('ar-SA', {
+    return new Date(dateString).toLocaleDateString('en', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',

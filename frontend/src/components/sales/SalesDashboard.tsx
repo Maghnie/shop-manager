@@ -27,8 +27,9 @@ interface StatCardProps {
 const SalesDashboard: React.FC = () => {
   const { stats, loading, error, refetch } = useSalesStats();
 
-  const formatCurrency = (amount: number): string => {
-    return `$${amount.toFixed(2)}`;
+  const formatCurrency = (amount: unknown) => {
+    const num = Number(amount);
+    return isNaN(num) ? '—' : `$${num.toFixed(2)}`;
   };
 
   const StatCard: React.FC<StatCardProps> = ({ 
