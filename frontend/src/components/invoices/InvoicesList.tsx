@@ -22,7 +22,10 @@ const InvoicesList: React.FC = () => {
     return matchesSearch;
   });
 
-  const formatCurrency = (amount: number): string => `$${amount.toFixed(2)}`;
+  const formatCurrency = (amount: unknown) => {
+    const num = Number(amount);
+    return isNaN(num) ? '—' : `$${num.toFixed(2)}`;
+  };
   
   const formatDate = (dateString: string): string => {
     return new Date(dateString).toLocaleDateString('ar-SA', {
