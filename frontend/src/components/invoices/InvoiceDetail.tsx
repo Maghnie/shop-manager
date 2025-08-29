@@ -202,7 +202,11 @@ const InvoiceDetail: React.FC = () => {
     return methods[method as keyof typeof methods] || method;
   };
 
-  const formatCurrency = (amount: number) => `$${amount.toFixed(2)}`;
+  const formatCurrency = (amount: unknown) => {
+    const num = Number(amount);
+    return isNaN(num) ? '—' : `$${num.toFixed(2)}`;
+  };
+  
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('ar-SA', {
       year: 'numeric',
