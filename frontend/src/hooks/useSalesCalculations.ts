@@ -17,37 +17,29 @@ export const useSalesCalculations = (
 ): SalesCalculations => {
   
   return useMemo(() => {
-    // Helper functions
-    const getSaleItems = (): SaleItem[] => {
-      return formData.items || [];
-    };
+    // Return zero calculations if products aren't loaded yet
+    if (!products.length) {
+      return {
+        subtotal: 0,
+        totalCost: 0,
+        discountAmount: formData.discount_amount || 0,
+        taxAmount: 0,
+        finalTotal: 0,
+        netProfit: 0,
+        profitPercentage: 0
+      };
+    }
 
-    const findProductById = (productId: number): Product | undefined => {
-      return products.find(product => product.id === productId);
-    };
-
-    const calculateItemSubtotal = (item: SaleItem): number => {
-      return item.quantity * item.unit_price;
-    };
-
-    const calculateItemCost = (item: SaleItem): number => {
-      const product = findProductById(item.product);
-      if (!product) {
-        return 0;
-      }
-      
-      return item.quantity * product.cost_price;
-    };
-
-    // Main calculations
-    const items = getSaleItems();
+    const items = formData.items || [];
     
     const subtotal = items.reduce((sum, item) => {
-      return sum + calculateItemSubtotal(item);
+      return sum + (item.quantity * item.unit_price);
     }, 0);
 
     const totalCost = items.reduce((sum, item) => {
-      return sum + calculateItemCost(item);
+      const product = products.find(p => p.id === item.product);
+      if (!product) return sum;
+      return sum + (item.quantity * product.cost_price);
     }, 0);
 
     const discountAmount = formData.discount_amount || 0;

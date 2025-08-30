@@ -148,6 +148,11 @@ const SaleForm: React.FC = () => {
     );
   }
 
+  const formatCurrency = (amount: unknown) => {
+    const num = Number(amount);
+    return isNaN(num) ? '—' : `$${num.toFixed(2)}`;
+  };
+
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       <div className="bg-white rounded-xl shadow-lg p-6">
@@ -386,16 +391,16 @@ const SaleForm: React.FC = () => {
                   </div>
                 </div>
 
-                {showProfitInfo && (
+                {showProfitInfo && products.length > 0 && (
                   <div className="space-y-2 bg-green-50 p-4 rounded-lg">
                     <h4 className="font-semibold text-green-800 mb-2">معلومات الربح (للبائع فقط)</h4>
                     <div className="flex justify-between text-sm">
                       <span>إجمالي التكلفة:</span>
-                      <span>${totalCost.toFixed(2)}</span>
+                      <span>{formatCurrency(totalCost)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span>صافي الربح:</span>
-                      <span className="text-green-600 font-semibold">${netProfit.toFixed(2)}</span>
+                      <span className="text-green-600 font-semibold">{formatCurrency(netProfit)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span>نسبة الربح:</span>
