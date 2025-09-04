@@ -46,7 +46,7 @@ export const useInventory = () => {
 
 export const useLowStockAlert = () => {
   const [lowStockItems, setLowStockItems] = useState<Inventory[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchLowStockItems = async () => {

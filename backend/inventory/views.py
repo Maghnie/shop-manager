@@ -73,7 +73,7 @@ class InventoryListView(generics.ListAPIView):
     serializer_class = InventorySerializer
     permission_classes = [AllowAny]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    # filterset_fields = ['is_low_stock', 'is_out_of_stock']
+    filterset_fields = ['is_low_stock', 'is_out_of_stock']
     search_fields = ['product__type__name_ar', 'product__brand__name_ar']
     ordering_fields = ['quantity_in_stock', 'last_updated']
     ordering = ['quantity_in_stock']  # Show low stock items first

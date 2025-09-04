@@ -4,7 +4,7 @@ import { useInventory } from '@/hooks/useInventory';
 import type { Inventory } from '@/types/product';
 
 const InventoryList: React.FC = () => {
-  const { inventory, loading, refetch, updateItem } = useInventory();
+  const { inventory, loading, error, refetch, updateItem, setInventory} = useInventory();
   const [filters, setFilters] = useState({
     search: '',
     stock_status: '', // all, low_stock, out_of_stock

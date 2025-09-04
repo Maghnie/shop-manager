@@ -1,4 +1,3 @@
-// src/components/inventory/LowStockAlerts.tsx
 
 import React from 'react';
 import { AlertTriangle, Package, RefreshCw, Eye } from 'lucide-react';
@@ -6,10 +5,10 @@ import { Link } from 'react-router-dom';
 import { useLowStockAlert } from '@/hooks/useInventory';
 
 const LowStockAlerts: React.FC = () => {
-  const { lowStockItems, loading, refetch, count } = useLowStockAlert();
+  const { lowStockItems, loading, error, refetch, count } = useLowStockAlert();
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('ar-SA', {
+    return new Date(dateString).toLocaleDateString('en-UK', {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit'
