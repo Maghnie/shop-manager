@@ -1,13 +1,18 @@
 # reports/views.py
 from decimal import Decimal
-from django.db.models import Avg, Max, Min, F, Case, When, Value, FloatField
+from django.db.models import Avg, Max, Min, F, Case, When, Value, FloatField, Sum, Count
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, generics
 from rest_framework.permissions import AllowAny  # FIXME
 from django.core.exceptions import FieldError
+from datetime import datetime, timedelta
+from django.utils import timezone
+from django.utils.dateparse import parse_datetime
 
 from inventory.models import Product
+from .models import SalesReport
+from .serializers import SalesReportSerializer, SalesReportSummarySerializer
 
 
 class ReportsView(APIView): #TODO make report calculations optimized 
@@ -809,3 +814,239 @@ class EnhancedBottomProductsByProfitPercentageView(APIView):
             response_data["warning"] = f"Only {total_products} products available. Showing all products."
 
         return Response(response_data, status=status.HTTP_200_OK)
+    
+# ============================================================================
+# SALES REPORT API ENDPOINTS
+# ============================================================================
+
+class SalesReportListView(generics.ListAPIView):
+    """
+    List sales reports with filtering options
+    
+    Query parameters:
+    - resolution: Filter by resolution (hourly, daily, weekly, monthly, yearly)
+    - start_date: Filter reports from this date (YYYY-MM-DD or ISO format)
+    - end_date: Filter reports until this date (YYYY-MM-DD or ISO format)
+    - limit: Number of results to return (default: 50, max: 200)
+    """
+    serializer_class = SalesReportSerializer
+    permission_classes = [AllowAny]  # FIXME
+
+    def get_queryset(self):
+        queryset = SalesReport.objects.all().order_by('-period_start')
+
+        # Filter by resolution
+        resolution = self.request.query_params.get('resolution')
+        if resolution and resolution in ['hourly', 'daily', 'weekly', 'monthly', 'yearly']:
+            queryset = queryset.filter(resolution=resolution)
+
+        # Filter by date range
+        start_date = self.request.query_params.get('start_date')
+        end_date = self.request.query_params.get('end_date')
+
+        if start_date:
+            try:
+                start_date = parse_datetime(start_date)
+                if start_date:
+                    queryset = queryset.filter(period_start__gte=start_date)
+            except ValueError:
+                pass  # Invalid date format, ignore
+
+        if end_date:
+            try:
+                end_date = parse_datetime(end_date)
+                if end_date:
+                    queryset = queryset.filter(period_start__lte=end_date)
+            except ValueError:
+                pass  # Invalid date format, ignore
+
+        # Apply limit
+        limit = self.request.query_params.get('limit', 50)
+        try:
+            limit = min(int(limit), 200)  # Max 200 results
+            queryset = queryset[:limit]
+        except (ValueError, TypeError):
+            queryset = queryset[:50]  # Default limit
+
+        return queryset
+
+
+class SalesReportDetailView(generics.RetrieveAPIView):
+    """Get a specific sales report by ID"""
+    serializer_class = SalesReportSerializer
+    queryset = SalesReport.objects.all()
+    permission_classes = [AllowAny]  # FIXME
+
+
+class SalesReportSummaryView(APIView):
+    """
+    Get aggregated sales report summaries by resolution
+    
+    Query parameters:
+    - resolution: Required (hourly, daily, weekly, monthly, yearly)
+    - start_date: Filter from this date (optional)
+    - end_date: Filter until this date (optional)
+    """
+    permission_classes = [AllowAny]  # FIXME
+
+    def get(self, request):
+        resolution = request.query_params.get('resolution')
+
+        if not resolution or resolution not in ['hourly', 'daily', 'weekly', 'monthly', 'yearly']:
+            return Response(
+                {"error": "Valid resolution parameter is required (hourly, daily, weekly, monthly, yearly)"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        queryset = SalesReport.objects.filter(resolution=resolution)
+
+        # Apply date filters
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
+
+        if start_date:
+            try:
+                start_date = parse_datetime(start_date)
+                if start_date:
+                    queryset = queryset.filter(period_start__gte=start_date)
+            except ValueError:
+                pass
+
+        if end_date:
+            try:
+                end_date = parse_datetime(end_date)
+                if end_date:
+                    queryset = queryset.filter(period_start__lte=end_date)
+            except ValueError:
+                pass
+
+        # Calculate aggregated metrics
+        aggregates = queryset.aggregate(
+            total_sales_count=Sum('sales_count'),
+            total_revenue=Sum('total_revenue'),
+            total_profit=Sum('total_profit'),
+            period_count=Count('id')
+        )
+
+        # Calculate average profit margin
+        total_revenue = aggregates['total_revenue'] or Decimal('0')
+        total_profit = aggregates['total_profit'] or Decimal('0')
+
+        if total_revenue > 0:
+            avg_profit_margin = (total_profit / total_revenue) * 100
+        else:
+            avg_profit_margin = Decimal('0')
+
+        # Get date range
+        first_period = queryset.order_by('period_start').first()
+        last_period = queryset.order_by('-period_start').first()
+
+        date_range = {}
+        if first_period and last_period:
+            date_range = {
+                'start': first_period.period_start.isoformat(),
+                'end': last_period.period_end.isoformat()
+            }
+
+        summary_data = {
+            'resolution': resolution,
+            'total_sales_count': aggregates['total_sales_count'] or 0,
+            'total_revenue': aggregates['total_revenue'] or Decimal('0'),
+            'total_profit': aggregates['total_profit'] or Decimal('0'),
+            'average_profit_margin': round(float(avg_profit_margin), 2),
+            'period_count': aggregates['period_count'] or 0,
+            'date_range': date_range
+        }
+
+        serializer = SalesReportSummarySerializer(summary_data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class SalesReportTrendsView(APIView):
+    """
+    Get sales trends for a specific resolution showing period-over-period changes
+    
+    Query parameters:
+    - resolution: Required (daily, weekly, monthly, yearly)
+    - periods: Number of recent periods to include (default: 10, max: 50)
+    """
+    permission_classes = [AllowAny]  # FIXME
+
+    def get(self, request):
+        resolution = request.query_params.get('resolution')
+
+        if not resolution or resolution not in ['daily', 'weekly', 'monthly', 'yearly']:
+            return Response(
+                {"error": "Valid resolution parameter is required (daily, weekly, monthly, yearly)"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Get number of periods
+        periods = request.query_params.get('periods', 10)
+        try:
+            periods = min(int(periods), 50)  # Max 50 periods
+        except (ValueError, TypeError):
+            periods = 10
+
+        # Get the most recent reports for this resolution
+        reports = SalesReport.objects.filter(
+            resolution=resolution
+        ).order_by('-period_start')[:periods]
+
+        if not reports:
+            return Response({
+                'resolution': resolution,
+                'trends': [],
+                'message': f'No {resolution} reports found'
+            }, status=status.HTTP_200_OK)
+
+        # Convert to list and reverse to get chronological order
+        reports = list(reversed(reports))
+
+        # Calculate trends
+        trends = []
+        for i, report in enumerate(reports):
+            trend_data = {
+                'period': report.period_display,
+                'period_start': report.period_start.isoformat(),
+                'sales_count': report.sales_count,
+                'total_revenue': float(report.total_revenue),
+                'total_profit': float(report.total_profit),
+                'profit_margin': float(report.profit_margin),
+                'average_sale_value': float(report.average_sale_value)
+            }
+
+            # Calculate period-over-period changes
+            if i > 0:
+                previous_report = reports[i - 1]
+
+                # Revenue change
+                if previous_report.total_revenue > 0:
+                    revenue_change = ((report.total_revenue - previous_report.total_revenue) /
+                                      previous_report.total_revenue) * 100
+                else:
+                    revenue_change = 100 if report.total_revenue > 0 else 0
+
+                # Sales count change
+                if previous_report.sales_count > 0:
+                    sales_change = ((report.sales_count - previous_report.sales_count) / 
+                                    previous_report.sales_count) * 100
+                else:
+                    sales_change = 100 if report.sales_count > 0 else 0
+
+                trend_data['changes'] = {
+                    'revenue_change_percent': round(float(revenue_change), 2),
+                    'sales_count_change_percent': round(float(sales_change), 2),
+                    'profit_margin_change': round(float(report.profit_margin - previous_report.profit_margin), 2)
+                }
+            else:
+                trend_data['changes'] = None
+
+            trends.append(trend_data)
+
+        return Response({
+            'resolution': resolution,
+            'periods_requested': periods,
+            'periods_returned': len(trends),
+            'trends': trends
+        }, status=status.HTTP_200_OK)
