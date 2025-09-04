@@ -50,6 +50,7 @@ def home_view(request):
 api_v1_patterns = [
     path('', api_root, name='api-v1-root'),    
     # Functional app groupings
+    path('', include('customers.urls')),
     path('inventory/', include('inventory.urls')),
     path('reports/', include('reports.urls')),
     path('users/', include('users.urls')),

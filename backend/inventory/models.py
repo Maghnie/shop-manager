@@ -6,6 +6,8 @@ from typing import Optional
 # from backend.settings import AUTH_USER_MODEL
 from django.core.exceptions import ValidationError
 import uuid
+from customers.models import Customer
+
 
 class ProductType(models.Model):
     """Predefined product types"""
@@ -176,7 +178,7 @@ class Sale(models.Model):
     sale_number = models.CharField(max_length=20, unique=True, verbose_name="رقم البيع")
     sale_date = models.DateTimeField(auto_now_add=True, verbose_name="تاريخ البيع")
     
-    # Customer info (optional for walk-in customers)
+    # Customer info (optional for walk-in customers) 
     customer_name = models.CharField(max_length=200, blank=True, verbose_name="اسم العميل")
     customer_phone = models.CharField(max_length=20, blank=True, verbose_name="رقم الهاتف")
     customer_address = models.TextField(blank=True, verbose_name="العنوان")
@@ -187,6 +189,17 @@ class Sale(models.Model):
     discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="قيمة الخصم")
     tax_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0, verbose_name="نسبة الضريبة")
     notes = models.TextField(blank=True, verbose_name="ملاحظات")
+
+    # Reference to Customer
+    customer = models.ForeignKey(
+        'customers.Customer',  
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='sales',
+        verbose_name="العميل",
+        help_text="العميل المرتبط بهذه البيعة"
+    )
     
     # Metadata
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="البائع")
@@ -199,11 +212,17 @@ class Sale(models.Model):
         verbose_name_plural = "عمليات البيع"
     
     def __str__(self):
-        return f"بيعة #{self.sale_number} - {self.customer_name or 'عميل مباشر'}"
+        customer_name = self.customer.display_name if self.customer else 'عميل مباشر'
+        return f"بيعة #{self.sale_number} - {customer_name}"
     
     def save(self, *args, **kwargs):
         if not self.sale_number:
             self.sale_number = self.generate_sale_number()
+        
+        # Set default customer if none provided
+        if not self.customer_id:
+            self.customer = Customer.get_default_male_customer()
+            
         super().save(*args, **kwargs)
     
     @staticmethod
@@ -225,6 +244,16 @@ class Sale(models.Model):
             sequence = 1
         
         return f"{prefix}{sequence:03d}"
+    
+    @property
+    def customer_display(self):
+        """Get customer display name or fallback"""
+        if self.customer:
+            return self.customer.display_name
+        elif self.customer_name:
+            return self.customer_name
+        else:
+            return 'عميل مباشر'
     
     @property
     def subtotal(self):
