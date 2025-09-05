@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator
+from django.utils import timezone
 from decimal import Decimal
 from typing import Optional
 # from backend.settings import AUTH_USER_MODEL
@@ -113,10 +114,10 @@ class Product(models.Model):
         return self.selling_price - self.cost_price
     
     @property
-    def profit_percentage(self) -> float:
+    def profit_percentage(self) -> Decimal:
         """Calculate profit percentage"""
         if self.cost_price > 0:
-            return float((self.profit / self.cost_price) * 100)
+            return Decimal((self.profit / self.cost_price) * 100)
         return 0.0
     
     @property
@@ -176,7 +177,7 @@ class Sale(models.Model):
     
     # Basic info
     sale_number = models.CharField(max_length=20, unique=True, verbose_name="رقم البيع")
-    sale_date = models.DateTimeField(auto_now_add=True, verbose_name="تاريخ البيع")
+    sale_date = models.DateTimeField(default=timezone.now, verbose_name="تاريخ البيع")
     
     # Customer info (optional for walk-in customers) 
     customer_name = models.CharField(max_length=200, blank=True, verbose_name="اسم العميل")
@@ -308,7 +309,10 @@ class SaleItem(models.Model):
     class Meta:
         verbose_name = "منتج مباع"
         verbose_name_plural = "المنتجات المباعة"
-        unique_together = ['sale', 'product']  # Prevent duplicate products in same sale
+        constraints = [ # Prevent duplicate products in same sale
+            models.UniqueConstraint(fields=['sale', 'product'], name='unique_sale_product')
+        ]
+        # unique_together = ['sale', 'product']  # deprecated in django 4.2?
     
     def __str__(self):
         return f"{self.product} x{self.quantity} - ${self.total_price}"
@@ -374,7 +378,7 @@ class Invoice(models.Model):
     sale = models.OneToOneField(Sale, on_delete=models.CASCADE, related_name='invoice', verbose_name="البيعة")
     
     # Invoice-specific details
-    invoice_date = models.DateTimeField(auto_now_add=True, verbose_name="تاريخ الفاتورة")
+    invoice_date = models.DateTimeField(default=timezone.now, verbose_name="تاريخ الفاتورة")
     due_date = models.DateField(null=True, blank=True, verbose_name="تاريخ الاستحقاق")
     
     # Company details (can be moved to settings later)
@@ -400,17 +404,24 @@ class Invoice(models.Model):
     
     def save(self, *args, **kwargs):
         if not self.invoice_number:
-            self.invoice_number = self.generate_invoice_number()
+            # Use the sale's date if available, otherwise today's date
+            invoice_date = self.sale.sale_date.date() if self.sale else None
+            self.invoice_number = self.generate_invoice_number(for_date=invoice_date)
+        
+        # Override auto_now_add behavior to use the sale's date
+        if self.sale and not self.pk:  # Only on creation
+            self.invoice_date = self.sale.sale_date
+            
         super().save(*args, **kwargs)
     
     @staticmethod
-    def generate_invoice_number():
-        """Generate unique invoice number"""
+    def generate_invoice_number(for_date=None):
+        """Generate unique invoice number for a specific date"""
         import datetime
-        today = datetime.date.today()
-        prefix = f"INV{today.strftime('%Y%m%d')}"
+        target_date = for_date if for_date else datetime.date.today()
+        prefix = f"INV{target_date.strftime('%Y%m%d')}"
         
-        # Find the last invoice number for today
+        # Find the last invoice number for the target date
         last_invoice = Invoice.objects.filter(
             invoice_number__startswith=prefix
         ).order_by('invoice_number').last()
@@ -444,4 +455,4 @@ def create_inventory_record(sender, instance, created, **kwargs):
 def create_invoice_for_sale(sender, instance, created, **kwargs):
     """Automatically create invoice when sale is created"""
     if created and instance.status == 'completed':
-        Invoice.objects.get_or_create(sale=instance)
+        Invoice.objects.get_or_create(sale=instance, invoice_date=instance.sale_date)
