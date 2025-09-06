@@ -26,6 +26,9 @@ import InvoiceDetail from './components/invoices/InvoiceDetail';
 // New inventory components
 import InventoryList from './components/inventory/InventoryList';
 
+// Analytics components
+import { SalesAnalyticsDashboard } from './apps/analytics';
+
 import './App.css';
 
 // Configure axios defaults
@@ -66,7 +69,7 @@ const App: React.FC = () => {
 
   return (
     <Router>
-      <div className="min-h-screen bg-gray-50" dir="rtl">
+      <div className="min-h-screen min-w-screen-lg bg-gray-50 " dir="rtl">
         {isAuthenticated && <Navbar onLogout={handleLogout} />}
 
         <div className={isAuthenticated ? 'pt-16' : ''}>
@@ -183,6 +186,14 @@ const App: React.FC = () => {
                 path="/reports"
                 element={
                   isAuthenticated ? <Reports /> : <Navigate to="/login" />
+                }
+              />
+
+              {/* Analytics */}
+              <Route
+                path="/analytics"
+                element={
+                  isAuthenticated ? <SalesAnalyticsDashboard /> : <Navigate to="/login" />
                 }
               />
 

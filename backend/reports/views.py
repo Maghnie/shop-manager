@@ -8,7 +8,7 @@ from rest_framework.permissions import AllowAny  # FIXME
 from django.core.exceptions import FieldError
 from datetime import datetime, timedelta
 from django.utils import timezone
-from django.utils.dateparse import parse_datetime
+from django.utils.dateparse import parse_datetime, parse_date
 
 from inventory.models import Product
 from .models import SalesReport
@@ -846,17 +846,35 @@ class SalesReportListView(generics.ListAPIView):
 
         if start_date:
             try:
-                start_date = parse_datetime(start_date)
-                if start_date:
-                    queryset = queryset.filter(period_start__gte=start_date)
+                # First try to parse as datetime, then as date
+                parsed_start = parse_datetime(start_date)
+                if not parsed_start:
+                    parsed_date = parse_date(start_date)
+                    if parsed_date:
+                        parsed_start = datetime.combine(parsed_date, datetime.min.time())
+                
+                if parsed_start:
+                    # Ensure it's timezone-aware
+                    if timezone.is_naive(parsed_start):
+                        parsed_start = timezone.make_aware(parsed_start)
+                    queryset = queryset.filter(period_start__gte=parsed_start)
             except ValueError:
                 pass  # Invalid date format, ignore
 
         if end_date:
             try:
-                end_date = parse_datetime(end_date)
-                if end_date:
-                    queryset = queryset.filter(period_start__lte=end_date)
+                # First try to parse as datetime, then as date
+                parsed_end = parse_datetime(end_date)
+                if not parsed_end:
+                    parsed_date = parse_date(end_date)
+                    if parsed_date:
+                        parsed_end = datetime.combine(parsed_date, datetime.max.time())
+                
+                if parsed_end:
+                    # Ensure it's timezone-aware
+                    if timezone.is_naive(parsed_end):
+                        parsed_end = timezone.make_aware(parsed_end)
+                    queryset = queryset.filter(period_start__lte=parsed_end)
             except ValueError:
                 pass  # Invalid date format, ignore
 
@@ -906,17 +924,35 @@ class SalesReportSummaryView(APIView):
 
         if start_date:
             try:
-                start_date = parse_datetime(start_date)
-                if start_date:
-                    queryset = queryset.filter(period_start__gte=start_date)
+                # First try to parse as datetime, then as date
+                parsed_start = parse_datetime(start_date)
+                if not parsed_start:
+                    parsed_date = parse_date(start_date)
+                    if parsed_date:
+                        parsed_start = datetime.combine(parsed_date, datetime.min.time())
+                
+                if parsed_start:
+                    # Ensure it's timezone-aware
+                    if timezone.is_naive(parsed_start):
+                        parsed_start = timezone.make_aware(parsed_start)
+                    queryset = queryset.filter(period_start__gte=parsed_start)
             except ValueError:
                 pass
 
         if end_date:
             try:
-                end_date = parse_datetime(end_date)
-                if end_date:
-                    queryset = queryset.filter(period_start__lte=end_date)
+                # First try to parse as datetime, then as date
+                parsed_end = parse_datetime(end_date)
+                if not parsed_end:
+                    parsed_date = parse_date(end_date)
+                    if parsed_date:
+                        parsed_end = datetime.combine(parsed_date, datetime.max.time())
+                
+                if parsed_end:
+                    # Ensure it's timezone-aware
+                    if timezone.is_naive(parsed_end):
+                        parsed_end = timezone.make_aware(parsed_end)
+                    queryset = queryset.filter(period_start__lte=parsed_end)
             except ValueError:
                 pass
 
