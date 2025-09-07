@@ -15,6 +15,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
+import django_filters
 from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import (
@@ -67,13 +68,35 @@ def product_reports(request):
     
 ##################### Inventory and sales stuff 
 
+class InventoryFilter(django_filters.FilterSet):
+    is_low_stock = django_filters.BooleanFilter(method='filter_low_stock')
+    is_out_of_stock = django_filters.BooleanFilter(method='filter_out_of_stock')
+    
+    class Meta:
+        model = Inventory
+        fields = ['product__type', 'product__brand']  # Only real DB fields
+    
+    def filter_low_stock(self, queryset, name, value):
+        if value is True:
+            return queryset.filter(quantity_in_stock__lte=F('minimum_stock_level'))
+        elif value is False:
+            return queryset.filter(quantity_in_stock__gt=F('minimum_stock_level'))
+        return queryset
+    
+    def filter_out_of_stock(self, queryset, name, value):
+        if value is True:
+            return queryset.filter(quantity_in_stock=0)
+        elif value is False:
+            return queryset.filter(quantity_in_stock__gt=0)
+        return queryset
+
 class InventoryListView(generics.ListAPIView):
     """List all inventory items with stock levels"""
     queryset = Inventory.objects.select_related('product', 'product__type', 'product__brand').all()
     serializer_class = InventorySerializer
     permission_classes = [AllowAny]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['is_low_stock', 'is_out_of_stock']
+    filterset_class = InventoryFilter
     search_fields = ['product__type__name_ar', 'product__brand__name_ar']
     ordering_fields = ['quantity_in_stock', 'last_updated']
     ordering = ['quantity_in_stock']  # Show low stock items first
