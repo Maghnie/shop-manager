@@ -45,28 +45,30 @@ export interface SalesReportSummary {
 }
 
 export interface SalesReportFilters {
-  resolution?: string;
-  start_date?: string;
-  end_date?: string;
-  limit?: number;
+  resolution: string;
+  start_date: string;
+  end_date: string;
+  limit: number;
 }
 
 export interface SalesReportTrendsFilters {
   resolution: string;
   periods?: number;
+  start_date: string;
+  end_date: string;
 }
 
 export class AnalyticsService {
-  static async getSalesReports(filters?: SalesReportFilters): Promise<SalesReportData[]> {
+  static async getSalesReports(filters: SalesReportFilters): Promise<SalesReportData[]> {
     const params = new URLSearchParams();
     
-    if (filters?.resolution) params.append('resolution', filters.resolution);
-    if (filters?.start_date) params.append('start_date', filters.start_date);
-    if (filters?.end_date) params.append('end_date', filters.end_date);
-    if (filters?.limit) params.append('limit', filters.limit.toString());
+    if (filters.resolution) params.append('resolution', filters.resolution);
+    if (filters.start_date) params.append('start_date', filters.start_date);
+    if (filters.end_date) params.append('end_date', filters.end_date);
+    if (filters.limit) params.append('limit', filters.limit.toString());
 
     const response = await axios.get(`reports/sales-reports/?${params.toString()}`);
-    return response.data.results;
+    return response.data;
   }
 
   static async getSalesReportTrends(filters: SalesReportTrendsFilters): Promise<{
@@ -83,7 +85,9 @@ export class AnalyticsService {
     }
     
     params.append('resolution', filters.resolution);
-    if (filters.periods) params.append('periods', filters.periods.toString());
+    // if (filters.periods) params.append('periods', filters.periods.toString());
+    if (filters.start_date) params.append('start_date', filters.start_date);
+    if (filters.end_date) params.append('end_date', filters.end_date);
 
     const response = await axios.get(`reports/sales-reports/trends/?${params.toString()}`);
     return response.data;
@@ -105,28 +109,44 @@ export class AnalyticsService {
     return response.data;
   }
 
-  static async getSalesHeatmapData(resolution: 'hourly' | 'daily' = 'hourly'): Promise<SalesReportData[]> {
-    // Get recent data for heatmap visualization
-    const endDate = new Date();
-    const startDate = new Date();
+  static async getSalesHeatmapData(
+    resolution: 'hourly' | 'daily' = 'hourly', 
+    startDate: string, 
+    endDate: string
+  ): Promise<SalesReportData[]> {
+    let start_date: string;
+    let end_date: string;
     
-    if (resolution === 'hourly') {
-      // Get last 7 days of hourly data
-      startDate.setDate(endDate.getDate() - 7);
+    if (startDate && endDate) {
+      // Use provided date range
+      start_date = startDate;
+      end_date = endDate;
     } else {
-      // Get last 30 days of daily data
-      startDate.setDate(endDate.getDate() - 30);
+      // Get recent data for heatmap visualization (default behavior)
+      const defaultEndDate = new Date();
+      const defaultStartDate = new Date();
+      
+      if (resolution === 'hourly') {
+        // Get last 7 days of hourly data
+        defaultStartDate.setDate(defaultEndDate.getDate() - 7);
+      } else {
+        // Get last 30 days of daily data
+        defaultStartDate.setDate(defaultEndDate.getDate() - 30);
+      }
+      
+      // Format dates properly for Django timezone handling
+      const formatDateForAPI = (date: Date): string => {
+        return date.toISOString().split('T')[0]; // Send just YYYY-MM-DD format
+      };
+      
+      start_date = formatDateForAPI(defaultStartDate);
+      end_date = formatDateForAPI(defaultEndDate);
     }
-
-    // Format dates properly for Django timezone handling
-    const formatDateForAPI = (date: Date): string => {
-      return date.toISOString().split('T')[0]; // Send just YYYY-MM-DD format
-    };
 
     return this.getSalesReports({
       resolution,
-      start_date: formatDateForAPI(startDate),
-      end_date: formatDateForAPI(endDate),
+      start_date,
+      end_date,
       limit: 200
     });
   }

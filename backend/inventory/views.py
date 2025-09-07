@@ -42,6 +42,7 @@ class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):
 class ProductTypeListView(generics.ListCreateAPIView):
     queryset = ProductType.objects.all()
     serializer_class = ProductTypeSerializer
+    permission_classes = [AllowAny]  # FIXME just for testing because everyone can POST/PUT/GET/DELETE
 
 class BrandListView(generics.ListCreateAPIView):
     queryset = Brand.objects.all()

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { TimeSeriesChart, SalesHeatmap, ResolutionSelector } from '../components';
+import React, { useState, useMemo } from 'react';
+import { TimeSeriesChart, SalesHeatmap, ResolutionSelector, DateRangeSelector } from '../components';
 import { useSalesTimeSeries, useSalesHeatmapData } from '../hooks/useSalesTimeSeries';
 import { RESOLUTION_OPTIONS } from '../constants';
 
@@ -11,23 +11,40 @@ const getLabel = (value: string) => {
 export const SalesAnalyticsDashboard: React.FC = () => {
   const [resolution, setResolution] = useState<'daily' | 'weekly' | 'monthly' | 'yearly'>('monthly');
   const [heatmapResolution, setHeatmapResolution] = useState<'hourly' | 'daily'>('daily');
+  
+  // Date range state - default to last 30 days
+  const getDefaultDateRange = () => {
+    const endDate = new Date('2025-06-01'); //new Date();
+    const startDate = new Date('2025-01-01');
+    startDate.setDate(endDate.getDate() - 30);
+    return {
+      startDate: startDate.toISOString().split('T')[0],
+      endDate: endDate.toISOString().split('T')[0]
+    };
+  };
+  
+  const [dateRange, setDateRange] = useState(getDefaultDateRange());
 
-  // Fetch time series data
+  // Memoize the filters to prevent unnecessary re-renders and cache invalidation
+  const timeSeriesFilters = useMemo(() => ({
+    resolution,
+    start_date: dateRange.startDate,
+    end_date: dateRange.endDate
+  }), [resolution, dateRange.startDate, dateRange.endDate]);
+
+  // Fetch time series data with date range
   const { 
     data: timeSeriesData, 
     isLoading: timeSeriesLoading, 
     error: timeSeriesError 
-  } = useSalesTimeSeries({ 
-    resolution, 
-    periods: 30 // Last 30 periods
-  });
+  } = useSalesTimeSeries(timeSeriesFilters);
 
-  // Fetch heatmap data
+  // Fetch heatmap data with date range
   const { 
     data: heatmapData, 
     isLoading: heatmapLoading, 
     error: heatmapError 
-  } = useSalesHeatmapData(heatmapResolution);
+  } = useSalesHeatmapData(heatmapResolution, dateRange.startDate, dateRange.endDate);
 
   const handleResolutionChange = (newResolution: string) => {
     setResolution(newResolution as 'daily' | 'weekly' | 'monthly' | 'yearly');
@@ -35,6 +52,14 @@ export const SalesAnalyticsDashboard: React.FC = () => {
 
   const handleHeatmapResolutionChange = (newResolution: 'hourly' | 'daily') => {
     setHeatmapResolution(newResolution);
+  };
+  
+  const handleStartDateChange = (startDate: string) => {
+    setDateRange(prev => ({ ...prev, startDate }));
+  };
+  
+  const handleEndDateChange = (endDate: string) => {
+    setDateRange(prev => ({ ...prev, endDate }));
   };
 
   return (
@@ -54,9 +79,21 @@ export const SalesAnalyticsDashboard: React.FC = () => {
       >
         
         {/* Header Area */}
-        <div style={{ gridArea: 'header' }} className="flex flex-col justify-center">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">تحليلات المبيعات</h1>
-          <p className="text-gray-600">تحليل شامل لإيرادات المبيعات والاتجاهات الزمنية</p>
+        <div style={{ gridArea: 'header' }} className="flex flex-col justify-center space-y-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">تحليلات المبيعات</h1>
+            <p className="text-gray-600">تحليل شامل لإيرادات المبيعات والاتجاهات الزمنية</p>
+          </div>
+          
+          {/* Date Range Selector */}
+          <div className="bg-white rounded-lg p-4 shadow-sm">
+            <DateRangeSelector
+              startDate={dateRange.startDate}
+              endDate={dateRange.endDate}
+              onStartDateChange={handleStartDateChange}
+              onEndDateChange={handleEndDateChange}
+            />
+          </div>
         </div>
 
         {/* Stats Area - Right Side */}
