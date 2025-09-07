@@ -24,9 +24,14 @@ export const SalesHeatmap: React.FC<SalesHeatmapProps> = ({
   className = '',
   title
 }) => {
+  
   const formatCurrency = (value: number) => {
-    return `$${value.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+    return `$${value.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
   };
+  // const formatCurrency = (amount: unknown) => {
+  //   const num = Number(amount);
+  //   return isNaN(num) ? '—' : `$${num.toFixed(2)}`;
+  // };
 
   const getHeatmapData = (): HeatmapCell[][] => {
     if (resolution === 'hourly') {
@@ -38,7 +43,7 @@ export const SalesHeatmap: React.FC<SalesHeatmapProps> = ({
       data.forEach(item => {
         const date = new Date(item.period_start);
         const dayOfWeek = date.getDay(); // 0 = Sunday
-        const hour = date.getHours();
+        const hour = date.getHours() - 3; // TODO -3 to fix time shift - but there should be a timezone fix
         
         grid[dayOfWeek][hour] = {
           value: item.sales_count,
@@ -102,7 +107,7 @@ export const SalesHeatmap: React.FC<SalesHeatmapProps> = ({
 
   const heatmapData = getHeatmapData();
   const maxValue = Math.max(...heatmapData.flat().map(cell => cell.value));
-  const totalRevenue = data.reduce((sum, item) => sum + item.total_revenue, 0);
+  const totalRevenue = data.reduce((sum, item) => sum + Number(item.total_revenue), 0);
   const totalSales = data.reduce((sum, item) => sum + item.sales_count, 0);
 
   return (

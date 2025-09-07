@@ -69,11 +69,11 @@ const App: React.FC = () => {
 
   return (
     <Router>
-      <div className="min-h-screen min-w-screen-lg bg-gray-50 " dir="rtl">
+      <div className="min-h-screen w-full bg-gray-50 " dir="rtl">
         {isAuthenticated && <Navbar onLogout={handleLogout} />}
 
         <div className={isAuthenticated ? 'pt-16' : ''}>
-          <main className="container mx-auto px-4 py-6">
+          <main className="w-full">
             <Routes>
               {/* Authentication */}
               <Route

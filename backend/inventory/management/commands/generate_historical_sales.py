@@ -228,7 +228,7 @@ class Command(BaseCommand):
                 customer=random.choice(customers) if random.random() < 0.7 else None,  # 70% have customer
                 payment_method=random.choice(['cash', 'card', 'bank_transfer']),
                 status='completed',
-                discount_amount=Decimal(random.choice([0, 0, 0, 0, 0, 5, 10, 15, 20])),  # Most no discount
+                discount_amount=Decimal('0.00'),  # No discount
                 tax_percentage=Decimal('0.00'),  # Assuming no tax for now
                 created_by=random.choice(users)
             )

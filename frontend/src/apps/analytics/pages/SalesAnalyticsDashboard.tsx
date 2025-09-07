@@ -1,9 +1,15 @@
 import React, { useState } from 'react';
 import { TimeSeriesChart, SalesHeatmap, ResolutionSelector } from '../components';
 import { useSalesTimeSeries, useSalesHeatmapData } from '../hooks/useSalesTimeSeries';
+import { RESOLUTION_OPTIONS } from '../constants';
+
+// Get arabic label from english value for time resolution
+const getLabel = (value: string) => {
+  return RESOLUTION_OPTIONS.find(option => option.value === value)?.label || 'Unknown';
+};
 
 export const SalesAnalyticsDashboard: React.FC = () => {
-  const [resolution, setResolution] = useState<'hourly' | 'daily' | 'monthly'>('monthly');
+  const [resolution, setResolution] = useState<'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly'>('monthly');
   const [heatmapResolution, setHeatmapResolution] = useState<'hourly' | 'daily'>('daily');
 
   // Fetch time series data
@@ -24,7 +30,7 @@ export const SalesAnalyticsDashboard: React.FC = () => {
   } = useSalesHeatmapData(heatmapResolution);
 
   const handleResolutionChange = (newResolution: string) => {
-    setResolution(newResolution as 'hourly' | 'daily' | 'monthly');
+    setResolution(newResolution as 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly');
   };
 
   const handleHeatmapResolutionChange = (newResolution: 'hourly' | 'daily') => {
@@ -118,7 +124,7 @@ export const SalesAnalyticsDashboard: React.FC = () => {
             <TimeSeriesChart
               data={timeSeriesData?.trends || []}
               loading={timeSeriesLoading}
-              title={`اتجاهات الإيرادات - ${resolution === 'hourly' ? 'ساعي' : resolution === 'daily' ? 'يومي' : 'شهري'}`}
+              title={`اتجاهات الإيرادات - ${getLabel(resolution)}`}
               className="h-full"
             />
           </div>
