@@ -109,13 +109,53 @@ const ProductForm: React.FC = () => {
 
   const fetchProduct = async (): Promise<void> => {
     if (!id) return;
-    
+
     try {
       const response = await axios.get(`/inventory/products/${id}/`);
       const product = response.data;
-      
+
+      // // Try to find matching type name in options
+      // let typeName = '';
+      // let typeId: number | undefined = undefined;
+
+      // if (product.type) {
+      //   const matchedType = options.productTypes.find(pt => pt.id === product.type);
+      //   if (matchedType) {
+      //     typeName = matchedType.type_name_ar;
+      //     typeId = matchedType.id;
+      //   } else {
+      //     // Fallback: fetch product type by ID if not already loaded
+      //     try {
+      //       const typeRes = await axios.get(`/inventory/product-types/${product.type}/`);
+      //       typeName = typeRes.data.name_ar;
+      //       typeId = typeRes.data.id;
+
+      //       // Add it to local options so it shows up in combobox next time
+      //       setOptions(prev => ({
+      //         ...prev,
+      //         productTypes: [...prev.productTypes, typeRes.data],
+      //       }));
+      //     } catch (err) {
+      //       console.warn("Couldn't fetch product type details", err);
+      //       typeName = String(product.type); // fallback
+      //     }
+      //   }
+      // }
+
+      // setFormData({
+      //   type: typeName,
+      //   typeId: typeId,
+      //   brand: product.brand?.toString() || '',
+      //   cost_price: product.cost_price?.toString() || '',
+      //   selling_price: product.selling_price?.toString() || '',
+      //   size: product.size || '',
+      //   weight: product.weight?.toString() || '',
+      //   material: product.material?.toString() || '',
+      //   tags: product.tags || ''
+      // });
       setFormData({
-        type: product.type?.toString() || '',
+        type: product.type_name_ar || '',   // show the name in the combobox
+        typeId: product.type || undefined,  // keep the ID for backend submission
         brand: product.brand?.toString() || '',
         cost_price: product.cost_price?.toString() || '',
         selling_price: product.selling_price?.toString() || '',
@@ -129,6 +169,7 @@ const ProductForm: React.FC = () => {
       navigate('/products/');
     }
   };
+
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
     const { name, value } = e.target;
@@ -188,7 +229,7 @@ const ProductForm: React.FC = () => {
       if (!typeId && formData.type) {
         const typeRes = await axios.post('/inventory/product-types/', {
           name_ar: formData.type,
-          name_en: formData.type,
+          name_en: formData.type, // just reusing arabic name for custom entries for now
         });
         typeId = typeRes.data.id;
 
