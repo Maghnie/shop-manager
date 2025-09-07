@@ -72,6 +72,19 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = ({
         pointBorderColor: '#ffffff',
         pointBorderWidth: 2,
       },
+      {
+        label: 'إجمالي الأرباح',
+        data: data.map(item => item.total_profit),
+        borderColor: CHART_COLORS.profit,
+        backgroundColor: CHART_COLORS.profitLight,
+        fill: true,
+        tension: 0.4,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        pointBackgroundColor: CHART_COLORS.profit,
+        pointBorderColor: '#ffffff',
+        pointBorderWidth: 2,
+      },
     ],
   };
 
@@ -107,28 +120,28 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = ({
           family: 'system-ui, -apple-system, sans-serif',
           size: 12,
         },
-        callbacks: {
-          label: function(context) {
-            const value = context.parsed.y;
-            const dataPoint = data[context.dataIndex];
-            const change = dataPoint.changes?.revenue_change_percent;
+        // callbacks: {
+        //   label: function(context) {
+        //     const value = context.parsed.y;
+        //     const dataPoint = data[context.dataIndex];
+        //     const change = dataPoint.changes?.revenue_change_percent;
             
-            let label = `الإيرادات: ${formatCurrency(value)}`;
-            if (change !== undefined) {
-              const changeText = change >= 0 ? `+${change.toFixed(1)}%` : `${change.toFixed(1)}%`;
-              const changeColor = change >= 0 ? '🔸' : '🔻';
-              label += ` (${changeColor} ${changeText})`;
-            }
-            return label;
-          },
-          afterLabel: function(context) {
-            const dataPoint = data[context.dataIndex];
-            return [
-              `عدد المبيعات: ${dataPoint.sales_count}`,
-              `متوسط قيمة البيع: ${formatCurrency(dataPoint.average_sale_value)}`
-            ];
-          }
-        }
+        //     let label = `الإيرادات: ${formatCurrency(value)}`;
+        //     if (change !== undefined) {
+        //       const changeText = change >= 0 ? `+${change.toFixed(1)}%` : `${change.toFixed(1)}%`;
+        //       const changeColor = change >= 0 ? '🔼' : '🔻';
+        //       label += ` (${changeColor} ${changeText})`;
+        //     }
+        //     return label;
+        //   },
+        //   afterLabel: function(context) {
+        //     const dataPoint = data[context.dataIndex];
+        //     return [
+        //       `عدد المبيعات: ${dataPoint.sales_count}`,
+        //       `متوسط قيمة البيع: ${formatCurrency(dataPoint.average_sale_value)}`
+        //     ];
+        //   }
+        // }
       },
     },
     scales: {

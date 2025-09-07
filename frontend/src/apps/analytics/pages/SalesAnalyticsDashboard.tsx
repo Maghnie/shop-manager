@@ -9,7 +9,7 @@ const getLabel = (value: string) => {
 };
 
 export const SalesAnalyticsDashboard: React.FC = () => {
-  const [resolution, setResolution] = useState<'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly'>('monthly');
+  const [resolution, setResolution] = useState<'daily' | 'weekly' | 'monthly' | 'yearly'>('monthly');
   const [heatmapResolution, setHeatmapResolution] = useState<'hourly' | 'daily'>('daily');
 
   // Fetch time series data
@@ -30,7 +30,7 @@ export const SalesAnalyticsDashboard: React.FC = () => {
   } = useSalesHeatmapData(heatmapResolution);
 
   const handleResolutionChange = (newResolution: string) => {
-    setResolution(newResolution as 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly');
+    setResolution(newResolution as 'daily' | 'weekly' | 'monthly' | 'yearly');
   };
 
   const handleHeatmapResolutionChange = (newResolution: 'hourly' | 'daily') => {

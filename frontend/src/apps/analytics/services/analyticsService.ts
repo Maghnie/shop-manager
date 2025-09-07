@@ -2,7 +2,7 @@ import axios from 'axios';
 
 export interface SalesReportData {
   id: number;
-  resolution: 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly';
+  resolution: 'daily' | 'weekly' | 'monthly' | 'yearly';
   period_start: string;
   period_end: string;
   period_display: string;

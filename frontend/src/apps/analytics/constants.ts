@@ -1,5 +1,5 @@
 export const RESOLUTION_OPTIONS = [
-  { value: 'hourly', label: 'ساعي', icon: '🕐' },
+  // { value: 'hourly', label: 'ساعي', icon: '🕐' },
   { value: 'daily', label: 'يومي', icon: '📅' },
   { value: 'weekly', label: 'أسبوعي', icon: '📊' },
   { value: 'monthly', label: 'شهري', icon: '🗓️' },
