@@ -85,7 +85,4 @@ This is a product, inventory, sales, invoice, and analytics management app, spec
 4. Push to branch: `git push origin feature-name`
 5. Submit pull request
 
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
 
