@@ -6,6 +6,7 @@
 [![CI](https://github.com/maghnie/shop-manager/actions/workflows/frontend.yml/badge.svg)](https://github.com/maghnie/shop-manager/actions/workflows/frontend.yml)
 [![Known Vulnerabilities](https://snyk.io/test/github/maghnie/shop-manager/badge.svg)](https://snyk.io/test/github/maghnie/shop-manager)
 [![Maintenance](https://img.shields.io/badge/Maintained-Yes-green)]()
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Maghnie/shop-manager)
 
 
 # Shop Management System
