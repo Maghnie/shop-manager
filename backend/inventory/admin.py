@@ -1,5 +1,8 @@
 from django.contrib import admin
 from .models import Product, ProductType, Brand, Material
+from .models import Inventory
+from .models import Sale, SaleItem, Invoice
+
 
 @admin.register(ProductType)
 class ProductTypeAdmin(admin.ModelAdmin):
@@ -67,3 +70,9 @@ class ProductAdmin(admin.ModelAdmin):
         if obj:  # Editing existing object
             readonly_fields.append('created_by')
         return readonly_fields
+    
+@admin.register(Sale)
+class SaleAdmin(admin.ModelAdmin):
+    list_display = ['sale_number', 'sale_date', 'final_total', 'created_at']
+    search_fields = ['sale_number', 'sale_date']
+    ordering = ['sale_date']

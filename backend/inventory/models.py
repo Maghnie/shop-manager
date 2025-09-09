@@ -176,7 +176,7 @@ class Sale(models.Model):
     ]
     
     # Basic info
-    sale_number = models.CharField(max_length=20, unique=True, verbose_name="رقم البيع")
+    sale_number = models.CharField(max_length=20, unique=True, verbose_name="رقم البيعة")
     sale_date = models.DateTimeField(default=timezone.now, verbose_name="تاريخ البيع")
     
     # Customer info (optional for walk-in customers) 
