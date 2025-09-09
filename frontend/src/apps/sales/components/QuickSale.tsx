@@ -1,10 +1,8 @@
-// src/components/sales/QuickSale.tsx
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShoppingCart, Plus, Minus, Zap, Receipt } from 'lucide-react';
-import { SalesService } from '@/services/saleService';
-import { useAvailableProducts } from '@/hooks/useSales';
+import { SalesService } from '@/apps/sales/services/saleService';
+import { useAvailableProducts } from '@/apps/sales/hooks/useSales';
 import type { SaleItem, QuickSaleResponse } from '@/types/product';
 
 const QuickSale: React.FC = () => {

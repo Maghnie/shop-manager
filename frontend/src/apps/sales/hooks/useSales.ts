@@ -1,7 +1,5 @@
-// src/hooks/useSales.ts
-
 import { useState, useEffect } from 'react';
-import { SalesService } from '@/services/saleService';
+import { SalesService } from '@/apps/sales/services/saleService';
 import type { SaleListItem, Sale, SalesFilters, Product, SalesStats } from '@/types/product';
 
 export const useSales = () => {

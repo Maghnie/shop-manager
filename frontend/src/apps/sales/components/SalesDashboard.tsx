@@ -1,5 +1,3 @@
-// src/components/sales/SalesDashboard.tsx
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -12,8 +10,8 @@ import {
   Award,
   AlertTriangle
 } from 'lucide-react';
-import { useSalesStats } from '../../hooks/useSales';
-import LowStockAlerts from '../inventory/LowStockAlerts';
+import { useSalesStats } from '../hooks/useSales';
+import LowStockAlerts from '../../../components/inventory/LowStockAlerts';
 
 interface StatCardProps {
   title: string;

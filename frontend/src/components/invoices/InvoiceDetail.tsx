@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Printer, Download, CheckSquare, ArrowLeft, Eye } from 'lucide-react';
-import { InvoiceService } from '@/services/saleService';
+import { InvoiceService } from '@/apps/sales/services/saleService';
 import { useInvoice } from '@/hooks/useInvoices';
 
 const InvoiceDetail: React.FC = () => {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { InventoryService } from '@/services/saleService';
+import { InventoryService } from '@/apps/sales/services/saleService';
 import type { Inventory } from '@/types/product';
 
 export const useInventory = () => {

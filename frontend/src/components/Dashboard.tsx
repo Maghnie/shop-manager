@@ -18,7 +18,7 @@ import {
 
 // Import the new components
 import LowStockAlerts from './inventory/LowStockAlerts';
-import { useSalesStats } from '../hooks/useSales';
+import { useSalesStats } from '@/apps/sales/hooks/useSales';
 import { useLowStockAlert } from '@/hooks/useInventory';
 
 const Dashboard: React.FC = () => {

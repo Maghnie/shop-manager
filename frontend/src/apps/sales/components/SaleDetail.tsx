@@ -1,10 +1,8 @@
-// src/components/sales/SaleDetail.tsx
-
 import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Edit, Trash2, CheckCircle, XCircle, Receipt, ArrowLeft, DollarSign } from 'lucide-react';
-import { SalesService } from '@/services/saleService';
-import { useSale } from '@/hooks/useSales';
+import { SalesService } from '@/apps/sales/services/saleService';
+import { useSale } from '@/apps/sales/hooks/useSales';
 import type { Sale } from '@/types/product';
 
 const SaleDetail: React.FC = () => {

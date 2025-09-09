@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Eye, Search } from 'lucide-react';
 import { useInvoices } from '../../hooks/useInvoices';
-import { InvoiceService } from '@/services/saleService';
+import { InvoiceService } from '@/apps/sales/services/saleService';
 import type { InvoiceListItem, Invoice } from '@/types/product';
 
 const InvoicesList: React.FC = () => {

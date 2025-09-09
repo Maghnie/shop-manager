@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Plus, Minus, Save, X, Calculator } from 'lucide-react';
-import { SalesService } from '@/services/saleService';
-import { useAvailableProducts, useSale } from '@/hooks/useSales';
-import { useSalesCalculations } from '@/hooks/useSalesCalculations'
+import { SalesService } from '@/apps/sales/services/saleService';
+import { useAvailableProducts, useSale } from '@/apps/sales/hooks/useSales';
+import { useSalesCalculations } from '@/apps/sales/hooks/useSalesCalculations'
 import type { Sale, SaleItem } from '@/types/product';
 
 const SaleForm: React.FC = () => {

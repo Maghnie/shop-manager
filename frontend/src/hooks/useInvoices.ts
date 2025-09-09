@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { InvoiceService } from '@/services/saleService';
+import { InvoiceService } from '@/apps/sales/services/saleService';
 import type { InvoiceListItem, Invoice } from '@/types/product';
 
 export const useInvoices = () => {
