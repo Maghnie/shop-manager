@@ -13,11 +13,7 @@ import Reports from './components/Reports';
 import Navbar from './components/Navbar';
 
 // New sales components
-import SalesList from '@/apps/sales/components/SalesList';
-import SaleForm from './apps/sales/components/SaleForm';
-import SaleDetail from './apps/sales/components/SaleDetail';
-import QuickSale from './apps/sales/components/QuickSale';
-import SalesDashboard from './apps/sales/components/SalesDashboard';
+import { SalesList, SaleForm, SaleDetail, QuickSale, SalesDashboard } from '@/apps/sales';
 
 // New invoice components
 import InvoicesList from './components/invoices/InvoicesList';
