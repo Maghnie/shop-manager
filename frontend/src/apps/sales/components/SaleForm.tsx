@@ -6,7 +6,7 @@ import { useAvailableProducts, useSale } from '@/apps/sales/hooks/useSales';
 import { useSalesCalculations } from '@/apps/sales/hooks/useSalesCalculations'
 import type { Sale, SaleItem } from '@/types/product';
 
-const SaleForm: React.FC = () => {
+export const SaleForm: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEditing = Boolean(id);
@@ -450,5 +450,3 @@ const SaleForm: React.FC = () => {
     </div>
   );
 };
-
-export default SaleForm;

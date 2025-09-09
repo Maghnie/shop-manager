@@ -22,7 +22,7 @@ interface StatCardProps {
   bgColor: string;
 }
 
-const SalesDashboard: React.FC = () => {
+export const SalesDashboard: React.FC = () => {
   const { stats, loading, error, refetch } = useSalesStats();
 
   const formatCurrency = (amount: unknown) => {
@@ -351,5 +351,3 @@ const SalesDashboard: React.FC = () => {
     </div>
   );
 };
-
-export default SalesDashboard;

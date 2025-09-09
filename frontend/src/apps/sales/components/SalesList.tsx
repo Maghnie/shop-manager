@@ -16,7 +16,7 @@ interface Sale {
   profit_percentage: number;
 }
 
-const SalesList: React.FC = () => {
+export const SalesList: React.FC = () => {
   const [sales, setSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
@@ -319,5 +319,3 @@ const SalesList: React.FC = () => {
     </div>
   );
 };
-
-export default SalesList;

@@ -5,7 +5,7 @@ import { SalesService } from '@/apps/sales/services/saleService';
 import { useSale } from '@/apps/sales/hooks/useSales';
 import type { Sale } from '@/types/product';
 
-const SaleDetail: React.FC = () => {
+export const SaleDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const saleId = id ? parseInt(id) : 0;
@@ -383,5 +383,3 @@ const SaleDetail: React.FC = () => {
     </div>
   );
 };
-
-export default SaleDetail;

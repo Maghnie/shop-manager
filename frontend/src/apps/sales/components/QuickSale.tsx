@@ -5,7 +5,7 @@ import { SalesService } from '@/apps/sales/services/saleService';
 import { useAvailableProducts } from '@/apps/sales/hooks/useSales';
 import type { SaleItem, QuickSaleResponse } from '@/types/product';
 
-const QuickSale: React.FC = () => {
+export const QuickSale: React.FC = () => {
   const navigate = useNavigate();
   const { products, loading: productsLoading } = useAvailableProducts();
   
@@ -344,5 +344,3 @@ const QuickSale: React.FC = () => {
     </div>
   );
 };
-
-export default QuickSale;
