@@ -14,7 +14,8 @@ from rest_framework.decorators import api_view, action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated, AllowAny
-
+from django.views.decorators.cache import cache_page
+from django.core.cache import cache
 import django_filters
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -158,7 +159,7 @@ class SaleViewSet(ModelViewSet):
         return Response({'message': 'تم إلغاء البيعة وإرجاع المخزون'})
 
 class SaleStatsView(generics.GenericAPIView):
-    """Get sales statistics and analytics (all DB-side, efficient)."""
+    """Get sales statistics and analytics"""
     permission_classes = [AllowAny]
 
     # helper to compute aggregates for a Sale queryset
