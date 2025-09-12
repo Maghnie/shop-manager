@@ -1,9 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Plus, Minus, Save, X, Calculator } from 'lucide-react';
+import { Save, X, Calculator, Undo2 } from 'lucide-react';
+import { useHotkeys } from 'react-hotkeys-hook';
 import { SalesService } from '@/apps/sales/services/saleService';
 import { useAvailableProducts, useSale } from '@/apps/sales/hooks/useSales';
-import { useSalesCalculations } from '@/apps/sales/hooks/useSalesCalculations'
+import { useSalesCalculations } from '@/apps/sales/hooks/useSalesCalculations';
+import { CustomerSubform } from './CustomerSubform';
+import { ProductInput } from './ProductInput';
+import { SalesTable } from './SalesTable';
+import { SaleSummary } from './SaleSummary';
 import type { Sale, SaleItem } from '@/types/product';
 
 export const SaleForm: React.FC = () => {
@@ -13,6 +18,11 @@ export const SaleForm: React.FC = () => {
   
   const { products, loading: productsLoading } = useAvailableProducts();
   const { sale, loading: saleLoading } = useSale(id ? parseInt(id) : undefined);
+  
+  const [showCustomerInfo, setShowCustomerInfo] = useState(false);
+  const [showProfitInfo, setShowProfitInfo] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [addedItemsHistory, setAddedItemsHistory] = useState<SaleItem[]>([]);
   
   const [formData, setFormData] = useState<Partial<Sale>>({
     customer_name: '',
@@ -24,9 +34,6 @@ export const SaleForm: React.FC = () => {
     notes: '',
     items: []
   });
-  
-  const [saving, setSaving] = useState(false);
-  const [showProfitInfo, setShowProfitInfo] = useState(true);
 
   // Load sale data when editing
   useEffect(() => {
@@ -35,7 +42,7 @@ export const SaleForm: React.FC = () => {
     }
   }, [isEditing, sale]);
 
-  // Calculate totals
+  // Calculate totals using the existing hook
   const { 
     subtotal, 
     totalCost, 
@@ -44,47 +51,107 @@ export const SaleForm: React.FC = () => {
     finalTotal, 
     netProfit, 
     profitPercentage 
-    } = useSalesCalculations(formData, products);
+  } = useSalesCalculations(formData, products);
 
+  // Event Handlers
   const handleInputChange = (field: keyof Sale, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const addItem = () => {
-    const newItem: SaleItem = {
-      product: 0,
-      quantity: 1,
-      unit_price: 0
-    };
-    setFormData(prev => ({
-      ...prev,
-      items: [...(prev.items || []), newItem]
-    }));
+  const handleCustomerUpdate = (field: keyof Pick<Sale, 'customer_name' | 'customer_phone' | 'customer_address'>, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const updateItem = (index: number, field: keyof SaleItem, value: any) => {
+  const addProductToSale = useCallback((productId: number, quantity: number = 1) => {
+    const product = products.find(p => p.id === productId);
+    if (!product) return;
+
+    const existingItemIndex = formData.items?.findIndex(item => item.product === productId);
+    
+    if (existingItemIndex !== undefined && existingItemIndex >= 0) {
+      // Update existing item quantity
+      const updatedItems = [...(formData.items || [])];
+      updatedItems[existingItemIndex] = {
+        ...updatedItems[existingItemIndex],
+        quantity: updatedItems[existingItemIndex].quantity + quantity
+      };
+      setFormData(prev => ({ ...prev, items: updatedItems }));
+    } else {
+      // Add new item
+      const newItem: SaleItem = {
+        product: productId,
+        quantity,
+        unit_price: product.selling_price
+      };
+      
+      setFormData(prev => ({
+        ...prev,
+        items: [...(prev.items || []), newItem]
+      }));
+      
+      // Add to history for undo functionality
+      setAddedItemsHistory(prev => [...prev, newItem]);
+    }
+  }, [formData.items, products]);
+
+  const updateItemQuantity = useCallback((index: number, quantity: number) => {
+    if (quantity <= 0) {
+      removeItem(index);
+      return;
+    }
+
     setFormData(prev => ({
       ...prev,
       items: prev.items?.map((item, i) => 
-        i === index ? { ...item, [field]: value } : item
+        i === index ? { ...item, quantity } : item
       ) || []
     }));
-  };
+  }, []);
 
-  const removeItem = (index: number) => {
+  const updateItemPrice = useCallback((index: number, price: number) => {
+    setFormData(prev => ({
+      ...prev,
+      items: prev.items?.map((item, i) => 
+        i === index ? { ...item, unit_price: price } : item
+      ) || []
+    }));
+  }, []);
+
+  const removeItem = useCallback((index: number) => {
     setFormData(prev => ({
       ...prev,
       items: prev.items?.filter((_, i) => i !== index) || []
     }));
-  };
+  }, []);
 
-  const handleProductSelect = (index: number, productId: number) => {
-    const product = products.find(p => p.id === productId);
-    if (product) {
-      updateItem(index, 'product', productId);
-      updateItem(index, 'unit_price', product.selling_price);
+  const undoLastItem = useCallback(() => {
+    if (addedItemsHistory.length === 0) return;
+    
+    const lastAddedItem = addedItemsHistory[addedItemsHistory.length - 1];
+    const updatedItems = formData.items?.filter(item => 
+      !(item.product === lastAddedItem.product && item.quantity === lastAddedItem.quantity)
+    ) || [];
+    
+    setFormData(prev => ({ ...prev, items: updatedItems }));
+    setAddedItemsHistory(prev => prev.slice(0, -1));
+  }, [addedItemsHistory, formData.items]);
+
+  const adjustLastItemQuantity = useCallback((delta: number) => {
+    const items = formData.items || [];
+    if (items.length === 0) return;
+
+    const lastIndex = items.length - 1;
+    const newQuantity = items[lastIndex].quantity + delta;
+    
+    if (newQuantity > 0) {
+      updateItemQuantity(lastIndex, newQuantity);
     }
-  };
+  }, [formData.items, updateItemQuantity]);
+
+  // Keyboard shortcuts
+  useHotkeys('ctrl+z', undoLastItem, [undoLastItem]);
+  useHotkeys('plus', () => adjustLastItemQuantity(1), [adjustLastItemQuantity]);
+  useHotkeys('minus', () => adjustLastItemQuantity(-1), [adjustLastItemQuantity]);
 
   const validateForm = (): string[] => {
     const errors: string[] = [];
@@ -148,19 +215,24 @@ export const SaleForm: React.FC = () => {
     );
   }
 
-  const formatCurrency = (amount: unknown) => {
-    const num = Number(amount);
-    return isNaN(num) ? '—' : `$${num.toFixed(2)}`;
-  };
-
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
+    <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="bg-white rounded-xl shadow-lg p-6">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-800">
             {isEditing ? 'تعديل البيعة' : 'بيعة جديدة'}
           </h1>
           <div className="flex space-x-4 space-x-reverse">
+            <button
+              type="button"
+              onClick={undoLastItem}
+              disabled={addedItemsHistory.length === 0}
+              className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition duration-200 flex items-center space-x-2 space-x-reverse disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Ctrl+Z"
+            >
+              <Undo2 className="w-4 h-4" />
+              <span>تراجع</span>
+            </button>
             <button
               type="button"
               onClick={() => setShowProfitInfo(!showProfitInfo)}
@@ -174,46 +246,16 @@ export const SaleForm: React.FC = () => {
 
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Customer Information */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                اسم العميل
-              </label>
-              <input
-                type="text"
-                value={formData.customer_name}
-                onChange={(e) => handleInputChange('customer_name', e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="اختياري - للعملاء المباشرين"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                رقم الهاتف
-              </label>
-              <input
-                type="tel"
-                value={formData.customer_phone}
-                onChange={(e) => handleInputChange('customer_phone', e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="اختياري"
-              />
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                العنوان
-              </label>
-              <textarea
-                value={formData.customer_address}
-                onChange={(e) => handleInputChange('customer_address', e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                rows={2}
-                placeholder="اختياري"
-              />
-            </div>
-          </div>
+          <CustomerSubform
+            customerData={{
+              customer_name: formData.customer_name || '',
+              customer_phone: formData.customer_phone || '',
+              customer_address: formData.customer_address || ''
+            }}
+            onUpdate={handleCustomerUpdate}
+            isVisible={showCustomerInfo}
+            onToggle={() => setShowCustomerInfo(!showCustomerInfo)}
+          />
 
           {/* Payment and Settings */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -264,152 +306,39 @@ export const SaleForm: React.FC = () => {
             </div>
           </div>
 
-          {/* Sale Items */}
+          {/* Product Input */}
           <div>
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-semibold text-gray-800">المنتجات</h3>
-              <button
-                type="button"
-                onClick={addItem}
-                className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition duration-200 flex items-center space-x-2 space-x-reverse"
-              >
-                <Plus className="w-4 h-4" />
-                <span>إضافة منتج</span>
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              {formData.items?.map((item, index) => (
-                <div key={index} className="bg-gray-50 p-4 rounded-lg">
-                  <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        المنتج *
-                      </label>
-                      <select
-                        value={item.product}
-                        onChange={(e) => handleProductSelect(index, parseInt(e.target.value))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        required
-                      >
-                        <option value={0}>اختر منتج...</option>
-                        {products.map(product => (
-                          <option key={product.id} value={product.id} disabled={product.available_stock === 0}>
-                            {product.type_name_ar} - المتوفر: {product.available_stock}
-                            {product.is_low_stock && ' ⚠️'}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        الكمية *
-                      </label>
-                      <input
-                        type="number"
-                        min="1"
-                        value={item.quantity}
-                        onChange={(e) => updateItem(index, 'quantity', parseInt(e.target.value) || 1)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        سعر الوحدة *
-                      </label>
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={item.unit_price}
-                        onChange={(e) => updateItem(index, 'unit_price', parseFloat(e.target.value) || 0)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        required
-                      />
-                    </div>
-
-                    <div className="flex flex-col">
-                      <span className="text-sm text-gray-600 mb-2">الإجمالي</span>
-                      <div className="font-semibold text-lg">
-                        ${(item.quantity * item.unit_price).toFixed(2)}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => removeItem(index)}
-                        className="mt-2 bg-red-500 text-white p-2 rounded-lg hover:bg-red-600 transition duration-200"
-                      >
-                        <Minus className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Product Stock Warning */}
-                  {item.product > 0 && (() => {
-                    const product = products.find(p => p.id === item.product);
-                    return product && item.quantity > product.available_stock && (
-                      <div className="mt-2 p-2 bg-red-100 text-red-700 rounded">
-                        ⚠️ الكمية المطلوبة ({item.quantity}) تتجاوز المخزون المتاح ({product.available_stock})
-                      </div>
-                    );
-                  })()}
-                </div>
-              ))}
-
-              {(!formData.items || formData.items.length === 0) && (
-                <div className="text-center py-8 text-gray-500">
-                  لا توجد منتجات مضافة. اضغط "إضافة منتج" لبدء البيعة.
-                </div>
-              )}
-            </div>
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">إضافة المنتجات</h3>
+            <ProductInput
+              products={products}
+              onAddProduct={addProductToSale}
+            />
           </div>
+
+          {/* Sales Table */}
+          {formData.items && formData.items.length > 0 && (
+            <SalesTable
+              items={formData.items}
+              products={products}
+              onUpdateQuantity={updateItemQuantity}
+              onUpdatePrice={updateItemPrice}
+              onRemoveItem={removeItem}
+              showProfitInfo={showProfitInfo}
+            />
+          )}
 
           {/* Summary */}
           {formData.items && formData.items.length > 0 && (
-            <div className="bg-gray-50 p-6 rounded-lg">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">ملخص البيعة</h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span>المجموع الفرعي:</span>
-                    <span>${subtotal.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>الخصم:</span>
-                    <span>-${discountAmount.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>الضريبة:</span>
-                    <span>+${taxAmount.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between font-bold text-lg border-t pt-2">
-                    <span>الإجمالي النهائي:</span>
-                    <span>${finalTotal.toFixed(2)}</span>
-                  </div>
-                </div>
-
-                {showProfitInfo && products.length > 0 && (
-                  <div className="space-y-2 bg-green-50 p-4 rounded-lg">
-                    <h4 className="font-semibold text-green-800 mb-2">معلومات الربح (للبائع فقط)</h4>
-                    <div className="flex justify-between text-sm">
-                      <span>إجمالي التكلفة:</span>
-                      <span>{formatCurrency(totalCost)}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span>صافي الربح:</span>
-                      <span className="text-green-600 font-semibold">{formatCurrency(netProfit)}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span>نسبة الربح:</span>
-                      <span className="text-green-600 font-semibold">{profitPercentage.toFixed(1)}%</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
+            <SaleSummary
+              subtotal={subtotal}
+              discountAmount={discountAmount}
+              taxAmount={taxAmount}
+              finalTotal={finalTotal}
+              totalCost={totalCost}
+              netProfit={netProfit}
+              profitPercentage={profitPercentage}
+              showProfitInfo={showProfitInfo}
+            />
           )}
 
           {/* Notes */}
