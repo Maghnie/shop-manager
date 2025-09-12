@@ -144,6 +144,18 @@ export const ProductInput: React.FC<ProductInputProps> = ({
     inputRef.current?.focus();
   }, []);
 
+  useEffect(() => {
+    if (selectedIndex >= 0 && dropdownRef.current) {
+        const selectedElement = dropdownRef.current.children[selectedIndex] as HTMLElement;
+        if (selectedElement) {
+        selectedElement.scrollIntoView({
+            block: 'nearest',
+            behavior: 'smooth'
+        });
+        }
+    }
+  }, [selectedIndex]);
+
   return (
     <div className="relative">
       {/* Help text */}
@@ -211,7 +223,6 @@ export const ProductInput: React.FC<ProductInputProps> = ({
           ))}
         </div>
       )}
-      
     </div>
   );
 };
