@@ -100,13 +100,24 @@ export const SaleForm: React.FC = () => {
       return;
     }
 
+    const product = products.find(p => p.id === formData.items?.[index]?.product);
+    const maxQuantity = product?.available_stock || 0;
+    const finalQuantity = Number(Math.min(quantity, maxQuantity));
+    
+    // Show warning if quantity was capped
+    if (finalQuantity < quantity) {
+        alert(`⚠ الكمية المطلوبة (${quantity}) تتجاوز المخزون المتاح (${maxQuantity})` +
+            `\n تم تقليل الكمية إلى الحد الأقصى المتاح: ${maxQuantity}`
+        );
+    }
+
     setFormData(prev => ({
       ...prev,
       items: prev.items?.map((item, i) => 
-        i === index ? { ...item, quantity } : item
+        i === index ? { ...item, quantity: finalQuantity } : item
       ) || []
     }));
-  }, [removeItem, products, formData.items]);
+  }, [[products, formData.items]]);
 
   const updateItemPrice = useCallback((index: number, price: number) => {
     setFormData(prev => ({
