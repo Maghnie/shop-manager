@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Save, X, Calculator, Undo2 } from 'lucide-react';
-import { useHotkeys } from 'react-hotkeys-hook';
 import { SalesService } from '@/apps/sales/services/saleService';
 import { useAvailableProducts, useSale } from '@/apps/sales/hooks/useSales';
 import { useSalesCalculations } from '@/apps/sales/hooks/useSalesCalculations';
@@ -135,18 +134,6 @@ export const SaleForm: React.FC = () => {
     
     const { quantity: finalQuantity } = validateAndCapQuantity(productId, quantity);
 
-
-    // const product = products.find(p => p.id === formData.items?.[index]?.product);
-    // const maxQuantity = product?.available_stock || 0;
-    // const finalQuantity = Number(Math.min(quantity, maxQuantity));
-    
-    // Show warning if quantity was capped
-    // if (finalQuantity < quantity) {
-    //     alert(`⚠ الكمية المطلوبة (${quantity}) تتجاوز المخزون المتاح (${maxQuantity})` +
-    //         `\n تم تقليل الكمية إلى الحد الأقصى المتاح: ${maxQuantity}`
-    //     );
-    // }
-
     setFormData(prev => ({
       ...prev,
       items: prev.items?.map((item, i) => 
@@ -181,35 +168,6 @@ export const SaleForm: React.FC = () => {
     setFormData(prev => ({ ...prev, items: updatedItems }));
     setAddedItemsHistory(prev => prev.slice(0, -1));
   }, [addedItemsHistory, formData.items]);
-
-  const adjustLastItemQuantity = useCallback((delta: number) => {
-    const items = formData.items || [];
-    if (items.length === 0) return;
-
-    const lastIndex = items.length - 1;
-    const newQuantity = items[lastIndex].quantity + delta;
-    console.log(items[lastIndex].quantity)
-    
-    if (newQuantity > 0) {
-      updateItemQuantity(lastIndex, newQuantity);
-    }
-  }, [formData.items, updateItemQuantity, removeItem]);
-
-  // Keyboard shortcuts
-  useHotkeys('mod+z', undoLastItem, {
-    enableOnFormTags: ['input', 'textarea', 'select'],
-    preventDefault: true,
-  }, [undoLastItem]);
-
-  useHotkeys(['ctrl+plus', 'ctrl+equal', 'cmd+plus', 'cmd+equal'], () => adjustLastItemQuantity(1), {
-    enableOnFormTags: ['input', 'textarea', 'select'],
-    preventDefault: true,
-  }, [adjustLastItemQuantity]);
-
-  useHotkeys(['ctrl+minus', 'cmd+minus'], () => adjustLastItemQuantity(-1), {
-    enableOnFormTags: ['input', 'textarea', 'select'],
-    preventDefault: true,
-  }, [adjustLastItemQuantity]);
 
   const validateForm = (): string[] => {
     const errors: string[] = [];

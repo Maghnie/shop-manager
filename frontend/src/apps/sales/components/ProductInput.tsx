@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useHotkeys } from 'react-hotkeys-hook';
 import { Search, Package } from 'lucide-react';
 import type { Product } from '@/types/product';
 
@@ -39,8 +38,7 @@ export const ProductInput: React.FC<ProductInputProps> = ({
       label: `${product.type_name_ar} ${product.brand_name_ar} (المتوفر: ${product.available_stock})`,
       product
     }));
-    console.log(searchTerm)
-    console.log(productOptions.at(0)?.product)
+
     const filtered = productOptions.filter(option =>
       option.product.type_name_ar.includes(searchTerm) ||
       (option.product.brand_name_ar || '').includes(searchTerm) ||
@@ -53,6 +51,7 @@ export const ProductInput: React.FC<ProductInputProps> = ({
   }, [inputValue, products]);
 
   // Parse quantity from input (e.g., "كيس بلاستيك 3" -> quantity: 3)
+  // TODO do we want to handle quantities via typing
   const parseQuantityFromInput = (input: string): { searchTerm: string; quantity: number } => {
     const quantityMatch = input.match(/\s+(\d+)$/);
     if (quantityMatch) {
@@ -132,13 +131,6 @@ export const ProductInput: React.FC<ProductInputProps> = ({
     handleSelectProduct(option);
   };
 
-  // Clear input on Esc key
-  useHotkeys('esc', () => {
-    setInputValue('');
-    setIsDropdownOpen(false);
-    setSelectedIndex(-1);
-  }, []);
-
   // Focus input when component mounts
   useEffect(() => {
     inputRef.current?.focus();
@@ -164,11 +156,10 @@ export const ProductInput: React.FC<ProductInputProps> = ({
           <span>⏎ Enter لإضافة المنتج</span>
           <span>↑↓ للتنقل</span>
           <span>Esc للمسح</span>
-          <span>Ctrl+Z للتراجع</span>
-          <span>+ / - لتعديل الكمية الأخيرة</span>
         </div>
       </div>
-      <div className="relative">
+      {/* Drop-down input field */}
+      <div className="relative mt-2">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <Search className="h-5 w-5 text-gray-400" />
         </div>
@@ -178,7 +169,7 @@ export const ProductInput: React.FC<ProductInputProps> = ({
           value={inputValue}
           onChange={(e) => handleInputChange(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="ابحث عن منتج... (مثال: كيس بلاستيك 5 لإضافة 5 قطع)"
+          placeholder="ابحث عن منتج... (مثال: كيس بلاستيك)"
           className="w-full pl-10 pr-4 py-3 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           autoComplete="off"
         />
