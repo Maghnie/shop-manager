@@ -9,6 +9,8 @@ import { ProductInput } from './ProductInput';
 import { SalesTable } from './SalesTable';
 import { SaleSummary } from './SaleSummary';
 import type { Sale, SaleItem } from '@/types/product';
+import toast from 'react-hot-toast';
+
 
 export const SaleForm: React.FC = () => {
   const navigate = useNavigate();
@@ -199,14 +201,16 @@ export const SaleForm: React.FC = () => {
     try {
       if (isEditing && id) {
         await SalesService.updateSale(parseInt(id), formData);
-        alert('تم تحديث البيعة بنجاح');
+        toast.success('تم تحديث البيعة بنجاح');
       } else {
         const newSale = await SalesService.createSale(formData);
-        alert('تم إنشاء البيعة بنجاح');
+        toast.success('تم إنشاء البيعة بنجاح');
+        // alert('تم إنشاء البيعة بنجاح');
         navigate(`/sales/${newSale.id}`);
       }
     } catch (error) {
-      alert('حدث خطأ أثناء حفظ البيعة');
+      toast.error('حدث خطأ أثناء حفظ البيعة');
+    //   alert('حدث خطأ أثناء حفظ البيعة');
       console.error(error);
     } finally {
       setSaving(false);

@@ -1,8 +1,7 @@
-// src/App.tsx
-
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import axios from 'axios';
+import { Toaster } from 'react-hot-toast';
 
 // Existing components
 import Login from './components/Login';
@@ -198,6 +197,35 @@ const App: React.FC = () => {
             </Routes>
           </main>
         </div>
+        <Toaster 
+          position="bottom-right"
+          reverseOrder={false}
+          gutter={8}
+          containerClassName=""
+          containerStyle={{}}
+          toastOptions={{
+            // Global toast options
+            duration: 4000,
+            style: {
+              background: '#363636',
+              color: '#fff',
+            },
+            // Success toast style
+            success: {
+              duration: 3000,
+              style: {
+                background: 'green',
+              },
+            },
+            // Error toast style  
+            error: {
+              duration: 4000,
+              style: {
+                background: 'red',
+              },
+            },
+          }}
+        />
       </div>
     </Router>
   );
