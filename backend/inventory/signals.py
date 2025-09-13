@@ -31,4 +31,4 @@ def handle_sale_reports_update(sender, instance, created, **kwargs):
             'sales_stats_month'
         ])
 
-        update_sales_reports_async.delay(instance.id, created)
+        # update_sales_reports_async.delay(instance.id, created)

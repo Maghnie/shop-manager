@@ -528,8 +528,9 @@ def available_products(request):
         products_data.append({
             'id': product.id,
             'name': str(product),
-            'type_ar': product.type.name_ar,
-            'brand_ar': product.brand.name_ar if product.brand else '',
+            'type_name_ar': product.type.name_ar,
+            'brand_name_ar': product.brand.name_ar if product.brand else 'عام',
+            'cost_price': float(product.cost_price),
             'selling_price': float(product.selling_price),
             'available_stock': product.inventory.quantity_in_stock,
             'size': product.size or '',
