@@ -62,6 +62,29 @@ export const SaleForm: React.FC = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const validateAndCapQuantity = useCallback((
+    productId: number, 
+    requestedQuantity: number, 
+    showWarning: boolean = true
+    ): { quantity: number; wasReduced: boolean } => {
+    const product = products.find(p => p.id === productId);
+    
+    if (!product) {
+        return { quantity: 0, wasReduced: false };
+    }
+    
+    const maxQuantity = product.available_stock;
+    const finalQuantity = Math.min(requestedQuantity, maxQuantity);
+    const wasReduced = finalQuantity < requestedQuantity;
+    
+    if (wasReduced && showWarning) {
+        alert(`⚠ الكمية المطلوبة (${requestedQuantity}) تتجاوز المخزون المتاح (${maxQuantity})` +
+             `\n تم تقليل الكمية إلى الحد الأقصى المتاح: ${finalQuantity}`);
+    }
+    
+    return { quantity: finalQuantity, wasReduced };
+  }, [products]);
+
   const addProductToSale = useCallback((productId: number, quantity: number = 1) => {
     const product = products.find(p => p.id === productId);
     if (!product) return;
@@ -71,16 +94,23 @@ export const SaleForm: React.FC = () => {
     if (existingItemIndex !== undefined && existingItemIndex >= 0) {
       // Update existing item quantity
       const updatedItems = [...(formData.items || [])];
+      const currentQuantity = updatedItems[existingItemIndex].quantity;
+      const requestedTotal = currentQuantity + quantity;
+        
+      const { quantity: finalQuantity } = validateAndCapQuantity(productId, requestedTotal);
+    
       updatedItems[existingItemIndex] = {
         ...updatedItems[existingItemIndex],
-        quantity: updatedItems[existingItemIndex].quantity + quantity
+        quantity: finalQuantity
       };
       setFormData(prev => ({ ...prev, items: updatedItems }));
     } else {
       // Add new item
+      const { quantity: finalQuantity } = validateAndCapQuantity(productId, quantity);
+    
       const newItem: SaleItem = {
         product: productId,
-        quantity,
+        quantity: finalQuantity,
         unit_price: product.selling_price
       };
       
@@ -92,7 +122,7 @@ export const SaleForm: React.FC = () => {
       // Add to history for undo functionality
       setAddedItemsHistory(prev => [...prev, newItem]);
     }
-  }, [formData.items, products]);
+  }, [formData.items, products, validateAndCapQuantity]);
 
   const updateItemQuantity = useCallback((index: number, quantity: number) => {
     if (quantity <= 0) {
@@ -100,16 +130,22 @@ export const SaleForm: React.FC = () => {
       return;
     }
 
-    const product = products.find(p => p.id === formData.items?.[index]?.product);
-    const maxQuantity = product?.available_stock || 0;
-    const finalQuantity = Number(Math.min(quantity, maxQuantity));
+    const productId = formData.items?.[index]?.product;
+    if (!productId) return;
+    
+    const { quantity: finalQuantity } = validateAndCapQuantity(productId, quantity);
+
+
+    // const product = products.find(p => p.id === formData.items?.[index]?.product);
+    // const maxQuantity = product?.available_stock || 0;
+    // const finalQuantity = Number(Math.min(quantity, maxQuantity));
     
     // Show warning if quantity was capped
-    if (finalQuantity < quantity) {
-        alert(`⚠ الكمية المطلوبة (${quantity}) تتجاوز المخزون المتاح (${maxQuantity})` +
-            `\n تم تقليل الكمية إلى الحد الأقصى المتاح: ${maxQuantity}`
-        );
-    }
+    // if (finalQuantity < quantity) {
+    //     alert(`⚠ الكمية المطلوبة (${quantity}) تتجاوز المخزون المتاح (${maxQuantity})` +
+    //         `\n تم تقليل الكمية إلى الحد الأقصى المتاح: ${maxQuantity}`
+    //     );
+    // }
 
     setFormData(prev => ({
       ...prev,
@@ -117,7 +153,7 @@ export const SaleForm: React.FC = () => {
         i === index ? { ...item, quantity: finalQuantity } : item
       ) || []
     }));
-  }, [[products, formData.items]]);
+  }, [[products, formData.items, validateAndCapQuantity]]);
 
   const updateItemPrice = useCallback((index: number, price: number) => {
     setFormData(prev => ({
