@@ -106,7 +106,7 @@ export const SaleForm: React.FC = () => {
         i === index ? { ...item, quantity } : item
       ) || []
     }));
-  }, []);
+  }, [removeItem, products, formData.items]);
 
   const updateItemPrice = useCallback((index: number, price: number) => {
     setFormData(prev => ({
@@ -127,10 +127,9 @@ export const SaleForm: React.FC = () => {
   const undoLastItem = useCallback(() => {
     if (addedItemsHistory.length === 0) return;
     
-    const lastAddedItem = addedItemsHistory[addedItemsHistory.length - 1];
-    const updatedItems = formData.items?.filter(item => 
-      !(item.product === lastAddedItem.product && item.quantity === lastAddedItem.quantity)
-    ) || [];
+    // const lastAddedItem = addedItemsHistory[addedItemsHistory.length - 1];
+    const updatedItems = [...(formData.items || [])];
+    updatedItems.pop();
     
     setFormData(prev => ({ ...prev, items: updatedItems }));
     setAddedItemsHistory(prev => prev.slice(0, -1));
@@ -142,16 +141,28 @@ export const SaleForm: React.FC = () => {
 
     const lastIndex = items.length - 1;
     const newQuantity = items[lastIndex].quantity + delta;
+    console.log(items[lastIndex].quantity)
     
     if (newQuantity > 0) {
       updateItemQuantity(lastIndex, newQuantity);
     }
-  }, [formData.items, updateItemQuantity]);
+  }, [formData.items, updateItemQuantity, removeItem]);
 
   // Keyboard shortcuts
-  useHotkeys('ctrl+z', undoLastItem, [undoLastItem]);
-  useHotkeys('plus', () => adjustLastItemQuantity(1), [adjustLastItemQuantity]);
-  useHotkeys('minus', () => adjustLastItemQuantity(-1), [adjustLastItemQuantity]);
+  useHotkeys('mod+z', undoLastItem, {
+    enableOnFormTags: ['input', 'textarea', 'select'],
+    preventDefault: true,
+  }, [undoLastItem]);
+
+  useHotkeys(['ctrl+plus', 'ctrl+equal', 'cmd+plus', 'cmd+equal'], () => adjustLastItemQuantity(1), {
+    enableOnFormTags: ['input', 'textarea', 'select'],
+    preventDefault: true,
+  }, [adjustLastItemQuantity]);
+
+  useHotkeys(['ctrl+minus', 'cmd+minus'], () => adjustLastItemQuantity(-1), {
+    enableOnFormTags: ['input', 'textarea', 'select'],
+    preventDefault: true,
+  }, [adjustLastItemQuantity]);
 
   const validateForm = (): string[] => {
     const errors: string[] = [];
