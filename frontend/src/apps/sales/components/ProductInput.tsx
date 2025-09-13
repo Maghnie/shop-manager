@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, Fragment } from 'react';
+import { Combobox, ComboboxInput, ComboboxOption, ComboboxOptions, Transition } from '@headlessui/react';
 import { Search, Package } from 'lucide-react';
 import type { Product } from '@/types/product';
 
@@ -17,136 +18,39 @@ export const ProductInput: React.FC<ProductInputProps> = ({
   products,
   onAddProduct
 }) => {
-  const [inputValue, setInputValue] = useState('');
-  const [filteredOptions, setFilteredOptions] = useState<ProductOption[]>([]);
-  const [selectedIndex, setSelectedIndex] = useState(-1);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [query, setQuery] = useState('');
+  const [selectedProduct, setSelectedProduct] = useState<ProductOption | null>(null);
 
-  // Filter options based on input
-  useEffect(() => {
-    if (!inputValue.trim()) {
-      setFilteredOptions([]);
-      setIsDropdownOpen(false);
-      return;
-    }
+  // Create product options
+  const productOptions: ProductOption[] = products.map(product => ({
+    id: product.id,
+    label: `${product.type_name_ar} ${product.brand_name_ar} (المتوفر: ${product.available_stock})`,
+    product
+  }));
 
-    const searchTerm = inputValue.trim();
-    const productOptions: ProductOption[] = products.map(product => ({
-      id: product.id,
-      label: `${product.type_name_ar} ${product.brand_name_ar} (المتوفر: ${product.available_stock})`,
-      product
-    }));
+  // Filter options based on query
+  const filteredOptions = query === ''
+    ? []
+    : productOptions.filter(option =>
+        option.product.type_name_ar.includes(query) ||
+        (option.product.brand_name_ar || '').includes(query) ||
+        (option.product.tags_list || []).some(tag => tag.includes(query))
+      );
 
-    const filtered = productOptions.filter(option =>
-      option.product.type_name_ar.includes(searchTerm) ||
-      (option.product.brand_name_ar || '').includes(searchTerm) ||
-      (option.product.tags_list || []).some(tag => tag.includes(searchTerm))
-    );
-
-    setFilteredOptions(filtered);
-    setIsDropdownOpen(filtered.length > 0);
-    setSelectedIndex(-1);
-  }, [inputValue, products]);
-
-  // Parse quantity from input (e.g., "كيس بلاستيك 3" -> quantity: 3)
-  // TODO do we want to handle quantities via typing
-  const parseQuantityFromInput = (input: string): { searchTerm: string; quantity: number } => {
-    const quantityMatch = input.match(/\s+(\d+)$/);
-    if (quantityMatch) {
-      const quantity = parseInt(quantityMatch[1]);
-      const searchTerm = input.replace(/\s+\d+$/, '').trim();
-      return { searchTerm, quantity };
-    }
-    return { searchTerm: input, quantity: 1 };
-  };
-
-  const handleInputChange = (value: string) => {
-    setInputValue(value);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (!isDropdownOpen) {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-      }
-      return;
-    }
-
-    switch (e.key) {
-      case 'ArrowDown':
-        e.preventDefault();
-        setSelectedIndex(prev => 
-          prev < filteredOptions.length - 1 ? prev + 1 : prev
-        );
-        break;
-      case 'ArrowUp':
-        e.preventDefault();
-        setSelectedIndex(prev => prev > 0 ? prev - 1 : -1);
-        break;
-      case 'Enter':
-        e.preventDefault();
-        if (selectedIndex >= 0 && filteredOptions[selectedIndex]) {
-          handleSelectProduct(filteredOptions[selectedIndex]);
-        } else if (filteredOptions.length === 1) {
-          // Auto-select if only one option
-          handleSelectProduct(filteredOptions[0]);
-        }
-        break;
-      case 'Escape':
-        e.preventDefault();
-        setInputValue('');
-        setIsDropdownOpen(false);
-        setSelectedIndex(-1);
-        break;
-    }
-  };
-
-  const handleSelectProduct = (option: ProductOption) => {
-    const { quantity } = parseQuantityFromInput(inputValue);
+  const handleProductSelect = (option: ProductOption | null) => {
+    if (!option) return;
     
     if (option.product.available_stock === 0) {
       alert(`المنتج ${option.product.type_name_ar} غير متوفر في المخزون`);
       return;
     }
 
-    if (quantity > option.product.available_stock) {
-      alert(`الكمية المطلوبة (${quantity}) تتجاوز المخزون المتاح (${option.product.available_stock})`);
-      return;
-    }
-
-    onAddProduct(option.product.id, quantity);
-    setInputValue('');
-    setIsDropdownOpen(false);
-    setSelectedIndex(-1);
+    onAddProduct(option.product.id, 1); // Always add quantity of 1
     
-    // Keep focus on input
-    setTimeout(() => {
-      inputRef.current?.focus();
-    }, 0);
+    // Reset the combobox
+    setSelectedProduct(null);
+    setQuery('');
   };
-
-  const handleClickOption = (option: ProductOption) => {
-    handleSelectProduct(option);
-  };
-
-  // Focus input when component mounts
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
-
-  useEffect(() => {
-    if (selectedIndex >= 0 && dropdownRef.current) {
-        const selectedElement = dropdownRef.current.children[selectedIndex] as HTMLElement;
-        if (selectedElement) {
-        selectedElement.scrollIntoView({
-            block: 'nearest',
-            behavior: 'smooth'
-        });
-        }
-    }
-  }, [selectedIndex]);
 
   return (
     <div className="relative">
@@ -158,62 +62,73 @@ export const ProductInput: React.FC<ProductInputProps> = ({
           <span>Esc للمسح</span>
         </div>
       </div>
-      {/* Drop-down input field */}
-      <div className="relative mt-2">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <Search className="h-5 w-5 text-gray-400" />
-        </div>
-        <input
-          ref={inputRef}
-          type="text"
-          value={inputValue}
-          onChange={(e) => handleInputChange(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="ابحث عن منتج... (مثال: كيس بلاستيك)"
-          className="w-full pl-10 pr-4 py-3 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          autoComplete="off"
-        />
-      </div>
 
-      {/* Dropdown */}
-      {isDropdownOpen && filteredOptions.length > 0 && (
-        <div
-          ref={dropdownRef}
-          className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-64 overflow-y-auto"
-        >
-          {filteredOptions.map((option, index) => (
-            <div
-              key={option.id}
-              onClick={() => handleClickOption(option)}
-              className={`px-4 py-3 cursor-pointer flex items-center space-x-3 space-x-reverse hover:bg-blue-50 ${
-                index === selectedIndex ? 'bg-blue-100 border-l-4 border-blue-500' : ''
-              } ${option.product.available_stock === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              <Package className={`w-5 h-5 ${option.product.is_low_stock ? 'text-orange-500' : 'text-gray-400'}`} />
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium text-gray-900 truncate">
-                  {option.product.type_name_ar}
-                  {option.product.brand_name_ar && (
-                    <span className="text-gray-500"> - {option.product.brand_name_ar}</span>
-                  )}
-                  <span className="text-gray-500"> - {`رقم ${option.product.id}`} </span>
-                  
-                </div>
-                <div className="text-xs text-gray-500 flex items-center space-x-4 space-x-reverse">
-                  <span>السعر: ${option.product.selling_price}</span>
-                  <span className={`${option.product.is_low_stock ? 'text-orange-600 font-medium' : ''}`}>
-                    المتوفر: {option.product.available_stock}
-                    {option.product.is_low_stock && ' ⚠️'}
-                  </span>
-                  {option.product.available_stock === 0 && (
-                    <span className="text-red-600 font-medium">غير متوفر</span>
-                  )}
-                </div>
-              </div>
+      <Combobox value={selectedProduct} onChange={handleProductSelect}>
+        <div className="relative mt-2">
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-5 w-5 text-gray-400" />
             </div>
-          ))}
+            
+            <ComboboxInput
+              className="w-full pl-10 pr-4 py-3 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              displayValue={() => query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="ابحث عن منتج..."
+              autoComplete="off"
+            />
+          </div>
+          
+          <Transition
+            as={Fragment}
+            leave="transition ease-in duration-100"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <ComboboxOptions className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-64 overflow-y-auto">
+              {filteredOptions.length === 0 && query !== '' ? (
+                <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
+                  لا توجد منتجات مطابقة للبحث
+                </div>
+              ) : (
+                filteredOptions.map((option) => (
+                  <ComboboxOption
+                    key={option.id}
+                    className={({ focus }) =>
+                      `px-4 py-3 cursor-pointer flex items-center space-x-3 space-x-reverse relative ${
+                        focus ? 'bg-blue-100 border-l-4 border-blue-500' : 'hover:bg-blue-50'
+                      } ${option.product.available_stock === 0 ? 'opacity-50 cursor-not-allowed' : ''}`
+                    }
+                    value={option}
+                    disabled={option.product.available_stock === 0}
+                  >
+                    <Package className={`w-5 h-5 ${option.product.is_low_stock ? 'text-orange-500' : 'text-gray-400'}`} />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium text-gray-900 truncate">
+                        {option.product.type_name_ar}
+                        {option.product.brand_name_ar && (
+                          <span className="text-gray-500"> - {option.product.brand_name_ar}</span>
+                        )}
+                        <span className="text-gray-500"> - رقم {option.product.id}</span>
+                      </div>
+                      <div className="text-xs text-gray-500 flex items-center space-x-4 space-x-reverse">
+                        <span>السعر: ${option.product.selling_price}</span>
+                        <span className={`${option.product.is_low_stock ? 'text-orange-600 font-medium' : ''}`}>
+                          المتوفر: {option.product.available_stock}
+                          {option.product.is_low_stock && ' ⚠️'}
+                        </span>
+                        {option.product.available_stock === 0 && (
+                          <span className="text-red-600 font-medium">غير متوفر</span>
+                        )}
+                      </div>
+                    </div>
+                  </ComboboxOption>
+                ))
+              )}
+            </ComboboxOptions>
+          </Transition>
         </div>
-      )}
+      </Combobox>
     </div>
   );
 };

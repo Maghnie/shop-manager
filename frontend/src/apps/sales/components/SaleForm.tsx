@@ -84,8 +84,11 @@ export const SaleForm: React.FC = () => {
   }, [products]);
 
   const addProductToSale = useCallback((productId: number, quantity: number = 1) => {
-    const product = products.find(p => p.id === productId);
+    const product = products.find(p => p.id === productId);    
     if (!product) return;
+    console.log("before creating saleitem, cost price: ", product.cost_price)
+    console.log("before creating saleitem, selling price: ", product.selling_price)
+
 
     const existingItemIndex = formData.items?.findIndex(item => item.product === productId);
     
@@ -112,6 +115,7 @@ export const SaleForm: React.FC = () => {
         unit_price: product.selling_price,
         cost_price: product.cost_price
       };
+      console.log("while creating saleitem, cost price: ", product.cost_price)
       
       setFormData(prev => ({
         ...prev,

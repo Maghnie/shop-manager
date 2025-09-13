@@ -1,4 +1,3 @@
-// SalesTable.tsx
 import React from 'react';
 import { X } from 'lucide-react';
 import type { Product, SaleItem } from '@/types/product';
@@ -9,7 +8,6 @@ interface SalesTableProps {
   onUpdateQuantity: (index: number, quantity: number) => void;
   onUpdatePrice: (index: number, price: number) => void;
   onRemoveItem: (index: number) => void;
-  showProfitInfo: boolean;
 }
 
 export const SalesTable: React.FC<SalesTableProps> = ({
@@ -18,7 +16,6 @@ export const SalesTable: React.FC<SalesTableProps> = ({
   onUpdateQuantity,
   onUpdatePrice,
   onRemoveItem,
-  showProfitInfo
 }) => {
   const getProductName = (id: number) => products.find(p => p.id === id)?.type_name_ar || 'غير معروف';
 
@@ -52,6 +49,7 @@ export const SalesTable: React.FC<SalesTableProps> = ({
                 value={item.unit_price}
                 onChange={(e) => onUpdatePrice(index, parseFloat(e.target.value) || 0)}
                 className="w-20 border rounded p-1 text-center"
+                dir="ltr" 
               />
             </td>
             <td className="px-4 py-2 border">{(item.quantity * item.unit_price).toFixed(2)}</td>

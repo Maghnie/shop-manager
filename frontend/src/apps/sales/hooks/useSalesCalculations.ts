@@ -29,18 +29,24 @@ export const useSalesCalculations = (
         profitPercentage: 0
       };
     }
-
-    const items = formData.items || [];
     
+    console.log("there are x products: ", products.length)
+    const items = formData.items || [];
+
+    if (items.length > 0){
+      console.log("there are x formData.items: ", items.length)
+      console.log("item at 0: ", items[0])
+    }
+
     const subtotal = items.reduce((sum, item) => {
       return sum + (item.quantity * item.unit_price);
     }, 0);
+    console.log("subtotal:", subtotal)
 
     const totalCost = items.reduce((sum, item) => {
-      const product = products.find(p => p.id === item.product);
-      if (!product) return sum;
-      return sum + (item.quantity * product.cost_price);
+      return sum + (item.quantity * item.cost_price);
     }, 0);
+    console.log("total cost:", totalCost)
 
     const discountAmount = formData.discount_amount || 0;
     const taxPercentage = formData.tax_percentage || 0;

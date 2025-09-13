@@ -51,7 +51,7 @@ export const SaleSummary: React.FC<SaleSummaryProps> = ({
 
         {showProfitInfo && (
           <div className="space-y-2 bg-green-50 p-4 rounded-lg">
-            <h4 className="font-semibold text-green-800 mb-2">معلومات الربح (للبائع فقط)</h4>
+            <h4 className="font-semibold text-green-800 mb-2">معلومات الربح</h4>
             <div className="flex justify-between text-sm">
               <span>إجمالي التكلفة:</span>
               <span>{formatCurrency(totalCost)}</span>

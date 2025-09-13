@@ -74,6 +74,7 @@ export interface SaleItem {
   available_stock?: number;
   quantity: number;
   unit_price: number;
+  cost_price: number;
   total_price?: number;
   profit_per_item?: number;
   total_profit?: number;
