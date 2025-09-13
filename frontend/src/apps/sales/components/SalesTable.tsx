@@ -43,6 +43,7 @@ export const SalesTable: React.FC<SalesTableProps> = ({
                 value={item.quantity}
                 onChange={(e) => onUpdateQuantity(index, parseInt(e.target.value, 10) || 1)}
                 className="w-16 border rounded p-1 text-center"
+                dir="ltr" 
               />
             </td>
             <td className="px-4 py-2 border">
