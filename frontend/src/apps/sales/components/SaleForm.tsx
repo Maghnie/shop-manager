@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Save, X, Calculator, Undo2 } from 'lucide-react';
+import { Save, X, Calculator } from 'lucide-react';
 import { SalesService } from '@/apps/sales/services/saleService';
 import { useAvailableProducts, useSale } from '@/apps/sales/hooks/useSales';
 import { useSalesCalculations } from '@/apps/sales/hooks/useSalesCalculations';
@@ -21,7 +21,6 @@ export const SaleForm: React.FC = () => {
   const [showCustomerInfo, setShowCustomerInfo] = useState(false);
   const [showProfitInfo, setShowProfitInfo] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [addedItemsHistory, setAddedItemsHistory] = useState<SaleItem[]>([]);
   
   const [formData, setFormData] = useState<Partial<Sale>>({
     customer_name: '',
@@ -110,16 +109,14 @@ export const SaleForm: React.FC = () => {
       const newItem: SaleItem = {
         product: productId,
         quantity: finalQuantity,
-        unit_price: product.selling_price
+        unit_price: product.selling_price,
+        cost_price: product.cost_price
       };
       
       setFormData(prev => ({
         ...prev,
         items: [...(prev.items || []), newItem]
       }));
-      
-      // Add to history for undo functionality
-      setAddedItemsHistory(prev => [...prev, newItem]);
     }
   }, [formData.items, products, validateAndCapQuantity]);
 
@@ -157,17 +154,6 @@ export const SaleForm: React.FC = () => {
       items: prev.items?.filter((_, i) => i !== index) || []
     }));
   }, []);
-
-  const undoLastItem = useCallback(() => {
-    if (addedItemsHistory.length === 0) return;
-    
-    // const lastAddedItem = addedItemsHistory[addedItemsHistory.length - 1];
-    const updatedItems = [...(formData.items || [])];
-    updatedItems.pop();
-    
-    setFormData(prev => ({ ...prev, items: updatedItems }));
-    setAddedItemsHistory(prev => prev.slice(0, -1));
-  }, [addedItemsHistory, formData.items]);
 
   const validateForm = (): string[] => {
     const errors: string[] = [];
@@ -239,16 +225,6 @@ export const SaleForm: React.FC = () => {
             {isEditing ? 'تعديل البيعة' : 'بيعة جديدة'}
           </h1>
           <div className="flex space-x-4 space-x-reverse">
-            <button
-              type="button"
-              onClick={undoLastItem}
-              disabled={addedItemsHistory.length === 0}
-              className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition duration-200 flex items-center space-x-2 space-x-reverse disabled:opacity-50 disabled:cursor-not-allowed"
-              title="Ctrl+Z"
-            >
-              <Undo2 className="w-4 h-4" />
-              <span>تراجع</span>
-            </button>
             <button
               type="button"
               onClick={() => setShowProfitInfo(!showProfitInfo)}
@@ -339,11 +315,10 @@ export const SaleForm: React.FC = () => {
               onUpdateQuantity={updateItemQuantity}
               onUpdatePrice={updateItemPrice}
               onRemoveItem={removeItem}
-              showProfitInfo={showProfitInfo}
             />
           )}
 
-          {/* Summary */}
+          {/* Summary */}          
           {formData.items && formData.items.length > 0 && (
             <SaleSummary
               subtotal={subtotal}
