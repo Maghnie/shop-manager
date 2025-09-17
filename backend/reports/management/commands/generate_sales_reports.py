@@ -16,7 +16,7 @@ class Command(BaseCommand):
         parser.add_argument(
             '--resolution',
             type=str,
-            choices=['hourly', 'daily', 'weekly', 'monthly', 'yearly', 'all'],
+            choices=['minutely', 'hourly', 'daily', 'weekly', 'monthly', 'yearly', 'all'],
             default='all',
             help='Time resolution for the report (default: all)'
         )
@@ -47,7 +47,7 @@ class Command(BaseCommand):
         
         # Define which resolutions to process
         if resolution == 'all':
-            resolutions = ['hourly', 'daily', 'weekly', 'monthly', 'yearly']
+            resolutions = ['minutely', 'hourly', 'daily', 'weekly', 'monthly', 'yearly']
         else:
             resolutions = [resolution]
         
@@ -157,7 +157,14 @@ class Command(BaseCommand):
         """Generate time periods based on resolution"""
         periods = []
         
-        if resolution == 'hourly':
+        if resolution == 'minutely':
+            current = start_date.replace(second=0, microsecond=0)
+            while current < end_date:
+                period_end = current + timedelta(minutes=1)
+                periods.append((current, period_end))
+                current = period_end
+
+        elif resolution == 'hourly':
             current = start_date.replace(minute=0, second=0, microsecond=0)
             while current < end_date:
                 period_end = current + timedelta(hours=1)

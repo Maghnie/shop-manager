@@ -31,4 +31,8 @@ def handle_sale_reports_update(sender, instance, created, **kwargs):
             'sales_stats_month'
         ])
 
+        # FIXME when redis is installed for proper caching
         # update_sales_reports_async.delay(instance.id, created)
+        # WORKAROUND
+        from reports.management.commands.generate_sales_reports import Command
+        Command("--resolution all --days 30")
