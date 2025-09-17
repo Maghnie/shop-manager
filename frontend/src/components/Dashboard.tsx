@@ -173,13 +173,6 @@ const Dashboard: React.FC = () => {
               <Receipt className="w-5 h-5" />
               <span>الفواتير</span>
             </Link>
-            <Link
-              to="/reports"
-              className="w-full bg-gradient-to-r from-red-500 to-red-600 text-white py-3 px-4 rounded-lg hover:from-red-600 hover:to-red-700 transition duration-200 flex items-center gap-2"
-            >
-              <BarChart3 className="w-5 h-5" />
-              <span>تقارير مفصلة</span>
-            </Link>
           </div>
         </div>
       </section>

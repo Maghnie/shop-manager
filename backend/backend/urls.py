@@ -22,7 +22,6 @@ def api_root(request, format=None):
         'version': 'v1',
         'endpoints': {
             'inventory': f"{base_url}/api/v1/inventory/",
-            'reports': f"{base_url}/api/v1/reports/",
             'users': f"{base_url}/api/v1/users/",
             'auth': {
                 'token': f"{base_url}/api/v1/auth/token/",
@@ -52,7 +51,6 @@ api_v1_patterns = [
     # Functional app groupings
     path('', include('customers.urls')),
     path('inventory/', include('inventory.urls')),
-    path('reports/', include('reports.urls')),
     path('users/', include('users.urls')),
     
     # Authentication endpoints

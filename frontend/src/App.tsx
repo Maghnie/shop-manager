@@ -8,7 +8,6 @@ import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import ProductList from './pages/ProductOverview';
 import ProductForm from './components/ProductForm';
-import Reports from './components/Reports';
 import Navbar from './components/Navbar';
 
 // New sales components
@@ -20,9 +19,6 @@ import InvoiceDetail from './components/invoices/InvoiceDetail';
 
 // New inventory components
 import InventoryList from './components/inventory/InventoryList';
-
-// Analytics components
-import { SalesAnalyticsDashboard } from './apps/analytics';
 
 import './App.css';
 
@@ -173,22 +169,6 @@ const App: React.FC = () => {
                 path="/inventory"
                 element={
                   isAuthenticated ? <InventoryList /> : <Navigate to="/login" />
-                }
-              />
-
-              {/* Reports */}
-              <Route
-                path="/reports"
-                element={
-                  isAuthenticated ? <Reports /> : <Navigate to="/login" />
-                }
-              />
-
-              {/* Analytics */}
-              <Route
-                path="/analytics"
-                element={
-                  isAuthenticated ? <SalesAnalyticsDashboard /> : <Navigate to="/login" />
                 }
               />
 

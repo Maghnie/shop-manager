@@ -29,7 +29,6 @@ INSTALLED_APPS = [
     'corsheaders',
     'customers',
     'inventory',
-    'reports', 
     # 'dj_rest_auth',
     # 'dj_rest_auth.registration',
     # 'allauth',

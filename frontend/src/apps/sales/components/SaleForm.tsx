@@ -205,12 +205,10 @@ export const SaleForm: React.FC = () => {
       } else {
         const newSale = await SalesService.createSale(formData);
         toast.success('تم إنشاء البيعة بنجاح');
-        // alert('تم إنشاء البيعة بنجاح');
         navigate(`/sales/${newSale.id}`);
       }
     } catch (error) {
       toast.error('حدث خطأ أثناء حفظ البيعة');
-    //   alert('حدث خطأ أثناء حفظ البيعة');
       console.error(error);
     } finally {
       setSaving(false);
