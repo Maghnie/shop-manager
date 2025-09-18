@@ -101,6 +101,7 @@ def product_reports(request):
 class InventoryFilter(django_filters.FilterSet):
     is_low_stock = django_filters.BooleanFilter(method='filter_low_stock')
     is_out_of_stock = django_filters.BooleanFilter(method='filter_out_of_stock')
+    include_archived = django_filters.BooleanFilter(method='filter_archived') 
     
     class Meta:
         model = Inventory
@@ -119,29 +120,58 @@ class InventoryFilter(django_filters.FilterSet):
         elif value is False:
             return queryset.filter(quantity_in_stock__gt=0)
         return queryset
+    
+    def filter_archived(self, queryset, name, value):
+        """Filter to show/hide archived products"""
+        if value is True:
+            return queryset.filter(product__is_active=False)  # Only archived
+        elif value is False:
+            return queryset.filter(product__is_active=True)   # Only active
+        return queryset  # Show all if not specified
 
 class InventoryListView(generics.ListAPIView):
     """List all inventory items with stock levels"""
-    queryset = Inventory.objects.select_related('product', 'product__type', 'product__brand').all()
+    # queryset = Inventory.objects.select_related('product', 'product__type', 'product__brand').all()
     serializer_class = InventorySerializer
-    permission_classes = [AllowAny]
+    permission_classes = [AllowAny] # FIXME
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_class = InventoryFilter
     search_fields = ['product__type__name_ar', 'product__brand__name_ar']
     ordering_fields = ['quantity_in_stock', 'last_updated']
     ordering = ['quantity_in_stock']  # Show low stock items first
 
+    def get_queryset(self):
+        """Filter inventory for active products, with option to include archived"""
+        base_queryset = Inventory.objects.select_related('product', 'product__type', 'product__brand')
+        
+        # Check if we want to include archived products
+        include_archived = self.request.query_params.get('include_archived', 'false').lower() == 'true'
+        
+        if include_archived:
+            # Show all inventory (active + archived products)
+            return base_queryset.all()
+        else:
+            # Default: only show inventory for active products
+            return base_queryset.filter(product__is_active=True)
+
 class InventoryDetailView(generics.RetrieveUpdateAPIView):
     """Update inventory stock levels manually"""
-    queryset = Inventory.objects.all()
+    # queryset = Inventory.objects.all()
     serializer_class = InventorySerializer
-    permission_classes = [AllowAny]
+    permission_classes = [AllowAny] # FIXME
+
+    def get_queryset(self):
+        """Allow updating inventory for both active and archived products"""
+        # For detail view, allow access to both active and archived
+        # since users might need to adjust stock for archived items
+        return Inventory.objects.select_related('product').all()
 
 
 @api_view(['GET'])
 def available_products(request):
     """Get products with available stock for sales"""
     products_with_stock = Product.objects.filter(
+        is_active=True, # i.e. product not archived by end user
         inventory__quantity_in_stock__gt=0
     ).select_related('type', 'brand', 'inventory').order_by('type__name_ar')
 

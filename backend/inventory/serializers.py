@@ -37,6 +37,7 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'type', 'cost_price', 'selling_price', 'brand', 'size', 
             'weight', 'material', 'tags', 'created_at', 'updated_at', 'created_by',
+            'is_active',
             # Computed fields
             'type_name_ar', 'type_name_en', 'brand_name_ar', 'brand_name_en',
             'material_name_ar', 'material_name_en', 'profit', 'profit_percentage', 'tags_list'
