@@ -16,21 +16,22 @@ def api_root(request, format=None):
     """
     # Get the current request's scheme and host
     base_url = request.build_absolute_uri('/').rstrip('/')
-    
+    api_version = 'v1'
+
     # Build endpoints dynamically based on URL patterns
     endpoints = {
-        'version': 'v1',
+        'version': api_version,
         'endpoints': {
-            'inventory': f"{base_url}/api/v1/inventory/",
-            'sales': f"{base_url}/api/v1/sales/",
-            'users': f"{base_url}/api/v1/users/",
+            'inventory': f"{base_url}/api/{api_version}/inventory/",
+            'sales': f"{base_url}/api/{api_version}/sales/",
+            'analytics': f"{base_url}/api/{api_version}/analytics/",
             'auth': {
-                'token': f"{base_url}/api/v1/auth/token/",
+                'token': f"{base_url}/api/{api_version}/auth/token/",
                 'login': f"{base_url}/api-auth/login/",
                 'logout': f"{base_url}/api-auth/logout/",
             }
         },
-        'documentation': f"{base_url}/api/v1/docs/",  # For future API docs
+        'documentation': f"{base_url}/api/{api_version}/docs/",  # For future API docs
     }
     
     return Response(endpoints)
@@ -53,7 +54,6 @@ api_v1_patterns = [
     path('', include('customers.urls')),
     path('inventory/', include('inventory.urls')),
     path('sales/', include('sales.urls')),
-    path('users/', include('users.urls')),
 
     # Authentication endpoints
     path('auth/token/', obtain_auth_token, name='api_v1_token_auth'),

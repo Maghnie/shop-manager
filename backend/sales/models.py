@@ -59,6 +59,11 @@ class Sale(models.Model):
         ordering = ['-sale_date']
         verbose_name = "عملية بيع"
         verbose_name_plural = "عمليات البيع"
+        indexes = [
+            models.Index(fields=['sale_date']),
+            models.Index(fields=['status', 'sale_date']),
+            models.Index(fields=['created_at']),
+        ]
 
     def __str__(self):
         customer_name = self.customer.display_name if self.customer else 'عميل مباشر'
@@ -160,6 +165,9 @@ class SaleItem(models.Model):
         verbose_name_plural = "المنتجات المباعة"
         constraints = [ # Prevent duplicate products in same sale
             models.UniqueConstraint(fields=['sale', 'product'], name='unique_sale_product')
+        ]
+        indexes = [
+            models.Index(fields=['product']),
         ]
 
     def __str__(self):
