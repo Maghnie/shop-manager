@@ -9,6 +9,7 @@ import { Toaster } from 'react-hot-toast';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import ProductList from './pages/ProductOverview';
+import ArchivedProducts from './pages/ArchivedProducts';
 import ProductForm from './components/ProductForm';
 import Navbar from './components/Navbar';
 
@@ -107,6 +108,12 @@ const App: React.FC = () => {
                 path="/products/:id/edit"
                 element={
                   isAuthenticated ? <ProductForm /> : <Navigate to="/login" />
+                }
+              />
+              <Route
+                path="/products/archived"
+                element={
+                  isAuthenticated ? <ArchivedProducts /> : <Navigate to="/login" />
                 }
               />
 

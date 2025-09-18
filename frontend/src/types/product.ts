@@ -24,6 +24,7 @@ export interface Product {
   created_by: number;
   available_stock: number;
   is_low_stock: boolean;
+  is_active: boolean;
 }
 
 export interface ProductType {

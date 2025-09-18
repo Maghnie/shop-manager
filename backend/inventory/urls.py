@@ -12,6 +12,8 @@ urlpatterns = [
     # Inventory URLs
     path('inventory/', views.InventoryListView.as_view(), name='inventory-list'),
     path('inventory/<int:pk>/', views.InventoryDetailView.as_view(), name='inventory-detail'),
+    
+    path('products/<int:pk>/toggle-archive/', views.ToggleProductArchiveView.as_view(), name='toggle-product-archive'),
 
     # Products with stock for sales
     path('products/available/', views.available_products, name='available-products'),

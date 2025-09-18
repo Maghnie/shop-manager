@@ -1,22 +1,26 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { Archive } from "lucide-react";
 import { useProducts } from "@/hooks/useProducts";
 import ProductFilters from "@/components/products/ProductFilters";
 import ProductTable from "@/components/products/ProductTable";
-import { deleteProduct } from "@/services/productService";
+import { toggleProductArchive } from "@/services/productService";
 
 const ProductOverview: React.FC = () => {
   const { products, filteredProducts, productTypes, brands, materials, loading, filters, setFilters, setProducts } = useProducts();
   const [adminView, setAdminView] = useState(false);
 
-  const handleDelete = async (productId: number) => {
-    if (window.confirm("هل أنت متأكد من حذف هذا المنتج؟")) {
-      try {
-        await deleteProduct(productId);
+  const handleArchive = async (productId: number) => {
+    try {
+      const response = await toggleProductArchive(productId);
+      if (response.data.status === 'success') {
+        // Remove archived product from the list
         setProducts(prev => prev.filter(p => p.id !== productId));
-      } catch {
-        alert("حدث خطأ أثناء حذف المنتج");
+        // Show success message
+        alert(response.data.message);
       }
+    } catch (error) {
+      alert("حدث خطأ أثناء أرشفة المنتج");
     }
   };
 
@@ -37,20 +41,30 @@ const ProductOverview: React.FC = () => {
             إجمالي المنتجات: {filteredProducts.length} من {products.length}
           </p>
         </div>
-        <Link
-          to="/products/new"
-          className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition duration-200 font-semibold"
-        >
-          إضافة منتج جديد +
-        </Link>
+        <div className="flex space-x-3 space-x-reverse">
+          <button
+            onClick={() => setAdminView(!adminView)}
+            className=" bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
+          >
+            {adminView ? "إخفاء أدوات المسؤول" : "عرض أدوات المسؤول"}
+          </button>
+          <Link
+            to="/products/archived"
+            className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition duration-200 flex items-center space-x-2 space-x-reverse"
+          >
+            <Archive className="w-4 h-4" />
+            <span>المنتجات المؤرشفة</span>
+          </Link>
+          <Link
+            to="/products/new"
+            className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition duration-200 font-semibold"
+          >
+            إضافة منتج جديد +
+          </Link>
+        </div>
       </div>
 
-      <button
-        onClick={() => setAdminView(!adminView)}
-        className="mb-4 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
-      >
-        {adminView ? "إخفاء أدوات المسؤول" : "عرض أدوات المسؤول"}
-      </button>
+      
 
       <ProductFilters
         filters={filters}
@@ -60,7 +74,11 @@ const ProductOverview: React.FC = () => {
         materials={materials}
       />
 
-      <ProductTable products={filteredProducts} adminView={adminView} onDelete={handleDelete} />
+      <ProductTable 
+        products={filteredProducts} 
+        adminView={adminView} 
+        onArchive={handleArchive} 
+      />
     </div>
   );
 };

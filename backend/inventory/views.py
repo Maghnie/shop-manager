@@ -1,5 +1,6 @@
 from rest_framework import generics, status, filters
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, action
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 import django_filters
@@ -16,20 +17,64 @@ from .serializers import (
 
 
 class ProductListCreateView(generics.ListCreateAPIView):
-    queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = [AllowAny]  # FIXME just for testing because everyone can POST/PUT/GET/DELETE
+
+    def get_queryset(self):
+        """Filter active products by default, unless archived=true"""
+        queryset = Product.objects.all()
+        archived = self.request.query_params.get('archived', 'false').lower()
+        
+        if archived == 'true':
+            return queryset.filter(is_active=False)
+        else:
+            return queryset.filter(is_active=True)
 
 class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = [AllowAny]  # FIXME just for testing because everyone can POST/PUT/GET/DELETE
 
+    def destroy(self, request, *args, **kwargs):
+        """Archive product instead of deleting it"""
+        instance = self.get_object()
+
+        # Don't actually delete, just archive
+        instance.is_active = False
+        instance.save()
+        return Response({
+            'status': 'archived',
+            'message': 'تم أرشفة المنتج بنجاح'
+        }, status=status.HTTP_200_OK)
+
 class ProductTypeListView(generics.ListCreateAPIView):
     queryset = ProductType.objects.all()
     serializer_class = ProductTypeSerializer
     permission_classes = [AllowAny]  # FIXME just for testing because everyone can POST/PUT/GET/DELETE
 
+class ToggleProductArchiveView(APIView):
+    """Toggle product archive status"""
+    permission_classes = [AllowAny] # FIXME 
+    
+    def post(self, request, pk):
+        try:
+            product = Product.objects.get(pk=pk)
+            product.is_active = not product.is_active
+            product.save()
+            
+            action = "تم إلغاء الأرشفة" if product.is_active else "تم الأرشفة"
+            
+            return Response({
+                'status': 'success',
+                'is_active': product.is_active,
+                'message': f'{action} للمنتج بنجاح'
+            })
+        except Product.DoesNotExist:
+            return Response({
+                'status': 'error',
+                'message': 'المنتج غير موجود'
+            }, status=status.HTTP_404_NOT_FOUND)
+        
 class BrandListView(generics.ListCreateAPIView):
     queryset = Brand.objects.all()
     serializer_class = BrandSerializer

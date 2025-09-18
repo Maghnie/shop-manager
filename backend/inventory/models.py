@@ -84,6 +84,10 @@ class Product(models.Model):
         verbose_name="المادة"
     )
     tags = models.TextField(blank=True, help_text="Comma-separated tags", verbose_name="العلامات")
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name="نشط"
+    )
     
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
