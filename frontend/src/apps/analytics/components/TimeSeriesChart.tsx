@@ -38,7 +38,7 @@ export const TimeSeriesChart: React.FC = () => {
     endDate: new Date()
   });
   
-  const [resolution, setResolution] = useState</*'hourly' | */'daily' | 'weekly' | 'monthly' | 'yearly'>('daily');
+  const [resolution, setResolution] = useState</*'hourly' |*/ 'daily' | 'weekly' | 'monthly' | 'yearly'>('daily');
   
   const [chartConfig, setChartConfig] = useState<ChartConfig>({
     showRevenue: true,

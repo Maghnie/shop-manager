@@ -44,10 +44,10 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
       return;
     }
 
-    // Check for reasonable date range (max 2 years)
+    // Check for reasonable date range (max 20 years)
     const daysDiff = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
-    if (daysDiff > 730) {
-      alert('نطاق التاريخ لا يمكن أن يتجاوز سنتين');
+    if (daysDiff > 7300) {
+      alert('نطاق التاريخ لا يمكن أن يتجاوز العشرون سنة');
       return;
     }
 

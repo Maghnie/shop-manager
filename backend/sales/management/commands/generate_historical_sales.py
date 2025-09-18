@@ -5,7 +5,8 @@ from datetime import datetime, timedelta
 import random
 from decimal import Decimal
 
-from inventory.models import Product, Sale, SaleItem
+from sales.models import Sale, SaleItem
+from inventory.models import Product
 from customers.models import Customer
 
 
@@ -121,10 +122,6 @@ class Command(BaseCommand):
         else:
             self.stdout.write('No sales were created - check for inventory or other issues')
         self.stdout.write('')
-        if total_sales > 0:
-            self.stdout.write(
-                'Now run: python manage.py generate_sales_reports --resolution all --days {} --overwrite'.format(years * 365)
-            )
     
     def create_default_customers(self):
         """Create some default customers for testing"""
@@ -200,9 +197,7 @@ class Command(BaseCommand):
         return date.replace(hour=hour, minute=minute, second=second)
     
     def generate_historical_sale_number(self, sale_date):
-        """Generate unique sale number for historical date (mimics Sale.generate_sale_number)"""
-        from inventory.models import Sale
-        
+        """Generate unique sale number for historical date (mimics Sale.generate_sale_number)"""        
         prefix = f"S{sale_date.strftime('%Y%m%d')}"
         
         # Find the last sale number for this historical date
