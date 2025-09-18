@@ -22,6 +22,7 @@ def api_root(request, format=None):
         'version': 'v1',
         'endpoints': {
             'inventory': f"{base_url}/api/v1/inventory/",
+            'sales': f"{base_url}/api/v1/sales/",
             'users': f"{base_url}/api/v1/users/",
             'auth': {
                 'token': f"{base_url}/api/v1/auth/token/",
@@ -47,12 +48,13 @@ def home_view(request):
 
 # API v1 URL patterns - centralized for easy management
 api_v1_patterns = [
-    path('', api_root, name='api-v1-root'),    
+    path('', api_root, name='api-v1-root'),
     # Functional app groupings
     path('', include('customers.urls')),
     path('inventory/', include('inventory.urls')),
+    path('sales/', include('sales.urls')),
     path('users/', include('users.urls')),
-    
+
     # Authentication endpoints
     path('auth/token/', obtain_auth_token, name='api_v1_token_auth'),
     # path('auth/', include('dj_rest_auth.urls')), # login, logout, password reset

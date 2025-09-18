@@ -61,7 +61,7 @@ export const SalesList: React.FC = () => {
       if (filters.date_from) params.append('date_from', filters.date_from);
       if (filters.date_to) params.append('date_to', filters.date_to);
       
-      const response = await axios.get(`inventory/sales/?${params.toString()}`);
+      const response = await axios.get(`sales/sales/?${params.toString()}`);
       setSales(response.data.results || response.data);
     } catch (error) {
       console.error('Error fetching sales:', error);

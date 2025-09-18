@@ -29,11 +29,12 @@ INSTALLED_APPS = [
     'corsheaders',
     'customers',
     'inventory',
+    'sales',
     # 'dj_rest_auth',
     # 'dj_rest_auth.registration',
     # 'allauth',
-    # 'allauth.account',  
-    # 'allauth.socialaccount', 
+    # 'allauth.account',
+    # 'allauth.socialaccount',
 ]
 
 MIDDLEWARE = [

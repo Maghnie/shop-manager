@@ -15,46 +15,54 @@ import type {
 export class SalesService {
   static async getSales(filters?: Record<string, string>): Promise<SaleListItem[]> {
     const params = new URLSearchParams(filters);
-    const response = await axios.get(`inventory/sales/?${params.toString()}`);
+    const response = await axios.get(`sales/sales/?${params.toString()}`);
     return response.data.results || response.data;
   }
 
   static async getSale(id: number): Promise<Sale> {
-    const response = await axios.get(`inventory/sales/${id}/`);
+    const response = await axios.get(`sales/sales/${id}/`);
     return response.data;
   }
 
   static async createSale(saleData: Partial<Sale>): Promise<Sale> {
-    const response = await axios.post('inventory/sales/', saleData);
+    const response = await axios.post('sales/sales/', saleData);
     return response.data;
   }
 
   static async updateSale(id: number, saleData: Partial<Sale>): Promise<Sale> {
-    const response = await axios.put(`inventory/sales/${id}/`, saleData);
+    const response = await axios.put(`sales/sales/${id}/`, saleData);
     return response.data;
   }
 
   static async deleteSale(id: number): Promise<void> {
-    await axios.delete(`inventory/sales/${id}/`);
+    await axios.delete(`sales/sales/${id}/`);
   }
 
   static async completeSale(id: number): Promise<{ message: string; invoice_id: number; invoice_number: string }> {
-    const response = await axios.post(`inventory/sales/${id}/complete/`);
+    const response = await axios.post(`sales/sales/${id}/complete/`);
     return response.data;
   }
 
   static async cancelSale(id: number): Promise<{ message: string }> {
-    const response = await axios.post(`inventory/sales/${id}/cancel/`);
+    const response = await axios.post(`sales/sales/${id}/cancel/`);
     return response.data;
   }
 
   static async createQuickSale(saleData: Partial<Sale>): Promise<QuickSaleResponse> {
-    const response = await axios.post('inventory/sales/quick/', saleData);
+    const response = await axios.post('sales/sales/quick/', saleData);
     return response.data;
   }
 
   static async getSalesStats(): Promise<SalesStats> {
-    const response = await axios.get('inventory/sales/stats/');
+    const response = await axios.get('sales/sales/stats/');
+    return response.data;
+  }
+
+  static async getSellersDashboard(dateFrom?: string, dateTo?: string): Promise<any> {
+    const params = new URLSearchParams();
+    if (dateFrom) params.append('date_from', dateFrom);
+    if (dateTo) params.append('date_to', dateTo);
+    const response = await axios.get(`sales/sellers/dashboard/?${params.toString()}`);
     return response.data;
   }
 
@@ -68,12 +76,12 @@ export class SalesService {
 export class InvoiceService {
   static async getInvoices(filters?: Record<string, string>): Promise<InvoiceListItem[]> {
     const params = new URLSearchParams(filters);
-    const response = await axios.get(`inventory/invoices/?${params.toString()}`);
+    const response = await axios.get(`sales/invoices/?${params.toString()}`);
     return response.data.results || response.data;
   }
 
   static async getInvoice(id: number): Promise<Invoice> {
-    const response = await axios.get(`inventory/invoices/${id}/`);
+    const response = await axios.get(`sales/invoices/${id}/`);
     return response.data;
   }
 
@@ -86,22 +94,22 @@ export class InvoiceService {
   }
 
   static async createInvoice(invoiceData: Partial<Invoice>): Promise<Invoice> {
-    const response = await axios.post('inventory/invoices/', invoiceData);
+    const response = await axios.post('sales/invoices/', invoiceData);
     return response.data;
   }
 
   static async updateInvoice(id: number, invoiceData: Partial<Invoice>): Promise<Invoice> {
-    const response = await axios.put(`inventory/invoices/${id}/`, invoiceData);
+    const response = await axios.put(`sales/invoices/${id}/`, invoiceData);
     return response.data;
   }
 
   static async markInvoicePrinted(id: number): Promise<{ message: string }> {
-    const response = await axios.post(`inventory/invoices/${id}/mark_printed/`);
+    const response = await axios.post(`sales/invoices/${id}/mark_printed/`);
     return response.data;
   }
 
   static async getInvoicePrintData(id: number): Promise<{ invoice: Invoice; formatted_for_print: boolean; print_timestamp: string }> {
-    const response = await axios.get(`inventory/invoices/${id}/print_data/`);
+    const response = await axios.get(`sales/invoices/${id}/print_data/`);
     return response.data;
   }
 }

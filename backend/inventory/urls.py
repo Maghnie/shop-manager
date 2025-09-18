@@ -1,12 +1,6 @@
 
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
+from django.urls import path
 from . import views
-
-# Create router for ViewSets
-router = DefaultRouter()
-router.register(r'sales', views.SaleViewSet)
-router.register(r'invoices', views.InvoiceViewSet)
 
 urlpatterns = [
     path('products/', views.ProductListCreateView.as_view(), name='product-list-create'),
@@ -18,13 +12,8 @@ urlpatterns = [
     # Inventory URLs
     path('inventory/', views.InventoryListView.as_view(), name='inventory-list'),
     path('inventory/<int:pk>/', views.InventoryDetailView.as_view(), name='inventory-detail'),
-    
-    # Additional sales endpoints
-    path('sales/stats/', views.SaleStatsView.as_view(), name='sales-stats'),
-    path('sales/quick/', views.quick_sale, name='quick-sale'),
-    path('sellers/dashboard/', views.sellers_dashboard, name='sellers-dashboard'),
-    path('products/available/', views.available_products, name='available-products'),
 
-    # Last catch-all
-    path('', include(router.urls)),
+    # Products with stock for sales
+    path('products/available/', views.available_products, name='available-products'),
+    path('reports/', views.product_reports, name='product-reports'),
 ]
