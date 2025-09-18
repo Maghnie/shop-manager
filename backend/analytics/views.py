@@ -36,6 +36,7 @@ class TimeSeriesAnalyticsView(APIView):
             date_from_str = request.GET.get('date_from')
             date_to_str = request.GET.get('date_to')
             resolution = request.GET.get('resolution', 'daily')
+            product_id_str = request.GET.get('product_id')
             
             # Validate resolution
             valid_resolutions = ['hourly', 'daily', 'weekly', 'monthly', 'yearly']
@@ -43,6 +44,21 @@ class TimeSeriesAnalyticsView(APIView):
                 return Response({
                     'error': f'دقة زمنية غير صحيحة. يجب أن تكون إحدى: {", ".join(valid_resolutions)}'
                 }, status=status.HTTP_400_BAD_REQUEST)
+
+            # Validate product_id if provided
+            product_id = None
+            if product_id_str:
+                try:
+                    product_id = int(product_id_str)
+                    # Verify product exists
+                    if not Product.objects.filter(id=product_id).exists():
+                        return Response({
+                            'error': 'المنتج المحدد غير موجود'
+                        }, status=status.HTTP_404_NOT_FOUND)
+                except ValueError:
+                    return Response({
+                        'error': 'معرف المنتج يجب أن يكون رقماً صحيحاً'
+                    }, status=status.HTTP_400_BAD_REQUEST)
             
             # Parse dates
             if date_from_str:
@@ -107,7 +123,8 @@ class TimeSeriesAnalyticsView(APIView):
             data = TimeSeriesService.get_time_series_data(
                 date_from=date_from,
                 date_to=date_to,
-                resolution=resolution
+                resolution=resolution,
+                product_id=product_id
             )
             
             # Serialize response
@@ -257,7 +274,8 @@ class AnalyticsExportView(APIView):
                 analytics_data = TimeSeriesService.get_time_series_data(
                     date_from=date_from,
                     date_to=date_to,
-                    resolution=resolution
+                    resolution=resolution,
+                    product_id=validated_data.get('product_id')
                 )
                 
                 export_data = analytics_data['data']

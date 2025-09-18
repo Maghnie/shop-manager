@@ -13,6 +13,7 @@ import {
 } from 'chart.js';
 import { Calendar, Settings, RefreshCw, TrendingUp, DollarSign } from 'lucide-react';
 import { useTimeSeriesData } from '../hooks/useTimeSeriesData';
+import { useAvailableProducts } from '@/apps/sales/hooks/useSales';
 import { DateRangePicker } from './DateRangePicker';
 import { AnalyticsService } from '../services/analyticsService';
 import { formatTimeSeriesForChart, getTimeSeriesChartOptions, isValidTimeSeriesData, getEmptyDataMessage } from '../utils/chartHelpers';
@@ -47,16 +48,18 @@ export const TimeSeriesChart: React.FC = () => {
     showSalesCount: false
   });
 
+  const [selectedProductId, setSelectedProductId] = useState<number | undefined>(undefined);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
-  // API hook
+  // API hooks
+  const { products } = useAvailableProducts();
   const { data, loading, error, refetch } = useTimeSeriesData();
 
   // Generate a params key for dependency tracking
   const paramsKey = useMemo(() => {
-    return `${AnalyticsService.formatDate(dateRange.startDate)}_${AnalyticsService.formatDate(dateRange.endDate)}_${resolution}`;
-  }, [dateRange.startDate, dateRange.endDate, resolution]);
+    return `${AnalyticsService.formatDate(dateRange.startDate)}_${AnalyticsService.formatDate(dateRange.endDate)}_${resolution}_${selectedProductId || 'all'}`;
+  }, [dateRange.startDate, dateRange.endDate, resolution, selectedProductId]);
 
   // Fetch data when parameters change
   useEffect(() => {
@@ -65,7 +68,8 @@ export const TimeSeriesChart: React.FC = () => {
         await refetch({
           date_from: AnalyticsService.formatDate(dateRange.startDate),
           date_to: AnalyticsService.formatDate(dateRange.endDate),
-          resolution
+          resolution,
+          product_id: selectedProductId
         });
       } catch (err) {
         console.error('Failed to fetch time series data:', err);
@@ -104,7 +108,8 @@ export const TimeSeriesChart: React.FC = () => {
     refetch({
       date_from: AnalyticsService.formatDate(dateRange.startDate),
       date_to: AnalyticsService.formatDate(dateRange.endDate),
-      resolution
+      resolution,
+      product_id: selectedProductId
     });
   };
 
@@ -165,6 +170,23 @@ export const TimeSeriesChart: React.FC = () => {
               onClose={() => setShowDatePicker(false)}
             />
           )}
+        </div>
+
+        {/* Product Selector */}
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-medium text-gray-700">المنتج:</label>
+          <select
+            value={selectedProductId || ''}
+            onChange={(e) => setSelectedProductId(e.target.value ? parseInt(e.target.value) : undefined)}
+            className="bg-white border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-48"
+          >
+            <option value="">جميع المنتجات</option>
+            {products.map(product => (
+              <option key={product.id} value={product.id}>
+                {product.type_name_ar} - {product.brand_name_ar || 'بدون علامة تجارية'}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Resolution Selector */}

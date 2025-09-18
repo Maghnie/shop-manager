@@ -97,16 +97,18 @@ class TimeSeriesService:
         cls,
         date_from: datetime,
         date_to: datetime,
-        resolution: str = 'daily'
+        resolution: str = 'daily',
+        product_id: Optional[int] = None
     ) -> Dict:
         """
         Get time series data for sales revenue, profit, and costs
-        
+
         Args:
             date_from: Start date
-            date_to: End date  
+            date_to: End date
             resolution: Time resolution (hourly, daily, weekly, monthly, yearly)
-        
+            product_id: Optional product ID to filter by specific product
+
         Returns:
             Dict with time series data
         """
@@ -115,7 +117,8 @@ class TimeSeriesService:
             'analytics_timeseries',
             date_from=date_from,
             date_to=date_to,
-            resolution=resolution
+            resolution=resolution,
+            product_id=product_id
         )
         
         # Try to get from cache
@@ -132,6 +135,10 @@ class TimeSeriesService:
             sale_date__gte=date_from,
             sale_date__lte=date_to
         ).select_related()
+
+        # Add product filtering if specified
+        if product_id:
+            sales_qs = sales_qs.filter(items__product_id=product_id)
         
         # Aggregate by time period
         time_series = sales_qs.annotate(

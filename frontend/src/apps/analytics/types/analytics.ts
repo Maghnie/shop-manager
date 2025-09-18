@@ -84,6 +84,7 @@ export interface TimeSeriesRequest {
   date_from?: string;
   date_to?: string;
   resolution?: 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly';
+  product_id?: number;
 }
 
 export interface BreakevenRequest {

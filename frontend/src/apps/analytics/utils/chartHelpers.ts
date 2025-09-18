@@ -231,7 +231,7 @@ export const formatBreakevenForChart = (products: BreakevenProduct[], fixedCosts
 
   // Generate quantity range for x-axis (0 to max of breakeven units * 2)
   const maxQuantity = Math.max(product.breakeven_units * 2, product.actual_performance.quantity_sold * 1.5, 100);
-  const quantityRange = [];
+  const quantityRange: number[] = [];
   const step = Math.ceil(maxQuantity / 20); // 20 points on the chart
 
   for (let i = 0; i <= maxQuantity; i += step) {
@@ -248,6 +248,15 @@ export const formatBreakevenForChart = (products: BreakevenProduct[], fixedCosts
   const breakevenQuantity = product.breakeven_units;
   const breakevenRevenue = breakevenQuantity * product.unit_price;
 
+  // Find closest indices for breakeven and actual performance points
+  const breakevenIndex = quantityRange.reduce((closest, curr, i) =>
+    Math.abs(curr - breakevenQuantity) < Math.abs(quantityRange[closest] - breakevenQuantity) ? i : closest, 0
+  );
+
+  const actualPerformanceIndex = quantityRange.reduce((closest, curr, i) =>
+    Math.abs(curr - product.actual_performance.quantity_sold) < Math.abs(quantityRange[closest] - product.actual_performance.quantity_sold) ? i : closest, 0
+  );
+
   return {
     labels: quantityRange,
     datasets: [
@@ -259,6 +268,7 @@ export const formatBreakevenForChart = (products: BreakevenProduct[], fixedCosts
         borderWidth: 2,
         borderDash: [5, 5],
         pointRadius: 0,
+        pointStyle: 'dash',
         fill: false,
       },
       {
@@ -268,6 +278,7 @@ export const formatBreakevenForChart = (products: BreakevenProduct[], fixedCosts
         backgroundColor: `${CHART_COLORS.costs}20`,
         borderWidth: 3,
         pointRadius: 0,
+        pointStyle: 'rect',
         fill: '+1', // Fill area between this line and fixed costs
       },
       {
@@ -277,44 +288,54 @@ export const formatBreakevenForChart = (products: BreakevenProduct[], fixedCosts
         backgroundColor: `${CHART_COLORS.revenue}20`,
         borderWidth: 3,
         pointRadius: 0,
+        pointStyle: 'rect',
         fill: false,
       },
       {
         label: 'منطقة الربح',
         data: revenueData,
         borderColor: 'transparent',
-        backgroundColor: `${CHART_COLORS.profit}15`,
+        backgroundColor: `${CHART_COLORS.profit}25`,
         borderWidth: 0,
         pointRadius: 0,
+        pointStyle: 'rectRot',
         fill: {
-          target: '-1', // Fill between revenue (this) and total costs (previous)
-          above: `${CHART_COLORS.profit}15`, // Green when above
+          target: 1, // Fill between this line and the total costs line (dataset index 1)
+          above: `${CHART_COLORS.profit}25`, // Green when revenue is above costs
           below: 'transparent' // Transparent when below
         },
       },
       {
         label: 'نقطة التعادل',
-        data: quantityRange.map(qty => qty === breakevenQuantity ? breakevenRevenue : null),
+        data: quantityRange.map((qty, index) =>
+          index === breakevenIndex ? breakevenRevenue : null
+        ),
         borderColor: CHART_COLORS.breakeven,
         backgroundColor: CHART_COLORS.breakeven,
         borderWidth: 0,
-        pointRadius: quantityRange.map(qty => qty === breakevenQuantity ? 8 : 0),
+        pointRadius: quantityRange.map((qty, index) =>
+          index === breakevenIndex ? 10 : 0
+        ),
         pointBorderWidth: 3,
         pointBorderColor: '#fff',
+        pointStyle: 'triangle',
         showLine: false,
         fill: false,
       },
       {
         label: 'الأداء الفعلي',
-        data: quantityRange.map(qty =>
-          qty === product.actual_performance.quantity_sold ? product.actual_performance.revenue : null
+        data: quantityRange.map((qty, index) =>
+          index === actualPerformanceIndex ? product.actual_performance.revenue : null
         ),
         borderColor: CHART_COLORS.performance,
         backgroundColor: CHART_COLORS.performance,
         borderWidth: 0,
-        pointRadius: quantityRange.map(qty => qty === product.actual_performance.quantity_sold ? 6 : 0),
+        pointRadius: quantityRange.map((qty, index) =>
+          index === actualPerformanceIndex ? 8 : 0
+        ),
         pointBorderWidth: 2,
         pointBorderColor: '#fff',
+        pointStyle: 'star',
         showLine: false,
         fill: false,
       }
@@ -344,6 +365,14 @@ export const getBreakevenChartOptions = () => ({
       position: 'top' as const,
       rtl: true,
       textDirection: 'rtl',
+      labels: {
+        usePointStyle: true, // Use the actual point styles in legend
+        pointStyleWidth: 15, // Make legend symbols larger
+        padding: 25, // Increase horizontal spacing between legend items
+        font: {
+          size: 12
+        }
+      }
     },
     tooltip: {
       rtl: true,

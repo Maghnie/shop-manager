@@ -27,6 +27,9 @@ export class AnalyticsService {
       if (params.resolution) {
         queryParams.append('resolution', params.resolution);
       }
+      if (params.product_id) {
+        queryParams.append('product_id', params.product_id.toString());
+      }
 
       const response = await axios.get(
         `${this.BASE_URL}/time-series/?${queryParams.toString()}`
