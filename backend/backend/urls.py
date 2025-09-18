@@ -51,6 +51,7 @@ api_v1_patterns = [
     # Functional app groupings
     path('', include('customers.urls')),
     path('inventory/', include('inventory.urls')),
+    path('analytics/', include('analytics.urls')),
     path('users/', include('users.urls')),
     
     # Authentication endpoints

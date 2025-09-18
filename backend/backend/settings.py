@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'customers',
     'inventory',
+    'analytics.apps.AnalyticsConfig',
     # 'dj_rest_auth',
     # 'dj_rest_auth.registration',
     # 'allauth',
@@ -71,16 +72,24 @@ TEMPLATES = [
 WSGI_APPLICATION = 'backend.wsgi.application'
 
 # Database
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB'),
-        'USER': os.getenv('POSTGRES_USER'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
-        'HOST': os.getenv('DB_HOST', 'localhost'),
-        'PORT': os.getenv('DB_PORT', '5432'),
+if os.getenv('POSTGRES_DB'):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('POSTGRES_DB'),
+            'USER': os.getenv('POSTGRES_USER'),
+            'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+            'HOST': os.getenv('DB_HOST', 'localhost'),
+            'PORT': os.getenv('DB_PORT', '5432'),
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # REST Framework configuration
 REST_FRAMEWORK = {
@@ -187,10 +196,10 @@ LOGGING = {
     },
 }
 
-CACHES = { # FIXME
+CACHES = {  # FIXME
     'default': {
         # 'BACKEND': 'django_redis.cache.RedisCache',
-        'BACKEND': 'django.core.cache.backends.dummy.DummyCache', 
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
         # 'LOCATION': 'redis://127.0.0.1:6379/1',
         # 'OPTIONS': {
         #     'CLIENT_CLASS': 'django_redis.client.DefaultClient',
