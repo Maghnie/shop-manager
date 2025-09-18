@@ -38,7 +38,7 @@ export const TimeSeriesChart: React.FC = () => {
     endDate: new Date()
   });
   
-  const [resolution, setResolution] = useState<'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly'>('daily');
+  const [resolution, setResolution] = useState</*'hourly' | */'daily' | 'weekly' | 'monthly' | 'yearly'>('daily');
   
   const [chartConfig, setChartConfig] = useState<ChartConfig>({
     showRevenue: true,
@@ -175,7 +175,7 @@ export const TimeSeriesChart: React.FC = () => {
             onChange={(e) => handleResolutionChange(e.target.value)}
             className="bg-white border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="hourly">ساعية</option>
+            {/* <option value="hourly">ساعية</option> */}
             <option value="daily">يومية</option>
             <option value="weekly">أسبوعية</option>
             <option value="monthly">شهرية</option>
