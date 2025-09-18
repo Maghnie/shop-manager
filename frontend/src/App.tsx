@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import axios from 'axios';
 import { Toaster } from 'react-hot-toast';
 
+// TODO refactor imports to the style of the analytics app further below
+
 // Existing components
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
@@ -19,6 +21,8 @@ import InvoiceDetail from './components/invoices/InvoiceDetail';
 
 // New inventory components
 import InventoryList from './components/inventory/InventoryList';
+
+import { AnalyticsDashboard } from '@/apps/analytics';
 
 import './App.css';
 
@@ -161,6 +165,20 @@ const App: React.FC = () => {
                 path="/invoices/sale/:saleId"
                 element={
                   isAuthenticated ? <InvoiceDetail /> : <Navigate to="/login" />
+                }
+              />
+
+              {/* Analytics Routes */}
+              <Route
+                path="/analytics"
+                element={
+                  isAuthenticated ? <AnalyticsDashboard /> : <Navigate to="/login" />
+                }
+              />
+              <Route
+                path="/analytics/dashboard" 
+                element={
+                  isAuthenticated ? <AnalyticsDashboard /> : <Navigate to="/login" />
                 }
               />
 

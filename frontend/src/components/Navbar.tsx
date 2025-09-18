@@ -16,6 +16,7 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
     { path: '/', label: 'لوحة التحكم', icon: '🏠' },
     { path: '/products', label: 'المنتجات', icon: '🔖' },
     { path: '/inventory', label: 'المخزون', icon: '📦' },
+    { path: '/analytics', label: 'التحليلات', icon: '📈' },
   ];
 
   // Sales dropdown items

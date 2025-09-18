@@ -118,6 +118,13 @@ const Dashboard: React.FC = () => {
               <ClipboardList className="w-5 h-5" />
               <span>إدارة المبيعات</span>
             </Link>
+            <Link
+              to="/analytics"
+              className="w-full bg-gradient-to-r from-indigo-500 to-indigo-600 text-white py-3 px-4 rounded-lg hover:from-indigo-600 hover:to-indigo-700 transition duration-200 flex items-center gap-2"
+            >
+              <BarChart3 className="w-5 h-5" />
+              <span>تحليلات المنتجات والمبيعات</span>
+            </Link>
           </div>
         </div>
 

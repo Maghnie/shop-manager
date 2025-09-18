@@ -54,6 +54,7 @@ api_v1_patterns = [
     path('', include('customers.urls')),
     path('inventory/', include('inventory.urls')),
     path('sales/', include('sales.urls')),
+    path('analytics/', include('analytics.urls')),
 
     # Authentication endpoints
     path('auth/token/', obtain_auth_token, name='api_v1_token_auth'),

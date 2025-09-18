@@ -201,7 +201,7 @@ LOGGING = {
             'propagate': False,
         },
         'analytics': {
-            'handlers': ['console'], # 'file'] if DEBUG else ['console'],
+            'handlers': ['console'], 
             'level': 'DEBUG' if DEBUG else 'INFO',
             'propagate': False,
         },

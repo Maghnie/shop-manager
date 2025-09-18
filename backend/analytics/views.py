@@ -18,7 +18,7 @@ class TimeSeriesAnalyticsView(APIView):
     """
     API endpoint for time series analytics
     
-    GET /api/v1/inventory/analytics/time-series/
+    GET /api/v1/analytics/time-series/
     
     Query Parameters:
     - date_from: Start date (ISO format)
@@ -102,7 +102,7 @@ class BreakevenAnalysisView(APIView):
     """
     API endpoint for breakeven analysis
     
-    GET /api/v1/inventory/analytics/breakeven/
+    GET /api/v1/analytics/breakeven/
     
     Query Parameters:
     - product_id: Specific product ID (optional, if not provided returns all products)
@@ -185,7 +185,7 @@ class AnalyticsExportView(APIView):
     """
     API endpoint for exporting analytics data
     
-    POST /api/v1/inventory/analytics/export/
+    POST /api/v1/analytics/export/
     
     Request Body:
     {
