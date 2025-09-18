@@ -8,8 +8,8 @@ export const fetchMaterials = () => axios.get("inventory/materials/");
 export const deleteProduct = (id: number) =>
   axios.delete(`/inventory/products/${id}/`);
 
-export const toggleProductArchive = (id: number) =>
-  axios.post(`/inventory/products/${id}/toggle-archive/`);
+export const toggleProductArchive = (id: number, forceArchive: boolean = false) =>
+  axios.post(`/inventory/products/${id}/toggle-archive/`, { force_archive: forceArchive });
 
 export const fetchArchivedProducts = () =>
   axios.get("inventory/products/", { params: { archived: true } });

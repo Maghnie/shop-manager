@@ -5,9 +5,11 @@ import ProductRow from "./ProductRow";
 interface Props {
   products: Product[];
   adminView: boolean;
-  onArchive: (id: number) => void; 
-  onRestore?: (id: number) => void; 
-  showArchived?: boolean; 
+  onArchive: (id: number, forceArchive?: boolean) => void;
+  onRestore?: (id: number) => void;
+  showArchived?: boolean;
+  showingStockWarning?: number | null;
+  onHideWarning?: () => void;
 }
 
 const ProductTable: React.FC<Props> = ({ 
@@ -15,7 +17,9 @@ const ProductTable: React.FC<Props> = ({
   adminView, 
   onArchive, 
   onRestore,
-  showArchived = false  
+  showArchived = false,
+  showingStockWarning,
+  onHideWarning
 }) => (
   <div className="bg-white rounded-xl shadow-lg overflow-hidden">
     <div className="overflow-x-auto">
@@ -40,7 +44,7 @@ const ProductTable: React.FC<Props> = ({
           {products.length === 0 ? (
             <tr>
               <td colSpan={adminView ? 10 : 9} className="text-center py-8 text-gray-500">
-                {showArchived ? "لا توجد منتجات مؤرشفة" : "لا توجد منتجات مطابقة للبحث"}              
+                {showArchived ? "لا توجد منتجات مؤرشفة" : "لا توجد منتجات مطابقة للبحث"}
               </td>
             </tr>
           ) : (
@@ -51,7 +55,9 @@ const ProductTable: React.FC<Props> = ({
                 adminView={adminView} 
                 onArchive={onArchive}
                 onRestore={onRestore}
-                showArchived={showArchived} 
+                showArchived={showArchived}
+                isShowingWarning={showingStockWarning === product.id}
+                onHideWarning={onHideWarning}
               />
             ))
           )}

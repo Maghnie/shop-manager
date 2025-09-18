@@ -53,12 +53,28 @@ class ProductTypeListView(generics.ListCreateAPIView):
     permission_classes = [AllowAny]  # FIXME just for testing because everyone can POST/PUT/GET/DELETE
 
 class ToggleProductArchiveView(APIView):
-    """Toggle product archive status"""
-    permission_classes = [AllowAny] # FIXME 
+    """Toggle product archive status with stock level warnings"""
+    permission_classes = [AllowAny] # FIXME
     
     def post(self, request, pk):
         try:
-            product = Product.objects.get(pk=pk)
+            product = Product.objects.select_related('inventory').get(pk=pk)
+            force_archive = request.data.get('force_archive', False)
+            
+            # Check if we're trying to archive (not restore)
+            if product.is_active and not force_archive:
+                # Check stock levels before archiving
+                stock_quantity = getattr(product.inventory, 'quantity_in_stock', 0)
+                
+                if stock_quantity > 0:
+                    return Response({
+                        'status': 'warning',
+                        'requires_confirmation': True,
+                        'stock_quantity': stock_quantity,
+                        'message': f'تحذير: هذا المنتج لديه {stock_quantity} قطعة في المخزون. هل تريد أرشفته رغم ذلك؟'
+                    })
+            
+            # Proceed with archive/restore
             product.is_active = not product.is_active
             product.save()
             
@@ -69,11 +85,17 @@ class ToggleProductArchiveView(APIView):
                 'is_active': product.is_active,
                 'message': f'{action} للمنتج بنجاح'
             })
+            
         except Product.DoesNotExist:
             return Response({
                 'status': 'error',
                 'message': 'المنتج غير موجود'
             }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': f'حدث خطأ: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 class BrandListView(generics.ListCreateAPIView):
     queryset = Brand.objects.all()

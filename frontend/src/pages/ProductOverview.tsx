@@ -9,19 +9,33 @@ import { toggleProductArchive } from "@/services/productService";
 const ProductOverview: React.FC = () => {
   const { products, filteredProducts, productTypes, brands, materials, loading, filters, setFilters, setProducts } = useProducts();
   const [adminView, setAdminView] = useState(false);
+  const [showingStockWarning, setShowingStockWarning] = useState<number | null>(null);
 
-  const handleArchive = async (productId: number) => {
+  const handleArchive = async (productId: number, forceArchive: boolean = false) => {
     try {
-      const response = await toggleProductArchive(productId);
+      const response = await toggleProductArchive(productId, forceArchive);
+      
+      if (response.data.status === 'warning' && response.data.requires_confirmation) {
+        // Show inline stock warning for this specific product
+        setShowingStockWarning(productId);
+        return;
+      }
+      
       if (response.data.status === 'success') {
-        // Remove archived product from the list
+        // Success - remove product from list and hide any warnings
         setProducts(prev => prev.filter(p => p.id !== productId));
-        // Show success message
+        setShowingStockWarning(null);
         alert(response.data.message);
       }
     } catch (error) {
+      console.error('Archive error:', error);
       alert("حدث خطأ أثناء أرشفة المنتج");
+      setShowingStockWarning(null);
     }
+  };
+
+  const handleHideWarning = () => {
+    setShowingStockWarning(null);
   };
 
   if (loading) {
@@ -44,13 +58,13 @@ const ProductOverview: React.FC = () => {
         <div className="flex space-x-3 space-x-reverse">
           <button
             onClick={() => setAdminView(!adminView)}
-            className=" bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
-          >
-            {adminView ? "إخفاء أدوات المسؤول" : "عرض أدوات المسؤول"}
+            className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
+          >            
+            {adminView ?  "إخفاء أدوات المسؤول" : "عرض أدوات المسؤول" }
           </button>
           <Link
             to="/products/archived"
-            className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition duration-200 flex items-center space-x-2 space-x-reverse"
+            className="bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition duration-200 flex items-center space-x-2 space-x-reverse"
           >
             <Archive className="w-4 h-4" />
             <span>المنتجات المؤرشفة</span>
@@ -62,9 +76,7 @@ const ProductOverview: React.FC = () => {
             إضافة منتج جديد +
           </Link>
         </div>
-      </div>
-
-      
+      </div>      
 
       <ProductFilters
         filters={filters}
@@ -77,7 +89,9 @@ const ProductOverview: React.FC = () => {
       <ProductTable 
         products={filteredProducts} 
         adminView={adminView} 
-        onArchive={handleArchive} 
+        onArchive={handleArchive}
+        showingStockWarning={showingStockWarning}
+        onHideWarning={handleHideWarning}
       />
     </div>
   );

@@ -19,7 +19,7 @@ class MaterialSerializer(serializers.ModelSerializer):
         fields = ['id', 'name_en', 'name_ar', 'created_at']
 
 class ProductSerializer(serializers.ModelSerializer):
-    # Add computed fields for display
+    # Computed fields for display
     type_name_ar = serializers.CharField(source='type.name_ar', read_only=True)
     type_name_en = serializers.CharField(source='type.name_en', read_only=True)
     brand_name_ar = serializers.CharField(source='brand.name_ar', read_only=True)
@@ -27,10 +27,15 @@ class ProductSerializer(serializers.ModelSerializer):
     material_name_ar = serializers.CharField(source='material.name_ar', read_only=True)
     material_name_en = serializers.CharField(source='material.name_en', read_only=True)
     
-    # Include computed properties
+    # Computed properties
     profit = serializers.ReadOnlyField()
     profit_percentage = serializers.ReadOnlyField()
     tags_list = serializers.ReadOnlyField()
+
+    # Inventory data
+    available_stock = serializers.IntegerField(source='inventory.quantity_in_stock', read_only=True)
+    is_low_stock = serializers.BooleanField(source='inventory.is_low_stock', read_only=True)
+    
     
     class Meta:
         model = Product
@@ -40,7 +45,9 @@ class ProductSerializer(serializers.ModelSerializer):
             'is_active',
             # Computed fields
             'type_name_ar', 'type_name_en', 'brand_name_ar', 'brand_name_en',
-            'material_name_ar', 'material_name_en', 'profit', 'profit_percentage', 'tags_list'
+            'material_name_ar', 'material_name_en', 'profit', 'profit_percentage', 'tags_list',
+            # Inventory fields
+            'available_stock', 'is_low_stock',
         ]
         read_only_fields = ['created_at', 'updated_at', 'created_by']
         
