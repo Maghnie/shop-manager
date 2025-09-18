@@ -7,6 +7,9 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
+import logging
+
+logger = logging.getLogger(__name__)
 
 from .services import TimeSeriesService, BreakevenService, ExportService, CacheService
 from .serializers import (
@@ -43,17 +46,42 @@ class TimeSeriesAnalyticsView(APIView):
             
             # Parse dates
             if date_from_str:
-                date_from = datetime.fromisoformat(date_from_str.replace('Z', '+00:00'))
+                try:
+                    # Try parsing as simple date format (YYYY-MM-DD)
+                    if 'T' not in date_from_str:
+                        date_from = timezone.make_aware(datetime.strptime(date_from_str, '%Y-%m-%d'))
+                    else:
+                        # Parse as ISO format with timezone
+                        date_from = datetime.fromisoformat(date_from_str.replace('Z', '+00:00'))
+                except ValueError:
+                    return Response({
+                        'error': f'تنسيق تاريخ البداية غير صحيح: {date_from_str}'
+                    }, status=status.HTTP_400_BAD_REQUEST)
             else:
                 # Default to 30 days ago
                 date_from = timezone.now() - timedelta(days=30)
-            
+
             if date_to_str:
-                date_to = datetime.fromisoformat(date_to_str.replace('Z', '+00:00'))
+                try:
+                    # Try parsing as simple date format (YYYY-MM-DD)
+                    if 'T' not in date_to_str:
+                        # For end date, set to end of day (23:59:59)
+                        date_to = timezone.make_aware(datetime.strptime(date_to_str, '%Y-%m-%d'))
+                        date_to = date_to.replace(hour=23, minute=59, second=59, microsecond=999999)
+                    else:
+                        # Parse as ISO format with timezone
+                        date_to = datetime.fromisoformat(date_to_str.replace('Z', '+00:00'))
+                except ValueError:
+                    return Response({
+                        'error': f'تنسيق تاريخ النهاية غير صحيح: {date_to_str}'
+                    }, status=status.HTTP_400_BAD_REQUEST)
             else:
                 # Default to now
                 date_to = timezone.now()
-            
+
+            # Debug logging
+            logger.info(f"Time series request: date_from={date_from}, date_to={date_to}, resolution={resolution}")
+
             # Validate date range
             if date_from >= date_to:
                 return Response({

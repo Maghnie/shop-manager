@@ -124,10 +124,13 @@ export class AnalyticsService {
   }
 
   /**
-   * Format date for API
+   * Format date for API - returns YYYY-MM-DD format for better readability
    */
   static formatDate(date: Date): string {
-    return date.toISOString();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   /**
