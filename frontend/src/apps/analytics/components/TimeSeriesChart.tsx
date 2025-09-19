@@ -159,7 +159,7 @@ export const TimeSeriesChart: React.FC = () => {
           >
             <Calendar className="w-4 h-4" />
             <span className="text-sm">
-              {dateRange.startDate.toLocaleDateString('ar-LB')} - {dateRange.endDate.toLocaleDateString('ar-LB')}
+              {dateRange.startDate.toLocaleDateString('en-UK')} - {dateRange.endDate.toLocaleDateString('en-UK')}
             </span>
           </button>
           

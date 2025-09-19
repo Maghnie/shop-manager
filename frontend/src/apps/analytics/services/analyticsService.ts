@@ -147,7 +147,7 @@ export class AnalyticsService {
    * Format currency for display
    */
   static formatCurrency(amount: number, currency: string = 'USD'): string {
-    return new Intl.NumberFormat('ar-LB', {
+    return new Intl.NumberFormat('en-UK', {
       style: 'currency',
       currency: currency,
       minimumFractionDigits: 2
@@ -158,7 +158,7 @@ export class AnalyticsService {
    * Format percentage for display
    */
   static formatPercentage(value: number): string {
-    return new Intl.NumberFormat('ar-LB', {
+    return new Intl.NumberFormat('en-UK', {
       style: 'percent',
       minimumFractionDigits: 1,
       maximumFractionDigits: 2

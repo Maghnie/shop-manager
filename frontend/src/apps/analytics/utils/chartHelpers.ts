@@ -112,7 +112,7 @@ export const formatTimeSeriesForChart = (
   }
 
   return {
-    labels: data.map(d => new Date(d.period).toLocaleDateString('ar-LB')),
+    labels: data.map(d => new Date(d.period).toLocaleDateString('en-UK')),
     datasets,
   };
 };
@@ -137,7 +137,7 @@ export const getTimeSeriesChartOptions = (hasSecondaryAxis: boolean = false) => 
         usePointStyle: true, // Use the actual point styles in legend
         pointStyleWidth: 15, // Make legend symbols larger
         font: {
-          size: 12
+          size: 15
         }
       }
     },
