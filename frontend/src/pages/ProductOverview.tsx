@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Archive } from "lucide-react";
+import { Archive, Pencil, PencilOff } from "lucide-react";
 import { useProducts } from "@/hooks/useProducts";
 import ProductFilters from "@/components/products/ProductFilters";
 import ProductTable from "@/components/products/ProductTable";
@@ -60,14 +60,14 @@ const ProductOverview: React.FC = () => {
             onClick={() => setAdminView(!adminView)}
             className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
           >            
-            {adminView ?  "إخفاء أدوات المسؤول" : "عرض أدوات المسؤول" }
+            {adminView ?  <PencilOff className="w-4 h-4" /> : <Pencil className="w-4 h-4" /> }
           </button>
           <Link
             to="/products/archived"
             className="bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition duration-200 flex items-center space-x-2 space-x-reverse"
           >
             <Archive className="w-4 h-4" />
-            <span>المنتجات المؤرشفة</span>
+            {/* <span>المنتجات المؤرشفة</span> */}
           </Link>
           <Link
             to="/products/new"
