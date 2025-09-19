@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Save, X, Calculator } from 'lucide-react';
+import { Save, X, Calculator, Settings } from 'lucide-react';
 import { SalesService } from '@/apps/sales/services/saleService';
 import { useAvailableProducts, useSale } from '@/apps/sales/hooks/useSales';
 import { useSalesCalculations } from '@/apps/sales/hooks/useSalesCalculations';
@@ -20,7 +20,7 @@ export const SaleForm: React.FC = () => {
   const { products, loading: productsLoading } = useAvailableProducts();
   const { sale, loading: saleLoading } = useSale(id ? parseInt(id) : undefined);
   
-  const [showCustomerInfo, setShowCustomerInfo] = useState(false);
+  const [showOptionalInfo, setShowOptionalInfo] = useState(false);
   const [showProfitInfo, setShowProfitInfo] = useState(true);
   const [saving, setSaving] = useState(false);
   
@@ -224,8 +224,8 @@ export const SaleForm: React.FC = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className="bg-white rounded-xl shadow-lg p-6">
+    <div className="max-w-7xl mx-auto px-6 py-10">
+      <div className="bg-white rounded-xl shadow-lg p-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-800">
             {isEditing ? 'تعديل البيعة' : 'بيعة جديدة'}
@@ -233,80 +233,27 @@ export const SaleForm: React.FC = () => {
           <div className="flex space-x-4 space-x-reverse">
             <button
               type="button"
+              onClick={() => setShowOptionalInfo(!showOptionalInfo)}
+              className="bg-blue-300 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-200 flex items-center space-x-2 space-x-reverse"
+            >
+              <Settings className="w-4 h-4" />
+              <span>{showOptionalInfo ? 'إخفاء' : 'عرض'} المعلومات الاختيارية</span>
+            </button>
+            {/* <button
+              type="button"
               onClick={() => setShowProfitInfo(!showProfitInfo)}
               className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition duration-200 flex items-center space-x-2 space-x-reverse"
             >
               <Calculator className="w-4 h-4" />
               <span>{showProfitInfo ? 'إخفاء' : 'عرض'} معلومات الربح</span>
-            </button>
+            </button> */}
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
-          {/* Customer Information */}
-          <CustomerSubform
-            customerData={{
-              customer_name: formData.customer_name || '',
-              customer_phone: formData.customer_phone || '',
-              customer_address: formData.customer_address || ''
-            }}
-            onUpdate={handleCustomerUpdate}
-            isVisible={showCustomerInfo}
-            onToggle={() => setShowCustomerInfo(!showCustomerInfo)}
-          />
-
-          {/* Payment and Settings */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                طريقة الدفع *
-              </label>
-              <select
-                value={formData.payment_method}
-                onChange={(e) => handleInputChange('payment_method', e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
-              >
-                <option value="cash">نقدي</option>
-                <option value="card">بطاقة</option>
-                <option value="bank_transfer">تحويل بنكي</option>
-                <option value="credit">آجل</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                مبلغ الخصم
-              </label>
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                value={formData.discount_amount}
-                onChange={(e) => handleInputChange('discount_amount', parseFloat(e.target.value) || 0)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                نسبة الضريبة (%)
-              </label>
-              <input
-                type="number"
-                min="0"
-                max="100"
-                step="0.1"
-                value={formData.tax_percentage}
-                onChange={(e) => handleInputChange('tax_percentage', parseFloat(e.target.value) || 0)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-          </div>
-
+        <form onSubmit={handleSubmit} className="space-y-12">                 
           {/* Product Input */}
-          <div>
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">إضافة المنتجات</h3>
+          <div className="bg-gray-50 rounded-lg p-6">
+            <h3 className="text-xl font-semibold text-gray-800 mb-6">إضافة المنتجات</h3>
             <ProductInput
               products={products}
               onAddProduct={addProductToSale}
@@ -314,46 +261,163 @@ export const SaleForm: React.FC = () => {
           </div>
 
           {/* Sales Table */}
-          {formData.items && formData.items.length > 0 && (
-            <SalesTable
-              items={formData.items}
-              products={products}
-              onUpdateQuantity={updateItemQuantity}
-              onUpdatePrice={updateItemPrice}
-              onRemoveItem={removeItem}
-            />
-          )}
-
-          {/* Summary */}          
-          {formData.items && formData.items.length > 0 && (
-            <SaleSummary
-              subtotal={subtotal}
-              discountAmount={discountAmount}
-              taxAmount={taxAmount}
-              finalTotal={finalTotal}
-              totalCost={totalCost}
-              netProfit={netProfit}
-              profitPercentage={profitPercentage}
-              showProfitInfo={showProfitInfo}
-            />
-          )}
-
-          {/* Notes */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              ملاحظات
-            </label>
-            <textarea
-              value={formData.notes}
-              onChange={(e) => handleInputChange('notes', e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              rows={3}
-              placeholder="ملاحظات إضافية..."
-            />
+          <div className="bg-white border border-gray-200 rounded-lg p-6">
+            <h3 className="text-xl font-semibold text-gray-800 mb-6">تفاصيل المنتجات</h3>
+            {formData.items && formData.items.length > 0 ? (
+              <SalesTable
+                items={formData.items}
+                products={products}
+                onUpdateQuantity={updateItemQuantity}
+                onUpdatePrice={updateItemPrice}
+                onRemoveItem={removeItem}
+              />
+            ) : (
+              <div className="text-center py-12 text-gray-500">
+                <p className="text-lg">لم يتم إضافة أي منتجات بعد</p>
+                <p className="text-sm mt-2">ابدأ بإضافة المنتجات من الأعلى</p>
+              </div>
+            )}
           </div>
 
+          {/* Optional Information Section */}
+          {showOptionalInfo && (
+            <div className="bg-gray-50 rounded-lg p-8 space-y-8">
+              <h3 className="text-xl font-semibold text-gray-800 mb-6">المعلومات الاختيارية</h3>
+
+              {/* Payment and Settings */}
+              <div>
+                <h4 className="text-lg font-medium text-gray-700 mb-4">إعدادات الدفع والخصومات</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      طريقة الدفع *
+                    </label>
+                    <select
+                      value={formData.payment_method}
+                      onChange={(e) => handleInputChange('payment_method', e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      required
+                    >
+                      <option value="cash">نقدي</option>
+                      <option value="card">بطاقة</option>
+                      <option value="bank_transfer">تحويل بنكي</option>
+                      <option value="credit">آجل</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      مبلغ الخصم
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={formData.discount_amount}
+                      onChange={(e) => handleInputChange('discount_amount', parseFloat(e.target.value) || 0)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      نسبة الضريبة (%)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="0.1"
+                      value={formData.tax_percentage}
+                      onChange={(e) => handleInputChange('tax_percentage', parseFloat(e.target.value) || 0)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Customer Information */}
+              <div>
+                <h4 className="text-lg font-medium text-gray-700 mb-4">معلومات العميل</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      اسم العميل
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.customer_name || ''}
+                      onChange={(e) => handleCustomerUpdate('customer_name', e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="اسم العميل"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      رقم الهاتف
+                    </label>
+                    <input
+                      type="tel"
+                      value={formData.customer_phone || ''}
+                      onChange={(e) => handleCustomerUpdate('customer_phone', e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="رقم الهاتف"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      العنوان
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.customer_address || ''}
+                      onChange={(e) => handleCustomerUpdate('customer_address', e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="العنوان"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Notes */}
+              <div>
+                <h4 className="text-lg font-medium text-gray-700 mb-4">ملاحظات</h4>
+                <textarea
+                  value={formData.notes}
+                  onChange={(e) => handleInputChange('notes', e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  rows={3}
+                  placeholder="ملاحظات إضافية..."
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Summary */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+            <h3 className="text-xl font-semibold text-gray-800 mb-6">ملخص البيعة</h3>
+            {formData.items && formData.items.length > 0 ? (
+              <SaleSummary
+                subtotal={subtotal}
+                discountAmount={discountAmount}
+                taxAmount={taxAmount}
+                finalTotal={finalTotal}
+                totalCost={totalCost}
+                netProfit={netProfit}
+                profitPercentage={profitPercentage}
+                showProfitInfo={showProfitInfo}
+              />
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <p className="text-lg">سيظهر ملخص البيعة عند إضافة المنتجات</p>
+              </div>
+            )}
+          </div>         
+
           {/* Actions */}
-          <div className="flex justify-end space-x-4 space-x-reverse">
+          <div className="flex justify-end space-x-6 space-x-reverse pt-4">
             <button
               type="button"
               onClick={() => navigate('/sales')}

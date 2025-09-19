@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { Grid2X2Plus, Grid2X2X } from 'lucide-react';
 import axios from 'axios';
 
 interface Sale {
@@ -19,6 +20,7 @@ interface Sale {
 export const SalesList: React.FC = () => {
   const [sales, setSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showOptionalColumns, setShowOptionalColumns] = useState(false);
   const [filters, setFilters] = useState({
     search: '',
     status: '',
@@ -139,6 +141,17 @@ export const SalesList: React.FC = () => {
           </p>
         </div>
         <div className="flex space-x-4 space-x-reverse">
+          <button
+            type="button"
+            onClick={() => setShowOptionalColumns(!showOptionalColumns)}
+            className="bg-gray-500 text-white p-2 rounded-lg hover:bg-gray-600 transition duration-200 relative group"
+            title={showOptionalColumns ? 'إخفاء التفاصيل الإضافية' : 'عرض التفاصيل الإضافية'}
+          >
+            {showOptionalColumns ? <Grid2X2X className="w-5 h-5" /> : <Grid2X2Plus className="w-5 h-5" />}
+            <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap mb-2">
+              {showOptionalColumns ? 'إخفاء التفاصيل الإضافية' : 'عرض التفاصيل الإضافية'}
+            </span>
+          </button>
           <Link
             to="/sales/new"
             className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition duration-200 font-semibold"
@@ -244,21 +257,21 @@ export const SalesList: React.FC = () => {
               <tr>
                 <th className="text-right py-4 px-6 font-semibold text-gray-700">رقم البيعة</th>
                 <th className="text-right py-4 px-6 font-semibold text-gray-700">التاريخ</th>
-                <th className="text-right py-4 px-6 font-semibold text-gray-700">العميل</th>
-                <th className="text-right py-4 px-6 font-semibold text-gray-700">البائع</th>
+                {showOptionalColumns && <th className="text-right py-4 px-6 font-semibold text-gray-700">العميل</th>}
+                {showOptionalColumns && <th className="text-right py-4 px-6 font-semibold text-gray-700">البائع</th>}
                 <th className="text-right py-4 px-6 font-semibold text-gray-700">عدد المنتجات</th>
-                <th className="text-right py-4 px-6 font-semibold text-gray-700">طريقة الدفع</th>
+                {showOptionalColumns && <th className="text-right py-4 px-6 font-semibold text-gray-700">طريقة الدفع</th>}
                 <th className="text-right py-4 px-6 font-semibold text-gray-700">الإجمالي</th>
                 <th className="text-right py-4 px-6 font-semibold text-gray-700 bg-green-100">الربح</th>
                 <th className="text-right py-4 px-6 font-semibold text-gray-700">نسبة الربح</th>
-                <th className="text-center py-4 px-6 font-semibold text-gray-700">الحالة</th>
+                {showOptionalColumns && <th className="text-center py-4 px-6 font-semibold text-gray-700">الحالة</th>}
                 <th className="text-center py-4 px-6 font-semibold text-gray-700">الإجراءات</th>
               </tr>
             </thead>
             <tbody>
               {filteredSales.length === 0 ? (
                 <tr>
-                  <td colSpan={11} className="text-center py-8 text-gray-500">
+                  <td colSpan={showOptionalColumns ? 11 : 7} className="text-center py-8 text-gray-500">
                     لا توجد مبيعات مطابقة للبحث
                   </td>
                 </tr>
@@ -267,15 +280,17 @@ export const SalesList: React.FC = () => {
                   <tr key={sale.id} className="border-b border-gray-100 hover:bg-gray-50">
                     <td className="py-4 px-6 font-medium">{sale.sale_number}</td>
                     <td className="py-4 px-6">{formatDate(sale.sale_date)}</td>
-                    <td className="py-4 px-6">{sale.customer_name || 'عميل مباشر'}</td>
-                    <td className="py-4 px-6">{sale.created_by_name}</td>
+                    {showOptionalColumns && <td className="py-4 px-6">{sale.customer_name || 'عميل مباشر'}</td>}
+                    {showOptionalColumns && <td className="py-4 px-6">{sale.created_by_name}</td>}
                     <td className="py-4 px-6">{sale.items_count}</td>
-                    <td className="py-4 px-6">
-                      {sale.payment_method === 'cash' && 'نقدي'}
-                      {sale.payment_method === 'card' && 'بطاقة'}
-                      {sale.payment_method === 'bank_transfer' && 'تحويل بنكي'}
-                      {sale.payment_method === 'credit' && 'آجل'}
-                    </td>
+                    {showOptionalColumns && (
+                      <td className="py-4 px-6">
+                        {sale.payment_method === 'cash' && 'نقدي'}
+                        {sale.payment_method === 'card' && 'بطاقة'}
+                        {sale.payment_method === 'bank_transfer' && 'تحويل بنكي'}
+                        {sale.payment_method === 'credit' && 'آجل'}
+                      </td>
+                    )}
                     <td className="py-4 px-6 font-semibold">{formatCurrency(sale.final_total)}</td>
                     <td className="py-4 px-6 text-green-600 font-semibold bg-green-50">
                       {formatCurrency(sale.net_profit)}
@@ -283,9 +298,11 @@ export const SalesList: React.FC = () => {
                     <td className="py-4 px-6 text-green-600 font-semibold">
                       {sale.profit_percentage.toFixed(1)}%
                     </td>
-                    <td className="py-4 px-6 text-center">
-                      {getStatusBadge(sale.status)}
-                    </td>
+                    {showOptionalColumns && (
+                      <td className="py-4 px-6 text-center">
+                        {getStatusBadge(sale.status)}
+                      </td>
+                    )}
                     <td className="py-4 px-6">
                       <div className="flex justify-center space-x-2 space-x-reverse">
                         <Link

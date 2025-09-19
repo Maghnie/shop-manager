@@ -10,7 +10,7 @@ const InvoiceDetail: React.FC = () => {
   const saleIdNum = saleId ? parseInt(saleId) : undefined;
   
   const { invoice, loading, refetch, fetchBySale } = useInvoice(invoiceId);
-  const [printing, setPrinting] = useState(false);
+  // const [printing, setPrinting] = useState(false);
 
   // Load invoice by sale ID if provided
   React.useEffect(() => {
@@ -20,178 +20,178 @@ const InvoiceDetail: React.FC = () => {
     }
   }, [saleIdNum, invoiceId, fetchBySale, invoice, loading]);
 
-  const handlePrint = async () => {
-    if (!invoice) return;
+  // const handlePrint = async () => {
+  //   if (!invoice) return;
 
-    setPrinting(true);
-    try {
-      const printData = await InvoiceService.getInvoicePrintData(invoice.id!);
+  //   setPrinting(true);
+  //   try {
+  //     const printData = await InvoiceService.getInvoicePrintData(invoice.id!);
       
-      // Create print window
-      const printWindow = window.open('', '_blank');
-      if (printWindow) {
-        printWindow.document.write(generatePrintHTML(printData.invoice));
-        printWindow.document.close();
-        printWindow.print();
+  //     // Create print window
+  //     const printWindow = window.open('', '_blank');
+  //     if (printWindow) {
+  //       printWindow.document.write(generatePrintHTML(printData.invoice));
+  //       printWindow.document.close();
+  //       printWindow.print();
         
-        // Mark as printed
-        await InvoiceService.markInvoicePrinted(invoice.id!);
-        refetch();
-      }
-    } catch (error) {
-      alert('حدث خطأ أثناء الطباعة');
-      console.error(error);
-    } finally {
-      setPrinting(false);
-    }
-  };
+  //       // Mark as printed
+  //       await InvoiceService.markInvoicePrinted(invoice.id!);
+  //       refetch();
+  //     }
+  //   } catch (error) {
+  //     alert('حدث خطأ أثناء الطباعة');
+  //     console.error(error);
+  //   } finally {
+  //     setPrinting(false);
+  //   }
+  // };
 
-  const generatePrintHTML = (invoiceData: any) => {
-    const sale = invoiceData.sale_details;
+  // const generatePrintHTML = (invoiceData: any) => {
+  //   const sale = invoiceData.sale_details;
     
-    return `
-    <!DOCTYPE html>
-    <html dir="rtl">
-    <head>
-      <meta charset="utf-8">
-      <title>فاتورة ${invoiceData.invoice_number}</title>
-      <style>
-        body { 
-          font-family: Arial, sans-serif; 
-          margin: 20px; 
-          direction: rtl;
-          color: #333;
-        }
-        .header { 
-          text-align: center; 
-          border-bottom: 2px solid #333; 
-          padding-bottom: 20px; 
-          margin-bottom: 30px; 
-        }
-        .company-name { 
-          font-size: 24px; 
-          font-weight: bold; 
-          margin-bottom: 10px; 
-        }
-        .invoice-info { 
-          display: flex; 
-          justify-content: space-between; 
-          margin-bottom: 30px; 
-        }
-        .customer-info, .invoice-details { 
-          flex: 1; 
-        }
-        .customer-info { 
-          margin-left: 20px; 
-        }
-        .invoice-details { 
-          text-align: left; 
-        }
-        table { 
-          width: 100%; 
-          border-collapse: collapse; 
-          margin-bottom: 20px; 
-        }
-        th, td { 
-          border: 1px solid #ddd; 
-          padding: 12px; 
-          text-align: center; 
-        }
-        th { 
-          background-color: #f5f5f5; 
-          font-weight: bold; 
-        }
-        .totals { 
-          text-align: left; 
-          margin-top: 20px; 
-        }
-        .totals div { 
-          margin-bottom: 8px; 
-        }
-        .final-total { 
-          font-size: 18px; 
-          font-weight: bold; 
-          border-top: 2px solid #333; 
-          padding-top: 10px; 
-        }
-        .footer { 
-          text-align: center; 
-          margin-top: 40px; 
-          font-size: 12px; 
-          color: #666; 
-        }
-        @media print {
-          body { margin: 0; }
-          .no-print { display: none; }
-        }
-      </style>
-    </head>
-    <body>
-      <div class="header">
-        <div class="company-name">${invoiceData.company_name}</div>
-        <div>${invoiceData.company_address}</div>
-        <div>هاتف: ${invoiceData.company_phone}</div>
-        ${invoiceData.company_email ? `<div>البريد الإلكتروني: ${invoiceData.company_email}</div>` : ''}
-      </div>
+  //   return `
+  //   <!DOCTYPE html>
+  //   <html dir="rtl">
+  //   <head>
+  //     <meta charset="utf-8">
+  //     <title>فاتورة ${invoiceData.invoice_number}</title>
+  //     <style>
+  //       body { 
+  //         font-family: Arial, sans-serif; 
+  //         margin: 20px; 
+  //         direction: rtl;
+  //         color: #333;
+  //       }
+  //       .header { 
+  //         text-align: center; 
+  //         border-bottom: 2px solid #333; 
+  //         padding-bottom: 20px; 
+  //         margin-bottom: 30px; 
+  //       }
+  //       .company-name { 
+  //         font-size: 24px; 
+  //         font-weight: bold; 
+  //         margin-bottom: 10px; 
+  //       }
+  //       .invoice-info { 
+  //         display: flex; 
+  //         justify-content: space-between; 
+  //         margin-bottom: 30px; 
+  //       }
+  //       .customer-info, .invoice-details { 
+  //         flex: 1; 
+  //       }
+  //       .customer-info { 
+  //         margin-left: 20px; 
+  //       }
+  //       .invoice-details { 
+  //         text-align: left; 
+  //       }
+  //       table { 
+  //         width: 100%; 
+  //         border-collapse: collapse; 
+  //         margin-bottom: 20px; 
+  //       }
+  //       th, td { 
+  //         border: 1px solid #ddd; 
+  //         padding: 12px; 
+  //         text-align: center; 
+  //       }
+  //       th { 
+  //         background-color: #f5f5f5; 
+  //         font-weight: bold; 
+  //       }
+  //       .totals { 
+  //         text-align: left; 
+  //         margin-top: 20px; 
+  //       }
+  //       .totals div { 
+  //         margin-bottom: 8px; 
+  //       }
+  //       .final-total { 
+  //         font-size: 18px; 
+  //         font-weight: bold; 
+  //         border-top: 2px solid #333; 
+  //         padding-top: 10px; 
+  //       }
+  //       .footer { 
+  //         text-align: center; 
+  //         margin-top: 40px; 
+  //         font-size: 12px; 
+  //         color: #666; 
+  //       }
+  //       @media print {
+  //         body { margin: 0; }
+  //         .no-print { display: none; }
+  //       }
+  //     </style>
+  //   </head>
+  //   <body>
+  //     <div class="header">
+  //       <div class="company-name">${invoiceData.company_name}</div>
+  //       <div>${invoiceData.company_address}</div>
+  //       <div>هاتف: ${invoiceData.company_phone}</div>
+  //       ${invoiceData.company_email ? `<div>البريد الإلكتروني: ${invoiceData.company_email}</div>` : ''}
+  //     </div>
 
-      <div class="invoice-info">
-        <div class="customer-info">
-          <h3>معلومات العميل</h3>
-          <div><strong>الاسم:</strong> ${sale.customer_name || 'عميل مباشر'}</div>
-          ${sale.customer_phone ? `<div><strong>الهاتف:</strong> ${sale.customer_phone}</div>` : ''}
-          ${sale.customer_address ? `<div><strong>العنوان:</strong> ${sale.customer_address}</div>` : ''}
-        </div>
+  //     <div class="invoice-info">
+  //       <div class="customer-info">
+  //         <h3>معلومات العميل</h3>
+  //         <div><strong>الاسم:</strong> ${sale.customer_name || 'عميل مباشر'}</div>
+  //         ${sale.customer_phone ? `<div><strong>الهاتف:</strong> ${sale.customer_phone}</div>` : ''}
+  //         ${sale.customer_address ? `<div><strong>العنوان:</strong> ${sale.customer_address}</div>` : ''}
+  //       </div>
         
-        <div class="invoice-details">
-          <h3>تفاصيل الفاتورة</h3>
-          <div><strong>رقم الفاتورة:</strong> ${invoiceData.invoice_number}</div>
-          <div><strong>رقم البيعة:</strong> ${sale.sale_number}</div>
-          <div><strong>التاريخ:</strong> ${new Date(invoiceData.invoice_date).toLocaleDateString('ar-SA')}</div>
-          <div><strong>طريقة الدفع:</strong> ${getPaymentMethodText(sale.payment_method)}</div>
-        </div>
-      </div>
+  //       <div class="invoice-details">
+  //         <h3>تفاصيل الفاتورة</h3>
+  //         <div><strong>رقم الفاتورة:</strong> ${invoiceData.invoice_number}</div>
+  //         <div><strong>رقم البيعة:</strong> ${sale.sale_number}</div>
+  //         <div><strong>التاريخ:</strong> ${new Date(invoiceData.invoice_date).toLocaleDateString('ar-SA')}</div>
+  //         <div><strong>طريقة الدفع:</strong> ${getPaymentMethodText(sale.payment_method)}</div>
+  //       </div>
+  //     </div>
 
-      <table>
-        <thead>
-          <tr>
-            <th>المنتج</th>
-            <th>الكمية</th>
-            <th>سعر الوحدة</th>
-            <th>الإجمالي</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${sale.items.map((item: any) => `
-            <tr>
-              <td style="text-align: right;">
-                ${item.product_name_ar}
-                ${item.product_brand_ar ? `<br><small>${item.product_brand_ar}</small>` : ''}
-              </td>
-              <td>${item.quantity}</td>
-              <td>$${item.unit_price.toFixed(2)}</td>
-              <td>$${item.total_price.toFixed(2)}</td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
+  //     <table>
+  //       <thead>
+  //         <tr>
+  //           <th>المنتج</th>
+  //           <th>الكمية</th>
+  //           <th>سعر الوحدة</th>
+  //           <th>الإجمالي</th>
+  //         </tr>
+  //       </thead>
+  //       <tbody>
+  //         ${sale.items.map((item: any) => `
+  //           <tr>
+  //             <td style="text-align: right;">
+  //               ${item.product_name_ar}
+  //               ${item.product_brand_ar ? `<br><small>${item.product_brand_ar}</small>` : ''}
+  //             </td>
+  //             <td>${item.quantity}</td>
+  //             <td>$${item.unit_price.toFixed(2)}</td>
+  //             <td>$${item.total_price.toFixed(2)}</td>
+  //           </tr>
+  //         `).join('')}
+  //       </tbody>
+  //     </table>
 
-      <div class="totals">
-        <div>المجموع الفرعي: $${sale.subtotal.toFixed(2)}</div>
-        ${sale.discount_amount > 0 ? `<div>الخصم: -$${sale.discount_amount.toFixed(2)}</div>` : ''}
-        ${sale.tax_amount > 0 ? `<div>الضريبة: +$${sale.tax_amount.toFixed(2)}</div>` : ''}
-        <div class="final-total">الإجمالي النهائي: $${sale.final_total.toFixed(2)}</div>
-      </div>
+  //     <div class="totals">
+  //       <div>المجموع الفرعي: $${sale.subtotal.toFixed(2)}</div>
+  //       ${sale.discount_amount > 0 ? `<div>الخصم: -$${sale.discount_amount.toFixed(2)}</div>` : ''}
+  //       ${sale.tax_amount > 0 ? `<div>الضريبة: +$${sale.tax_amount.toFixed(2)}</div>` : ''}
+  //       <div class="final-total">الإجمالي النهائي: $${sale.final_total.toFixed(2)}</div>
+  //     </div>
 
-      ${sale.notes ? `<div style="margin-top: 20px;"><strong>ملاحظات:</strong> ${sale.notes}</div>` : ''}
+  //     ${sale.notes ? `<div style="margin-top: 20px;"><strong>ملاحظات:</strong> ${sale.notes}</div>` : ''}
 
-      <div class="footer">
-        <p>شكراً لتعاملكم معنا</p>
-        <p>تاريخ الطباعة: ${new Date().toLocaleDateString('ar-SA')} ${new Date().toLocaleTimeString('ar-SA')}</p>
-      </div>
-    </body>
-    </html>
-    `;
-  };
+  //     <div class="footer">
+  //       <p>شكراً لتعاملكم معنا</p>
+  //       <p>تاريخ الطباعة: ${new Date().toLocaleDateString('ar-SA')} ${new Date().toLocaleTimeString('ar-SA')}</p>
+  //     </div>
+  //   </body>
+  //   </html>
+  //   `;
+  // };
 
   const getPaymentMethodText = (method: string) => {
     const methods = {
@@ -271,14 +271,14 @@ const InvoiceDetail: React.FC = () => {
             <span>عرض البيعة</span>
           </Link>
 
-          <button
+          {/* <button
             onClick={handlePrint}
             disabled={printing}
             className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition duration-200 flex items-center space-x-2 space-x-reverse disabled:opacity-50"
           >
             <Printer className="w-4 h-4" />
             <span>{printing ? 'جاري الطباعة...' : 'طباعة'}</span>
-          </button>
+          </button> */}
         </div>
       </div>
 
@@ -303,12 +303,12 @@ const InvoiceDetail: React.FC = () => {
               <div><span className="font-medium">رقم البيعة:</span> {sale.sale_number}</div>
               <div><span className="font-medium">التاريخ:</span> {formatDate(invoice.invoice_date!)}</div>
               <div><span className="font-medium">طريقة الدفع:</span> {getPaymentMethodText(sale.payment_method)}</div>
-              {invoice.is_printed && (
+              {/* {invoice.is_printed && (
                 <div className="flex items-center space-x-2 space-x-reverse text-green-600">
                   <CheckSquare className="w-4 h-4" />
                   <span>تم طباعتها في {formatDate(invoice.printed_at!)}</span>
                 </div>
-              )}
+              )} */}
             </div>
           </div>
         </div>
@@ -387,14 +387,14 @@ const InvoiceDetail: React.FC = () => {
       </div>
 
       {/* Print Status */}
-      {invoice.is_printed && (
+      {/* {invoice.is_printed && (
         <div className="mt-6 bg-green-50 border border-green-200 rounded-lg p-4">
           <div className="flex items-center space-x-2 space-x-reverse text-green-800">
             <CheckSquare className="w-5 h-5" />
             <span className="font-medium">تم طباعة هذه الفاتورة في {formatDate(invoice.printed_at!)}</span>
           </div>
         </div>
-      )}
+      )} */}
     </div>
   );
 };

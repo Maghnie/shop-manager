@@ -317,7 +317,7 @@ export const SaleDetail: React.FC = () => {
           </table>
         </div>
 
-        <div className="mt-4 flex justify-end">
+        {/* <div className="mt-4 flex justify-end">
           <button
             onClick={() => setShowProfitDetails(!showProfitDetails)}
             className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition duration-200 flex items-center space-x-2 space-x-reverse"
@@ -325,7 +325,7 @@ export const SaleDetail: React.FC = () => {
             <DollarSign className="w-4 h-4" />
             <span>{showProfitDetails ? 'إخفاء' : 'عرض'} تفاصيل الربح</span>
           </button>
-        </div>
+        </div> */}
       </div>
 
       {/* Financial Summary */}
