@@ -154,15 +154,6 @@ export const SalesDashboard: React.FC = () => {
           color="text-purple-600"
           bgColor="bg-purple-100"
         />
-        
-        <StatCard
-          title="تنبيهات المخزون"
-          value={stats.overview.low_stock_alerts.toString()}
-          subtitle="منتجات بحاجة لإعادة تعبئة"
-          icon={<AlertTriangle className="w-6 h-6" />}
-          color="text-orange-600"
-          bgColor="bg-orange-100"
-        />
       </div>
 
       {/* Time Period Stats */}
@@ -307,11 +298,11 @@ export const SalesDashboard: React.FC = () => {
         </div>
 
         {/* Low Stock Alerts */}
-        <LowStockAlerts />
+        {/* <LowStockAlerts /> */}
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-white rounded-lg shadow p-6 mt-8">
+      {/* <div className="bg-white rounded-lg shadow p-6 mt-8">
         <h3 className="text-lg font-semibold text-gray-800 mb-6">الإجراءات السريعة</h3>
         
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -347,7 +338,7 @@ export const SalesDashboard: React.FC = () => {
             <div className="text-sm font-medium">إدارة المخزون</div>
           </Link>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };
