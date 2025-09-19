@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { AlertTriangle, Package, RefreshCw, Eye } from 'lucide-react';
+import { AlertTriangle, PackageCheck, RefreshCw, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLowStockAlert } from '@/hooks/useInventory';
 
@@ -64,7 +64,7 @@ const LowStockAlerts: React.FC = () => {
 
       {count === 0 ? (
         <div className="text-center py-8">
-          <Package className="w-12 h-12 text-green-500 mx-auto mb-4" />
+          <PackageCheck className="w-12 h-12 text-green-500 mx-auto mb-4" />
           <h4 className="text-lg font-medium text-gray-800 mb-2">جميع المنتجات متوفرة</h4>
           <p className="text-gray-600">لا توجد تنبيهات مخزون في الوقت الحالي</p>
         </div>

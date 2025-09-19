@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { AlertTriangle, Package, Edit2, Search, Filter, Save, X } from 'lucide-react';
 import { useInventory } from '@/hooks/useInventory';
 import type { Inventory } from '@/types/product';
+import toast from 'react-hot-toast';
 
 const InventoryList: React.FC = () => {
   const { inventory, loading, error, refetch, updateItem, setInventory} = useInventory();
@@ -56,9 +57,9 @@ const InventoryList: React.FC = () => {
     try {
       await updateItem(itemId, editValues);
       setEditingItem(null);
-      alert('تم تحديث المخزون بنجاح');
+      toast.success('تم تحديث المخزون بنجاح');
     } catch (error) {
-      alert('حدث خطأ أثناء تحديث المخزون');
+      toast.error('حدث خطأ أثناء تحديث المخزون');
       console.error(error);
     }
   };
