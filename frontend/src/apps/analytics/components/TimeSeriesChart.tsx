@@ -172,23 +172,6 @@ export const TimeSeriesChart: React.FC = () => {
           )}
         </div>
 
-        {/* Product Selector */}
-        <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-gray-700">المنتج:</label>
-          <select
-            value={selectedProductId || ''}
-            onChange={(e) => setSelectedProductId(e.target.value ? parseInt(e.target.value) : undefined)}
-            className="bg-white border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-48"
-          >
-            <option value="">جميع المنتجات</option>
-            {products.map(product => (
-              <option key={product.id} value={product.id}>
-                {product.type_name_ar} - {product.brand_name_ar || 'بدون علامة تجارية'}
-              </option>
-            ))}
-          </select>
-        </div>
-
         {/* Resolution Selector */}
         <div className="flex items-center gap-2">
           <label className="text-sm font-medium text-gray-700">الدقة الزمنية:</label>
@@ -204,6 +187,23 @@ export const TimeSeriesChart: React.FC = () => {
             <option value="yearly">سنوية</option>
           </select>
         </div>
+
+        {/* Product Selector */}
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-medium text-gray-700">المنتج:</label>
+          <select
+            value={selectedProductId || ''}
+            onChange={(e) => setSelectedProductId(e.target.value ? parseInt(e.target.value) : undefined)}
+            className="bg-white border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-48"
+          >
+            <option value="">جميع المنتجات</option>
+            {products.map(product => (
+              <option key={product.id} value={product.id}>
+                {product.type_name_ar} - {product.brand_name_ar || 'بدون علامة تجارية'}
+              </option>
+            ))}
+          </select>
+        </div>        
 
         {/* Action Buttons */}
         <div className="flex items-center gap-2">
