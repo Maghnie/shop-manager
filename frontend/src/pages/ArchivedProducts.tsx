@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import ProductTable from "@/components/products/ProductTable";
 import { fetchArchivedProducts, toggleProductArchive } from "@/services/productService";
 import { type Product } from "@/types/product";
+import toast from 'react-hot-toast';
 
 
 const ArchivedProducts: React.FC = () => {
@@ -31,10 +32,10 @@ const ArchivedProducts: React.FC = () => {
       if (response.data.status === 'success') {
         // Remove restored product from archived list
         setArchivedProducts(prev => prev.filter(p => p.id !== productId));
-        alert(response.data.message);
+        toast.success(response.data.message);
       }
     } catch (error) {
-      alert("حدث خطأ أثناء استعادة المنتج");
+      toast.error("حدث خطأ أثناء استعادة المنتج");
     }
   };
 

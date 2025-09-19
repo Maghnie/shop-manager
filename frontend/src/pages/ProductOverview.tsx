@@ -5,6 +5,7 @@ import { useProducts } from "@/hooks/useProducts";
 import ProductFilters from "@/components/products/ProductFilters";
 import ProductTable from "@/components/products/ProductTable";
 import { toggleProductArchive } from "@/services/productService";
+import toast from 'react-hot-toast';
 
 const ProductOverview: React.FC = () => {
   const { products, filteredProducts, productTypes, brands, materials, loading, filters, setFilters, setProducts } = useProducts();
@@ -25,11 +26,11 @@ const ProductOverview: React.FC = () => {
         // Success - remove product from list and hide any warnings
         setProducts(prev => prev.filter(p => p.id !== productId));
         setShowingStockWarning(null);
-        alert(response.data.message);
+        toast.success(response.data.message);
       }
     } catch (error) {
       console.error('Archive error:', error);
-      alert("حدث خطأ أثناء أرشفة المنتج");
+      toast.error("حدث خطأ أثناء أرشفة المنتج");
       setShowingStockWarning(null);
     }
   };
