@@ -300,45 +300,7 @@ export const SalesDashboard: React.FC = () => {
         {/* Low Stock Alerts */}
         {/* <LowStockAlerts /> */}
       </div>
-
-      {/* Quick Actions */}
-      {/* <div className="bg-white rounded-lg shadow p-6 mt-8">
-        <h3 className="text-lg font-semibold text-gray-800 mb-6">الإجراءات السريعة</h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Link
-            to="/sales/new"
-            className="bg-blue-500 text-white p-4 rounded-lg hover:bg-blue-600 transition duration-200 text-center"
-          >
-            <ShoppingCart className="w-6 h-6 mx-auto mb-2" />
-            <div className="text-sm font-medium">بيعة جديدة</div>
-          </Link>
-          
-          <Link
-            to="/sales/quick"
-            className="bg-green-500 text-white p-4 rounded-lg hover:bg-green-600 transition duration-200 text-center"
-          >
-            <Target className="w-6 h-6 mx-auto mb-2" />
-            <div className="text-sm font-medium">بيعة سريعة</div>
-          </Link>
-          
-          <Link
-            to="/sales"
-            className="bg-purple-500 text-white p-4 rounded-lg hover:bg-purple-600 transition duration-200 text-center"
-          >
-            <Users className="w-6 h-6 mx-auto mb-2" />
-            <div className="text-sm font-medium">إدارة المبيعات</div>
-          </Link>
-          
-          <Link
-            to="/inventory"
-            className="bg-orange-500 text-white p-4 rounded-lg hover:bg-orange-600 transition duration-200 text-center"
-          >
-            <AlertTriangle className="w-6 h-6 mx-auto mb-2" />
-            <div className="text-sm font-medium">إدارة المخزون</div>
-          </Link>
-        </div>
-      </div> */}
+      
     </div>
   );
 };

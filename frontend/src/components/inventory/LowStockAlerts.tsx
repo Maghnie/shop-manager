@@ -34,31 +34,31 @@ const LowStockAlerts: React.FC = () => {
     <div className="bg-white rounded-lg shadow-lg p-6">
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center space-x-2 space-x-reverse">
-          <AlertTriangle className="w-5 h-5 text-yellow-600" />
+          {/* <AlertTriangle className="w-5 h-5 text-yellow-600" /> */}
           <h3 className="text-lg font-semibold text-gray-800">تنبيهات المخزون المنخفض</h3>
-          {count > 0 && (
+          {/* {count > 0 && (
             <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-medium">
               {count}
             </span>
-          )}
+          )} */}
         </div>
         
         <div className="flex space-x-2 space-x-reverse">
-          <button
+          {/* <button
             onClick={refetch}
             className="bg-blue-500 text-white px-3 py-2 rounded-lg hover:bg-blue-600 transition duration-200 flex items-center space-x-1 space-x-reverse"
           >
             <RefreshCw className="w-4 h-4" />
             <span>تحديث</span>
-          </button>
+          </button> */}
           
-          <Link
+          {/* <Link
             to="/inventory"
             className="bg-gray-500 text-white px-3 py-2 rounded-lg hover:bg-gray-600 transition duration-200 flex items-center space-x-1 space-x-reverse"
           >
             <Eye className="w-4 h-4" />
             <span>عرض الكل</span>
-          </Link>
+          </Link> */}
         </div>
       </div>
 
@@ -75,7 +75,7 @@ const LowStockAlerts: React.FC = () => {
             <div className="flex items-center space-x-2 space-x-reverse text-yellow-800">
               <AlertTriangle className="w-5 h-5" />
               <span className="font-medium">
-                يوجد {count} منتج بحاجة إلى إعادة تعبئة المخزون
+                يوجد {count} {count === 1 ? 'منتج' : 'منتجات'} بحاجة إلى إعادة التعبئة 
               </span>
             </div>
           </div>
@@ -138,12 +138,12 @@ const LowStockAlerts: React.FC = () => {
               >
                 إدارة المخزون المنخفض
               </Link>
-              <Link
+              {/* <Link
                 to="/inventory?stock_status=out_of_stock"
                 className="flex-1 bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition duration-200 text-center"
               >
                 عرض المنتجات المنتهية
-              </Link>
+              </Link> */}
             </div>
           </div>
         </div>
