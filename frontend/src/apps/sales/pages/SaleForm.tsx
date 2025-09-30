@@ -1,13 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Save, X, Calculator, Settings } from 'lucide-react';
+import { Save, X, Settings } from 'lucide-react';
 import { SalesService } from '@/apps/sales/services/saleService';
 import { useAvailableProducts, useSale } from '@/apps/sales/hooks/useSales';
 import { useSalesCalculations } from '@/apps/sales/hooks/useSalesCalculations';
-import { CustomerSubform } from './CustomerSubform';
-import { ProductInput } from './ProductInput';
-import { SalesTable } from './SalesTable';
-import { SaleSummary } from './SaleSummary';
+import { ProductInput, SalesTable, SaleSummary} from '@/apps/sales/components';
 import type { Sale, SaleItem } from '@/types/product';
 import toast from 'react-hot-toast';
 

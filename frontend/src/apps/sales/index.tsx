@@ -1,4 +1,4 @@
-export { SalesDashboard, SalesList, SaleForm, SaleDetail, QuickSale } from './components';
+export { SalesDashboard, SalesList, SaleForm, SaleDetail, QuickSale } from './pages';
 export { useSales, useSale, useAvailableProducts, useSalesStats, useSalesCalculations } from './hooks';
 export { SalesService, InvoiceService, InventoryService } from './services';
 export type { 

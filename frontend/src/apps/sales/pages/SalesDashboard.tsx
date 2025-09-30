@@ -5,13 +5,10 @@ import {
   TrendingUp, 
   ShoppingCart, 
   Calendar,
-  Users,
-  Target,
   Award,
-  AlertTriangle
 } from 'lucide-react';
 import { useSalesStats } from '../hooks/useSales';
-import LowStockAlerts from '../../../components/inventory/LowStockAlerts';
+// import LowStockAlerts from '../../../components/inventory/LowStockAlerts';
 
 interface StatCardProps {
   title: string;

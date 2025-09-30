@@ -13,14 +13,14 @@ import ArchivedProducts from './pages/ArchivedProducts';
 import ProductForm from './components/ProductForm';
 import Navbar from './components/Navbar';
 
-// New sales components
+// Sales components
 import { SalesList, SaleForm, SaleDetail, QuickSale, SalesDashboard } from '@/apps/sales';
 
-// New invoice components
+// Invoice components
 import InvoicesList from './components/invoices/InvoicesList';
 import InvoiceDetail from './components/invoices/InvoiceDetail';
 
-// New inventory components
+// Inventory components
 import InventoryList from './components/inventory/InventoryList';
 
 import { AnalyticsDashboard } from '@/apps/analytics';

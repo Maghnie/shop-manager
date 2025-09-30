@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Edit, Trash2, CheckCircle, XCircle, Receipt, ArrowLeft, DollarSign } from 'lucide-react';
+import { Edit, Trash2, CheckCircle, XCircle, Receipt, ArrowLeft } from 'lucide-react';
 import { SalesService } from '@/apps/sales/services/saleService';
 import { useSale } from '@/apps/sales/hooks/useSales';
-import type { Sale } from '@/types/product';
 
 export const SaleDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();

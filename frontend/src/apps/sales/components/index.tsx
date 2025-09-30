@@ -1,5 +1,3 @@
-export { SalesDashboard } from './SalesDashboard';
-export { SalesList } from './SalesList';
-export { SaleForm } from './SaleForm';
-export { SaleDetail } from './SaleDetail';
-export { QuickSale } from './QuickSale';
+export { ProductInput } from './ProductInput';
+export { SalesTable } from './SalesTable';
+export { SaleSummary } from './SaleSummary';

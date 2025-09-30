@@ -37,7 +37,8 @@ export const QuickSale: React.FC = () => {
       const newItem: SaleItem = {
         product: productId,
         quantity: 1,
-        unit_price: product.selling_price
+        unit_price: product.selling_price,
+        cost_price: product.cost_price
       };
       setItems([...items, newItem]);
     }
