@@ -152,18 +152,6 @@ export const SalesList: React.FC = () => {
               {showOptionalColumns ? 'إخفاء التفاصيل الإضافية' : 'عرض التفاصيل الإضافية'}
             </span>
           </button>
-          <Link
-            to="/sales/new"
-            className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition duration-200 font-semibold"
-          >
-            بيعة جديدة +
-          </Link>
-          <Link
-            to="/sales/quick"
-            className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition duration-200 font-semibold"
-          >
-            بيعة سريعة
-          </Link>
         </div>
       </div>
 

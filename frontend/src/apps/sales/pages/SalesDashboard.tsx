@@ -8,7 +8,6 @@ import {
   Award,
 } from 'lucide-react';
 import { useSalesStats } from '../hooks/useSales';
-// import LowStockAlerts from '../../../components/inventory/LowStockAlerts';
 
 interface StatCardProps {
   title: string;
@@ -113,13 +112,7 @@ export const SalesDashboard: React.FC = () => {
             to="/sales/new"
             className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-200"
           >
-            بيعة جديدة
-          </Link>
-          <Link
-            to="/sales/quick"
-            className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition duration-200"
-          >
-            بيعة سريعة
+            بيعة جديدة +
           </Link>
         </div>
       </div>

@@ -6,7 +6,6 @@ import type {
   InvoiceListItem,
   Product,
   SalesStats,
-  QuickSaleResponse,
   Inventory,
   ApiResponse
 } from '@/types/product';
@@ -45,11 +44,6 @@ export class SalesService {
 
   static async cancelSale(id: number): Promise<{ message: string }> {
     const response = await axios.post(`sales/sales/${id}/cancel/`);
-    return response.data;
-  }
-
-  static async createQuickSale(saleData: Partial<Sale>): Promise<QuickSaleResponse> {
-    const response = await axios.post('sales/sales/quick/', saleData);
     return response.data;
   }
 

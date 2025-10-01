@@ -2,4 +2,3 @@ export { SalesDashboard } from './SalesDashboard';
 export { SalesList } from './SalesList';
 export { SaleForm } from './SaleForm';
 export { SaleDetail } from './SaleDetail';
-export { QuickSale } from './QuickSale';

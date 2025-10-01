@@ -8,9 +8,8 @@ router.register(r'sales', views.SaleViewSet)
 router.register(r'invoices', views.InvoiceViewSet)
 
 urlpatterns = [
-    # Sales stats and quick sale
+    # Sales stats
     path('sales/stats/', views.SaleStatsView.as_view(), name='sales-stats'),
-    path('sales/quick/', views.quick_sale, name='quick-sale'),
     path('sellers/dashboard/', views.sellers_dashboard, name='sellers-dashboard'),
 
     # Router URLs

@@ -22,8 +22,8 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
   // Sales dropdown items
   const salesItems = [
     { path: '/sales/dashboard', label: 'لوحة المبيعات' },
-    { path: '/sales', label: 'إدارة المبيعات' },
-    { path: '/sales/quick', label: 'بيعة سريعة' },
+    { path: '/sales', label: 'سجل المبيعات' },
+    { path: '/sales/new', label: 'بيعة جديدة' },
     { path: '/invoices', label: 'الفواتير' }
   ];
 

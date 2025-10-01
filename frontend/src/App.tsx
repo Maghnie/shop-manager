@@ -14,7 +14,7 @@ import ProductForm from './components/ProductForm';
 import Navbar from './components/Navbar';
 
 // Sales components
-import { SalesList, SaleForm, SaleDetail, QuickSale, SalesDashboard } from '@/apps/sales';
+import { SalesList, SaleForm, SaleDetail, SalesDashboard } from '@/apps/sales';
 
 // Invoice components
 import InvoicesList from './components/invoices/InvoicesList';
@@ -134,12 +134,6 @@ const App: React.FC = () => {
                 path="/sales/new"
                 element={
                   isAuthenticated ? <SaleForm /> : <Navigate to="/login" />
-                }
-              />
-              <Route
-                path="/sales/quick"
-                element={
-                  isAuthenticated ? <QuickSale /> : <Navigate to="/login" />
                 }
               />
               <Route

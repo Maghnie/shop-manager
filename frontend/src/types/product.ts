@@ -193,16 +193,6 @@ export interface SalesFilters {
   date_to: string;
 }
 
-export interface QuickSaleResponse {
-  success: boolean;
-  sale_id: number;
-  sale_number: string;
-  invoice_id: number;
-  invoice_number: string;
-  total: number;
-  profit: number;
-}
-
 export interface ApiResponse<T> {
   results?: T[];
   count?: number;
