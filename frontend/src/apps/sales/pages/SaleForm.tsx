@@ -4,7 +4,7 @@ import { Save, X, Settings, Plus, Minus, Trash2 } from 'lucide-react';
 import { SalesService } from '@/apps/sales/services/saleService';
 import { useAvailableProducts, useSale } from '@/apps/sales/hooks/useSales';
 import { useSalesCalculations } from '@/apps/sales/hooks/useSalesCalculations';
-import { ProductInput, SalesTable, SaleSummary} from '@/apps/sales/components';
+import { ProductInput, SaleSummary} from '@/apps/sales/components';
 import type { Sale, SaleItem } from '@/types/product';
 import toast from 'react-hot-toast';
 
@@ -269,7 +269,7 @@ export const SaleForm: React.FC = () => {
                       <div className="flex justify-between items-start mb-2">
                         <div className="flex-1">
                           <h4 className="font-medium text-gray-800 text-sm">{product.type_name_ar}</h4>
-                          <p className="text-xs text-gray-500">#{product.id}</p>
+                          <p className="text-xs text-gray-500">{product.brand_name_ar} - رقم {product.id}</p>
                         </div>
                         <span className="text-sm font-bold text-blue-600">${product.selling_price}</span>
                       </div>
@@ -322,7 +322,7 @@ export const SaleForm: React.FC = () => {
                       return (
                         <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-medium text-sm truncate">{product?.type_name_ar || `Product #${item.product}`}</h4>
+                            <h4 className="font-medium text-sm truncate">{product?.type_name_ar} {product?.brand_name_ar} - رقم {product?.id}</h4>
                             <p className="text-xs text-gray-500">${item.unit_price} × {item.quantity}</p>
                           </div>
 
