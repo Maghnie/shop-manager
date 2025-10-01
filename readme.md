@@ -3,7 +3,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)](https://typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)](https://nodejs.org/)
-[![CI](https://github.com/maghnie/shop-manager/actions/workflows/frontend.yml/badge.svg)](https://github.com/maghnie/shop-manager/actions/workflows/frontend.yml)
+[![CI](https://github.com/maghnie/shop-manager/actions/workflows/tests.yml/badge.svg)](https://github.com/maghnie/shop-manager/actions/workflows/tests.yml)
 [![Known Vulnerabilities](https://snyk.io/test/github/maghnie/shop-manager/badge.svg)](https://snyk.io/test/github/maghnie/shop-manager)
 [![Maintenance](https://img.shields.io/badge/Maintained-Yes-green)]()
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Maghnie/shop-manager)
