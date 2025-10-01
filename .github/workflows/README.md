@@ -19,8 +19,7 @@ Automatically runs all backend and frontend tests on every push and pull request
 **Frontend Tests:**
 - Sets up Node.js 20
 - Installs all npm dependencies
-- Runs all Vitest unit tests
-- Uploads coverage reports as artifacts
+- Runs all Vitest unit tests with coverage
 
 ### Triggers
 - ✅ Every push to any branch
@@ -114,6 +113,38 @@ The workflow automatically discovers and runs tests in new Django apps and front
 **Frontend:**
 - Add test files matching `**/*.test.ts` or `**/*.test.tsx`
 - Vitest will discover them automatically
+
+## Coverage Reporting
+
+The workflow generates test coverage reports for both backend and frontend:
+
+### Backend Coverage
+- Uses `coverage.py` to measure Django test coverage
+- Generates XML report: `backend/coverage-backend.xml`
+- Outputs coverage summary in CI logs
+
+### Frontend Coverage
+- Uses Vitest with v8 coverage provider
+- Generates reports in `frontend/coverage/`
+
+### Codecov Integration
+
+Coverage reports are automatically uploaded to Codecov for visualization and tracking over time.
+
+**Setup Steps:**
+
+1. **Create Codecov account**: Go to [codecov.io](https://codecov.io) and sign up with GitHub
+2. **Add your repository**: Click "Add Repository" and select `shop-manager`
+3. **Get upload token**: Copy the upload token from repository settings
+4. **Add GitHub Secret**:
+   - Go to your GitHub repository → Settings → Secrets and variables → Actions
+   - Click "New repository secret"
+   - Name: `CODECOV_TOKEN`
+   - Value: Paste the token from Codecov
+5. **Add badge to README**: Copy the badge markdown from Codecov dashboard:
+   ```markdown
+   [![codecov](https://codecov.io/gh/YOUR_USERNAME/shop-manager/branch/main/graph/badge.svg)](https://codecov.io/gh/YOUR_USERNAME/shop-manager)
+   ```
 
 ### Performance
 

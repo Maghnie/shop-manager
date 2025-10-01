@@ -1,4 +1,4 @@
-name: Run Tests
+name: Unit Tests
 
 on:
   push:
@@ -54,7 +54,9 @@ jobs:
         DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
         DEBUG: 'False'
       run: |
-        python manage.py test --parallel --keepdb
+        coverage run --source='.' manage.py test --parallel --keepdb
+        coverage xml -o coverage-backend.xml
+        coverage report
 
   frontend-tests:
     runs-on: ubuntu-latest
@@ -73,13 +75,15 @@ jobs:
       working-directory: ./frontend
       run: npm ci
 
-    - name: Run frontend unit tests
+    - name: Run frontend unit tests with coverage
       working-directory: ./frontend
-      run: npm run test:run
+      run: npm run test:coverage
 
-    - name: Upload coverage reports
-      if: always()
-      uses: actions/upload-artifact@v4
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
       with:
-        name: coverage-reports
-        path: frontend/coverage
+        files: ./backend/coverage-backend.xml,./frontend/coverage/coverage-final.json
+        flags: backend,frontend
+        token: ${{ secrets.CODECOV_TOKEN }}
+        fail_ci_if_error: false
+        verbose: true
