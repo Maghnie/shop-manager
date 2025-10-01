@@ -8,7 +8,7 @@ import { Toaster } from 'react-hot-toast';
 // Existing components
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
-import ProductList from './pages/ProductOverview';
+import ProductOverview from './pages/ProductOverview';
 import ArchivedProducts from './pages/ArchivedProducts';
 import ProductForm from './components/ProductForm';
 import Navbar from './components/Navbar';
@@ -95,7 +95,7 @@ const App: React.FC = () => {
               <Route
                 path="/products"
                 element={
-                  isAuthenticated ? <ProductList /> : <Navigate to="/login" />
+                  isAuthenticated ? <ProductOverview /> : <Navigate to="/login" />
                 }
               />
               <Route
