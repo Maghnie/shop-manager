@@ -133,13 +133,15 @@ class TimeSeriesAnalyticsView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
             
         except ValueError as e:
+            logger.warning(f'Date format error in TimeSeriesAnalyticsView: {str(e)}')
             return Response({
-                'error': f'خطأ في تنسيق التاريخ: {str(e)}'
+                'error': 'خطأ في تنسيق التاريخ. يرجى التحقق من صحة التواريخ المدخلة'
             }, status=status.HTTP_400_BAD_REQUEST)
-        
+
         except Exception as e:
+            logger.error(f'Unexpected error in TimeSeriesAnalyticsView: {str(e)}', exc_info=True)
             return Response({
-                'error': f'حدث خطأ في الخادم: {str(e)}'
+                'error': 'حدث خطأ في الخادم. يرجى المحاولة مرة أخرى لاحقاً'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -219,10 +221,11 @@ class BreakevenAnalysisView(APIView):
             serializer = BreakevenResponseSerializer(data)
             
             return Response(serializer.data, status=status.HTTP_200_OK)
-            
+
         except Exception as e:
+            logger.error(f'Unexpected error in BreakevenAnalysisView: {str(e)}', exc_info=True)
             return Response({
-                'error': f'حدث خطأ في الخادم: {str(e)}'
+                'error': 'حدث خطأ في الخادم. يرجى المحاولة مرة أخرى لاحقاً'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -329,8 +332,9 @@ class AnalyticsExportView(APIView):
             response['Access-Control-Expose-Headers'] = 'Content-Disposition'
             
             return response
-            
+
         except Exception as e:
+            logger.error(f'Export error in AnalyticsExportView: {str(e)}', exc_info=True)
             return Response({
-                'error': f'حدث خطأ أثناء التصدير: {str(e)}'
+                'error': 'حدث خطأ أثناء التصدير. يرجى المحاولة مرة أخرى لاحقاً'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

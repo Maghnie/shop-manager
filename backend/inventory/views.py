@@ -6,6 +6,9 @@ from rest_framework.permissions import AllowAny
 import django_filters
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import F
+import logging
+
+logger = logging.getLogger(__name__)
 
 from .models import (
     Product, ProductType, Brand, Material, Inventory
@@ -92,9 +95,10 @@ class ToggleProductArchiveView(APIView):
                 'message': 'المنتج غير موجود'
             }, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
+            logger.error(f'Error toggling product archive status: {str(e)}', exc_info=True)
             return Response({
                 'status': 'error',
-                'message': f'حدث خطأ: {str(e)}'
+                'message': 'حدث خطأ في الخادم. يرجى المحاولة مرة أخرى لاحقاً'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 class BrandListView(generics.ListCreateAPIView):
@@ -115,8 +119,9 @@ def product_reports(request):
             }
         })
     except Exception as e:
+        logger.error(f'Error generating product reports: {str(e)}', exc_info=True)
         return Response(
-            {'error': str(e)},
+            {'error': 'حدث خطأ في الخادم. يرجى المحاولة مرة أخرى لاحقاً'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         ) 
 
