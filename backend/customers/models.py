@@ -141,7 +141,7 @@ class Customer(models.Model):
     
     def get_total_spent(self):
         """Get total amount spent by this customer"""
-        from inventory.models import Sale
+        from sales.models import Sale
         total = 0
         for sale in Sale.objects.filter(customer=self, status='completed'):
             total += sale.final_total  
@@ -149,11 +149,11 @@ class Customer(models.Model):
     
     def get_purchase_count(self):
         """Get number of completed purchases"""
-        from inventory.models import Sale
+        from sales.models import Sale
         return Sale.objects.filter(customer=self, status='completed').count()
     
     def get_last_purchase_date(self):
         """Get date of last purchase"""
-        from inventory.models import Sale
+        from sales.models import Sale
         last_sale = Sale.objects.filter(customer=self, status='completed').first()
         return last_sale.sale_date if last_sale else None
