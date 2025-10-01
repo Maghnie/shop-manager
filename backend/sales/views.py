@@ -9,7 +9,7 @@ from django.db.models.functions import TruncDate, Coalesce
 from django.utils import timezone
 
 from rest_framework import generics, status, filters
-from rest_framework.decorators import api_view, action
+from rest_framework.decorators import api_view, action, permission_classes
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -389,6 +389,7 @@ def sellers_dashboard(request):
 
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def quick_sale(request):
     """Create a quick sale for walk-in customers"""
     try:
@@ -419,14 +420,24 @@ def quick_sale(request):
             # Auto-create invoice
             invoice = Invoice.objects.create(sale=sale)
 
+            # Debug: Check if properties work
+            try:
+                total = float(sale.final_total)
+                profit = float(sale.net_profit)
+            except Exception as prop_error:
+                return Response(
+                    {'error': f'Error calculating sale properties: {str(prop_error)}'},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+
             return Response({
                 'success': True,
                 'sale_id': sale.id,
                 'sale_number': sale.sale_number,
                 'invoice_id': invoice.id,
                 'invoice_number': invoice.invoice_number,
-                'total': float(sale.final_total),
-                'profit': float(sale.net_profit)
+                'total': total,
+                'profit': profit
             }, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -37,8 +37,7 @@ export const QuickSale: React.FC = () => {
       const newItem: SaleItem = {
         product: productId,
         quantity: 1,
-        unit_price: product.selling_price,
-        cost_price: product.cost_price
+        unit_price: product.selling_price
       };
       setItems([...items, newItem]);
     }
@@ -90,6 +89,7 @@ export const QuickSale: React.FC = () => {
         customer_name: customerName,
         payment_method: paymentMethod,
         discount_amount: discount,
+        tax_percentage: 0,
         items: items
       };
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Save, X, Settings } from 'lucide-react';
+import { Save, X, Settings, Plus, Minus, Trash2 } from 'lucide-react';
 import { SalesService } from '@/apps/sales/services/saleService';
 import { useAvailableProducts, useSale } from '@/apps/sales/hooks/useSales';
 import { useSalesCalculations } from '@/apps/sales/hooks/useSalesCalculations';
@@ -114,7 +114,6 @@ export const SaleForm: React.FC = () => {
         unit_price: product.selling_price,
         cost_price: product.cost_price
       };
-      console.log("while creating saleitem, cost price: ", product.cost_price)
       
       setFormData(prev => ({
         ...prev,
@@ -156,6 +155,10 @@ export const SaleForm: React.FC = () => {
       ...prev,
       items: prev.items?.filter((_, i) => i !== index) || []
     }));
+  }, []);
+
+  const clearAllItems = useCallback(() => {
+    setFormData(prev => ({ ...prev, items: [] }));
   }, []);
 
   const validateForm = (): string[] => {
@@ -236,44 +239,170 @@ export const SaleForm: React.FC = () => {
               <Settings className="w-4 h-4" />
               <span>{showOptionalInfo ? 'إخفاء' : 'عرض'} المعلومات الاختيارية</span>
             </button>
-            {/* <button
-              type="button"
-              onClick={() => setShowProfitInfo(!showProfitInfo)}
-              className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition duration-200 flex items-center space-x-2 space-x-reverse"
-            >
-              <Calculator className="w-4 h-4" />
-              <span>{showProfitInfo ? 'إخفاء' : 'عرض'} معلومات الربح</span>
-            </button> */}
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-12">                 
-          {/* Product Input */}
-          <div className="bg-gray-50 rounded-lg p-6">
-            <h3 className="text-xl font-semibold text-gray-800 mb-6">إضافة المنتجات</h3>
-            <ProductInput
-              products={products}
-              onAddProduct={addProductToSale}
-            />
-          </div>
-
-          {/* Sales Table */}
-          <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <h3 className="text-xl font-semibold text-gray-800 mb-6">تفاصيل المنتجات</h3>
-            {formData.items && formData.items.length > 0 ? (
-              <SalesTable
-                items={formData.items}
-                products={products}
-                onUpdateQuantity={updateItemQuantity}
-                onUpdatePrice={updateItemPrice}
-                onRemoveItem={removeItem}
-              />
-            ) : (
-              <div className="text-center py-12 text-gray-500">
-                <p className="text-lg">لم يتم إضافة أي منتجات بعد</p>
-                <p className="text-sm mt-2">ابدأ بإضافة المنتجات من الأعلى</p>
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Two Column Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Left Column: Product Selection */}
+            <div className="space-y-6">
+              {/* Product Combobox */}
+              <div className="bg-gray-50 rounded-lg p-6">
+                <h3 className="text-xl font-semibold text-gray-800 mb-6">إضافة المنتجات</h3>
+                <ProductInput
+                  products={products}
+                  onAddProduct={addProductToSale}
+                />
               </div>
-            )}
+
+              {/* Quick Product Selection Buttons */}
+              <div className="bg-white border border-gray-200 rounded-lg p-6">
+                <h3 className="text-xl font-semibold text-gray-800 mb-6">اختيار سريع</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {products.slice(0, 10).map(product => (
+                    <div
+                      key={product.id}
+                      onClick={() => addProductToSale(product.id, 1)}
+                      className="p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-blue-50 hover:border-blue-300 transition-colors"
+                    >
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="flex-1">
+                          <h4 className="font-medium text-gray-800 text-sm">{product.type_name_ar}</h4>
+                          <p className="text-xs text-gray-500">#{product.id}</p>
+                        </div>
+                        <span className="text-sm font-bold text-blue-600">${product.selling_price}</span>
+                      </div>
+                      <div className="flex justify-between items-center text-xs text-gray-500 mb-2">
+                        <span>المتوفر: {product.available_stock}</span>
+                        {product.is_low_stock && (
+                          <span className="text-red-500">⚠️</span>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        className="w-full bg-blue-500 text-white py-1.5 rounded hover:bg-blue-600 transition-colors flex items-center justify-center space-x-1 space-x-reverse text-xs"
+                      >
+                        <Plus className="w-3 h-3" />
+                        <span>إضافة</span>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                {products.length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    لا توجد منتجات متاحة
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Right Column: Basket and Summary */}
+            <div className="space-y-6">
+              {/* Basket */}
+              <div className="bg-white border border-gray-200 rounded-lg p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-xl font-semibold text-gray-800">السلة ({formData.items?.length || 0})</h3>
+                  {formData.items && formData.items.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={clearAllItems}
+                      className="text-red-500 hover:text-red-700 text-sm flex items-center space-x-1 space-x-reverse"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      <span>مسح الكل</span>
+                    </button>
+                  )}
+                </div>
+
+                <div className="space-y-3">
+                  {formData.items && formData.items.length > 0 ? (
+                    formData.items.map((item, index) => {
+                      const product = products.find(p => p.id === item.product);
+                      return (
+                        <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-medium text-sm truncate">{product?.type_name_ar || `Product #${item.product}`}</h4>
+                            <p className="text-xs text-gray-500">${item.unit_price} × {item.quantity}</p>
+                          </div>
+
+                          <div className="flex items-center space-x-2 space-x-reverse ml-2">
+                            <button
+                              type="button"
+                              onClick={() => updateItemQuantity(index, item.quantity - 1)}
+                              className="w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
+                            >
+                              <Minus className="w-4 h-4" />
+                            </button>
+
+                            <span className="w-8 text-center font-medium">{item.quantity}</span>
+
+                            <button
+                              type="button"
+                              onClick={() => updateItemQuantity(index, item.quantity + 1)}
+                              className="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center hover:bg-green-600 transition-colors"
+                              disabled={product && item.quantity >= product.available_stock}
+                            >
+                              <Plus className="w-4 h-4" />
+                            </button>
+
+                            <div className="ml-4 text-right min-w-[80px]">
+                              <span className="font-semibold text-sm">${(item.quantity * item.unit_price).toFixed(2)}</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div className="text-center py-12 text-gray-500">
+                      <p className="text-lg">السلة فارغة</p>
+                      <p className="text-sm mt-2">ابدأ بإضافة المنتجات</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Summary */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                <h3 className="text-xl font-semibold text-gray-800 mb-6">ملخص البيعة</h3>
+                {formData.items && formData.items.length > 0 ? (
+                  <SaleSummary
+                    subtotal={subtotal}
+                    discountAmount={discountAmount}
+                    taxAmount={taxAmount}
+                    finalTotal={finalTotal}
+                    totalCost={totalCost}
+                    netProfit={netProfit}
+                    profitPercentage={profitPercentage}
+                    showProfitInfo={showProfitInfo}
+                  />
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <p className="text-lg">سيظهر ملخص البيعة عند إضافة المنتجات</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Actions */}
+              <div className="flex justify-end space-x-4 space-x-reverse">
+                <button
+                  type="button"
+                  onClick={() => navigate('/sales')}
+                  className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition duration-200 flex items-center space-x-2 space-x-reverse"
+                >
+                  <X className="w-4 h-4" />
+                  <span>إلغاء</span>
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving || !formData.items?.length}
+                  className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition duration-200 flex items-center space-x-2 space-x-reverse disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{saving ? 'جاري الحفظ...' : (isEditing ? 'تحديث البيعة' : 'حفظ البيعة')}</span>
+                </button>
+              </div>
+            </div>
           </div>
 
           {/* Optional Information Section */}
@@ -391,47 +520,6 @@ export const SaleForm: React.FC = () => {
               </div>
             </div>
           )}
-
-          {/* Summary */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-            <h3 className="text-xl font-semibold text-gray-800 mb-6">ملخص البيعة</h3>
-            {formData.items && formData.items.length > 0 ? (
-              <SaleSummary
-                subtotal={subtotal}
-                discountAmount={discountAmount}
-                taxAmount={taxAmount}
-                finalTotal={finalTotal}
-                totalCost={totalCost}
-                netProfit={netProfit}
-                profitPercentage={profitPercentage}
-                showProfitInfo={showProfitInfo}
-              />
-            ) : (
-              <div className="text-center py-8 text-gray-500">
-                <p className="text-lg">سيظهر ملخص البيعة عند إضافة المنتجات</p>
-              </div>
-            )}
-          </div>         
-
-          {/* Actions */}
-          <div className="flex justify-end space-x-6 space-x-reverse pt-4">
-            <button
-              type="button"
-              onClick={() => navigate('/sales')}
-              className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition duration-200 flex items-center space-x-2 space-x-reverse"
-            >
-              <X className="w-4 h-4" />
-              <span>إلغاء</span>
-            </button>
-            <button
-              type="submit"
-              disabled={saving || !formData.items?.length}
-              className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition duration-200 flex items-center space-x-2 space-x-reverse disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Save className="w-4 h-4" />
-              <span>{saving ? 'جاري الحفظ...' : (isEditing ? 'تحديث البيعة' : 'حفظ البيعة')}</span>
-            </button>
-          </div>
         </form>
       </div>
     </div>

@@ -43,7 +43,7 @@ export const SaleSummary: React.FC<SaleSummaryProps> = ({
             <span>الضريبة:</span>
             <span>+{formatCurrency(taxAmount)}</span>
           </div>
-          <div className="flex justify-between font-bold text-lg border-t pt-2">
+          <div className="flex justify-between font-bold text-lg border-t pt-2 gap-8">
             <span>الإجمالي النهائي:</span>
             <span>{formatCurrency(finalTotal)}</span>
           </div>
