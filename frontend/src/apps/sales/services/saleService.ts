@@ -52,14 +52,6 @@ export class SalesService {
     return response.data;
   }
 
-  static async getSellersDashboard(dateFrom?: string, dateTo?: string): Promise<any> {
-    const params = new URLSearchParams();
-    if (dateFrom) params.append('date_from', dateFrom);
-    if (dateTo) params.append('date_to', dateTo);
-    const response = await axios.get(`sales/sellers/dashboard/?${params.toString()}`);
-    return response.data;
-  }
-
   static async getAvailableProducts(): Promise<Product[]> {
     const response = await axios.get('inventory/products/available/');
     return response.data.products;

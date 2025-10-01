@@ -10,7 +10,6 @@ router.register(r'invoices', views.InvoiceViewSet)
 urlpatterns = [
     # Sales stats
     path('sales/stats/', views.SaleStatsView.as_view(), name='sales-stats'),
-    path('sellers/dashboard/', views.sellers_dashboard, name='sellers-dashboard'),
 
     # Router URLs
     path('', include(router.urls)),
