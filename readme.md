@@ -6,24 +6,45 @@
 [![CI](https://github.com/maghnie/shop-manager/actions/workflows/frontend.yml/badge.svg)](https://github.com/maghnie/shop-manager/actions/workflows/frontend.yml)
 [![Known Vulnerabilities](https://snyk.io/test/github/maghnie/shop-manager/badge.svg)](https://snyk.io/test/github/maghnie/shop-manager)
 [![Maintenance](https://img.shields.io/badge/Maintained-Yes-green)]()
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Maghnie/shop-manager)
 
 
-# Inventory Management System
+# Shop Management System
 
-A modern, responsive inventory management application built with Django (backend) and React + Vite + TS (frontend), designed specifically for shops that need Arabic RTL support.
+This is a product, inventory, sales, invoice, and analytics management app, specifically designed for shops that need:
+- A simple UI and a powerful backend
+- Arabic RTL support
+- Highly customizable features
+  
+## Features
 
-## 🌟 Features
-
-- **Modern UI**: Clean, intuitive Arabic interface with RTL support
+- **Modern UI**: Arabic interface with RTL support
 - **Product Management**: Add, edit, delete, and search products
-- **Advanced Filtering**: Search by type, brand, material, and tags
-- **Profit Analytics**: Automatic profit calculations and reporting
+- **Inventory Management**: Keep track of stock levels, get automatic alerts for different thresholds
+- **Sales & Invoice Management**: Add sales with real-time discount and profit calculations, generate partial and complete invoices
+- **Customer Management**: Create and attach customer profiles per sale
+- **Advanced Filtering**: Look up product information by type, brand, material, and tags
+- **Product & Sales Analytics**: Automatic cost, revenue, and profit calculations and reporting
 - **Interactive Charts**: Export-ready charts and visualizations
-- **Responsive Design**: Works perfectly on desktop and mobile
-- **Secure Authentication**: Built-in user authentication system
 - **Docker Deployment**: Easy containerized deployment
 
-## 🛠 Technology Stack
+## 📈 Reports & Analytics
+
+- **Top Profit Products**: By dollar amount and percentage
+- **Lowest Profit Analysis**: Identify products needing attention
+- **Summary Statistics**: Average profit, totals, and trends
+- **Total Revenue Time Series**: Quantify patterns and seasonal effects via daily, weekly, monthly, and yearly reporting
+- **Revenue-per-hour Heatmap**: Identify peak sales hours
+- **Year-over-year, Month-over-month Analysis**: Compare performance metrics over different time intervals
+
+## 🌐 Localization
+
+- Native Arabic support
+- RTL layout optimization
+- Currency formatting (USD)
+- Date/time localization (🇱🇧)
+
+## Tech Stack
 
 - **Backend**: Django 4.2, Django REST Framework
 - **Frontend**: React 18, Tailwind CSS
@@ -31,7 +52,7 @@ A modern, responsive inventory management application built with Django (backend
 - **Charts**: Chart.js
 - **Deployment**: Docker & Docker Compose
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Docker and Docker Compose installed
@@ -57,196 +78,12 @@ A modern, responsive inventory management application built with Django (backend
    - Admin Panel: http://localhost:8000/admin
    - Default login: `admin` / `admin123`
 
-## 📊 Product Features
-
-### Product Fields
-- Type (required)
-- Brand (optional)
-- Cost Price (required)
-- Selling Price (required)
-- Size (optional)
-- Weight (optional)
-- Material (optional)
-- Searchable Tags (optional)
-
-### Automated Calculations
-- Profit Amount ($)
-- Profit Percentage (%)
-- Real-time profit preview in forms
-
-## 📈 Reports & Analytics
-
-- **Top Profit Products**: By dollar amount and percentage
-- **Lowest Profit Analysis**: Identify products needing attention
-- **Interactive Charts**: Bar charts, pie charts, and line graphs
-- **Export Functionality**: Download charts as high-quality PNG
-- **Summary Statistics**: Average profit, totals, and trends
-
-## 🔧 Management Commands
-
-```bash
-# Start the application
-./start.sh
-
-# Stop the application
-./stop.sh
-
-# Create database backup
-./backup.sh
-
-# Restore from backup
-./restore.sh backup_file.sql
-
-# View logs
-docker-compose logs -f
-
-# Access Django shell
-docker-compose exec web python manage.py shell
-```
-
-## 🎨 Customization
-
-### Adding New Product Types/Brands/Materials
-1. Access Django Admin: http://localhost:8000/admin
-2. Navigate to the respective section
-3. Add new entries with both Arabic and English names
-
-### Modifying Sample Data
-Edit the management command:
-```bash
-docker-compose exec web python manage.py load_sample_data
-```
-
-## 🔒 Security Features
-
-- Token-based authentication
-- CORS protection
-- Input validation and sanitization
-- SQL injection protection
-- XSS protection
-
-## 📱 Mobile Support
-
-- Fully responsive design
-- Touch-friendly interface
-- Optimized for Arabic RTL layout
-- Fast loading on mobile networks
-
-## 🌐 Localization
-
-- Native Arabic support
-- RTL layout optimization
-- Currency formatting (USD)
-- Date/time localization
-
-## 🔄 Backup & Recovery
-
-Automated backup system included:
-- Database backups with timestamps
-- Easy restore functionality
-- Data migration support
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-**Port conflicts:**
-```bash
-# Stop conflicting services
-sudo lsof -i :8000
-sudo kill -9 PID
-```
-
-**Database connection issues:**
-```bash
-# Restart services
-docker-compose restart
-```
-
-**Frontend build issues:**
-```bash
-# Clear cache and rebuild
-docker-compose build --no-cache web
-```
-
-## 📝 API Documentation
-
-### Endpoints
-- `GET /api/products/` - List products
-- `POST /api/products/` - Create product
-- `GET /api/products/{id}/` - Get product details
-- `PUT /api/products/{id}/` - Update product
-- `DELETE /api/products/{id}/` - Delete product
-- `GET /api/reports/` - Get profit reports
-
-### Authentication
-```bash
-# Get token
-curl -X POST http://localhost:8000/api/auth/login/ \
-  -H "Content-Type: application/json" \
-  -d '{"username": "admin", "password": "admin123"}'
-
-# Use token
-curl -H "Authorization: Token your-token-here" \
-  http://localhost:8000/api/products/
-```
-
 ## 🤝 Contributing
 
 1. Fork the repository
 2. Create feature branch: `git checkout -b feature-name`
-3. Commit changes: `git commit -am 'Add feature'`
+3. Commit changes: `git commit -am 'feat: add feature'` (In this house, we obey the laws of [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/))
 4. Push to branch: `git push origin feature-name`
 5. Submit pull request
 
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 🆘 Support
-
-For support and questions:
-- Create an issue on GitHub
-- Check the troubleshooting section
-- Review Docker logs: `docker-compose logs`
-
-## 🎯 Roadmap
-
-- [ ] Real-time inventory updates
-- [ ] Barcode scanning support
-- [ ] Multi-currency support
-- [ ] Advanced reporting features
-- [ ] Mobile app development
-- [ ] Multi-store support
-
----
-
-**Built with ❤️ for small business owners**
-
-## Getting started for devs
-
-1. python -m venv venv
-1. venv/Scripts/activate
-1. py -m pip install Django
-1. pip install psycopg2-binary --only-binary :all:
-1. pip install python-dotenv
-1. django-admin startproject backend
-### frontend setup
-1. cd frontend
-1. npm install
-1. npm run dev
-1. npm install -D vitest
-1. npm install lucide-react
-1. npm install @types/node --save-dev
-1. npm install -D @playwright/test
-1. npx playwright install
-1. Install MSW CLI globally for easier setup: npm install -g msw
-1. After installing MSW, you'll need to initialize it for browser mocking: npx msw init public/ --save
-
-# For power  users
-
-## Run tests
-
-1. `cd frontend`
-1. `npm run tests`
 
