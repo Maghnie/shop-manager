@@ -8,6 +8,7 @@ class CustomerSerializer(serializers.ModelSerializer):
     # Read-only computed fields
     display_name = serializers.CharField(read_only=True)
     full_contact = serializers.CharField(read_only=True)
+    total_spent = serializers.SerializerMethodField()
     total_purchases = serializers.SerializerMethodField()
     purchase_count = serializers.SerializerMethodField()
     last_purchase_date = serializers.SerializerMethodField()
