@@ -10,7 +10,7 @@ env_file_loaded = load_dotenv(BASE_DIR.parent / '.env')
 if not env_file_loaded:
     print("Did not find env file - using default values.")
 
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-change-this-key-in-production')
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', '*']
