@@ -64,6 +64,13 @@ class SaleSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['sale_number', 'created_by', 'created_at', 'updated_at']
 
+    def validate(self, data):
+        """Validate that sale has at least one item"""
+        items = data.get('items', [])
+        if not items or len(items) == 0:
+            raise serializers.ValidationError({'items': 'يجب إضافة منتج واحد على الأقل'})
+        return data
+
     @transaction.atomic
     def create(self, validated_data):
         """Create sale with items"""

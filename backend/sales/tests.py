@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 from rest_framework import status
 
-from inventory.models import Product, ProductType, ProductBrand, Inventory
+from inventory.models import Product, ProductType, Brand, Inventory
 from sales.models import Sale, SaleItem, Invoice
 
 User = get_user_model()
@@ -25,7 +25,7 @@ class SaleModelTestCase(TestCase):
             name_en='Test Type',
             name_ar='نوع اختبار'
         )
-        self.brand = ProductBrand.objects.create(
+        self.brand = Brand.objects.create(
             name_en='Test Brand',
             name_ar='علامة تجارية اختبارية'
         )
@@ -39,11 +39,10 @@ class SaleModelTestCase(TestCase):
             size='M',
             created_by=self.user
         )
-        Inventory.objects.create(
-            product=self.product1,
-            quantity_in_stock=100,
-            minimum_stock_level=10
-        )
+        # Update the auto-created inventory record
+        self.product1.inventory.quantity_in_stock = 100
+        self.product1.inventory.minimum_stock_level = 10
+        self.product1.inventory.save()
 
         self.product2 = Product.objects.create(
             type=self.product_type,
@@ -53,11 +52,10 @@ class SaleModelTestCase(TestCase):
             size='L',
             created_by=self.user
         )
-        Inventory.objects.create(
-            product=self.product2,
-            quantity_in_stock=50,
-            minimum_stock_level=5
-        )
+        # Update the auto-created inventory record
+        self.product2.inventory.quantity_in_stock = 50
+        self.product2.inventory.minimum_stock_level = 5
+        self.product2.inventory.save()
 
     def test_sale_calculations_no_discount_no_tax(self):
         """
@@ -278,7 +276,7 @@ class SaleAPITestCase(TestCase):
             name_en='Test Type',
             name_ar='نوع اختبار'
         )
-        self.brand = ProductBrand.objects.create(
+        self.brand = Brand.objects.create(
             name_en='Test Brand',
             name_ar='علامة تجارية اختبارية'
         )
@@ -291,11 +289,11 @@ class SaleAPITestCase(TestCase):
             size='M',
             created_by=self.user
         )
-        self.inventory = Inventory.objects.create(
-            product=self.product,
-            quantity_in_stock=100,
-            minimum_stock_level=10
-        )
+        # Update the auto-created inventory record
+        self.inventory = self.product.inventory
+        self.inventory.quantity_in_stock = 100
+        self.inventory.minimum_stock_level = 10
+        self.inventory.save()
 
     def test_create_sale_without_items_fails(self):
         """
@@ -338,7 +336,8 @@ class SaleAPITestCase(TestCase):
               - Sale record created in database
               - Sale has 1 item
               - Inventory reduced by 5 (100 -> 95)
-              - Sale status is 'pending'
+              - Payment method is 'cash'
+              - Sale status is 'completed' (cash sales are immediately completed)
 
         This tests the core sale creation workflow including inventory updates.
         """
@@ -374,8 +373,9 @@ class SaleAPITestCase(TestCase):
         self.inventory.refresh_from_db()
         self.assertEqual(self.inventory.quantity_in_stock, initial_stock - 5)
 
-        # Verify sale status
-        self.assertEqual(sale.status, 'pending')
+        # Verify payment method and sale status (cash sales are completed immediately)
+        self.assertEqual(sale.payment_method, 'cash')
+        self.assertEqual(sale.status, 'completed')
 
     def test_create_sale_exceeding_stock_fails(self):
         """
@@ -553,6 +553,10 @@ class SaleItemTestCase(TestCase):
             size='M',
             created_by=self.user
         )
+        # Update the auto-created inventory record
+        self.product.inventory.quantity_in_stock = 100
+        self.product.inventory.minimum_stock_level = 10
+        self.product.inventory.save()
 
         self.sale = Sale.objects.create(
             customer_name='Test Customer',
