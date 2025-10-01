@@ -18,7 +18,6 @@ export const SaleForm: React.FC = () => {
   const { sale, loading: saleLoading } = useSale(id ? parseInt(id) : undefined);
   
   const [showOptionalInfo, setShowOptionalInfo] = useState(false);
-  const [showProfitInfo, setShowProfitInfo] = useState(true);
   const [saving, setSaving] = useState(false);
   
   const [formData, setFormData] = useState<Partial<Sale>>({
@@ -130,25 +129,16 @@ export const SaleForm: React.FC = () => {
 
     const productId = formData.items?.[index]?.product;
     if (!productId) return;
-    
+
     const { quantity: finalQuantity } = validateAndCapQuantity(productId, quantity);
 
     setFormData(prev => ({
       ...prev,
-      items: prev.items?.map((item, i) => 
+      items: prev.items?.map((item, i) =>
         i === index ? { ...item, quantity: finalQuantity } : item
       ) || []
     }));
   }, [[products, formData.items, validateAndCapQuantity]]);
-
-  const updateItemPrice = useCallback((index: number, price: number) => {
-    setFormData(prev => ({
-      ...prev,
-      items: prev.items?.map((item, i) => 
-        i === index ? { ...item, unit_price: price } : item
-      ) || []
-    }));
-  }, []);
 
   const removeItem = useCallback((index: number) => {
     setFormData(prev => ({
@@ -374,7 +364,6 @@ export const SaleForm: React.FC = () => {
                     totalCost={totalCost}
                     netProfit={netProfit}
                     profitPercentage={profitPercentage}
-                    showProfitInfo={showProfitInfo}
                   />
                 ) : (
                   <div className="text-center py-8 text-gray-500">

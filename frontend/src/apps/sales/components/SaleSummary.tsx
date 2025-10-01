@@ -8,7 +8,6 @@ interface SaleSummaryProps {
   totalCost: number;
   netProfit: number;
   profitPercentage: number;
-  showProfitInfo: boolean;
 }
 
 export const SaleSummary: React.FC<SaleSummaryProps> = ({
@@ -18,8 +17,7 @@ export const SaleSummary: React.FC<SaleSummaryProps> = ({
   finalTotal,
   totalCost,
   netProfit,
-  profitPercentage,
-  showProfitInfo
+  profitPercentage
 }) => {
   const formatCurrency = (amount: number) => {
     return isNaN(amount) ? '—' : `$${amount.toFixed(2)}`;
@@ -49,27 +47,25 @@ export const SaleSummary: React.FC<SaleSummaryProps> = ({
           </div>
         </div>
 
-        {showProfitInfo && (
-          <div className="space-y-2 bg-green-50 p-4 rounded-lg">
-            <h4 className="font-semibold text-green-800 mb-2">معلومات الربح</h4>
-            <div className="flex justify-between text-sm">
-              <span>إجمالي التكلفة:</span>
-              <span>{formatCurrency(totalCost)}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span>صافي الربح:</span>
-              <span className={`font-semibold ${netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {formatCurrency(netProfit)}
-              </span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span>نسبة الربح:</span>
-              <span className={`font-semibold ${profitPercentage >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {profitPercentage.toFixed(1)}%
-              </span>
-            </div>
+        <div className="space-y-2 bg-green-50 p-4 rounded-lg">
+          <h4 className="font-semibold text-green-800 mb-2">معلومات الربح</h4>
+          <div className="flex justify-between text-sm">
+            <span>إجمالي التكلفة:</span>
+            <span>{formatCurrency(totalCost)}</span>
           </div>
-        )}
+          <div className="flex justify-between text-sm">
+            <span>صافي الربح:</span>
+            <span className={`font-semibold ${netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {formatCurrency(netProfit)}
+            </span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span>نسبة الربح:</span>
+            <span className={`font-semibold ${profitPercentage >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {profitPercentage.toFixed(1)}%
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   );
