@@ -58,6 +58,15 @@ jobs:
         coverage xml -o coverage-backend.xml
         coverage report
 
+    - name: Upload backend coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        files: ./backend/coverage-backend.xml
+        flags: backend
+        token: ${{ secrets.CODECOV_TOKEN }}
+        fail_ci_if_error: false
+        verbose: true
+
   frontend-tests:
     runs-on: ubuntu-latest
 
@@ -79,11 +88,11 @@ jobs:
       working-directory: ./frontend
       run: npm run test:coverage
 
-    - name: Upload coverage to Codecov
+    - name: Upload frontend coverage to Codecov
       uses: codecov/codecov-action@v4
       with:
-        files: ./backend/coverage-backend.xml,./frontend/coverage/coverage-final.json
-        flags: backend,frontend
+        files: ./frontend/coverage/coverage-final.json
+        flags: frontend
         token: ${{ secrets.CODECOV_TOKEN }}
         fail_ci_if_error: false
         verbose: true
