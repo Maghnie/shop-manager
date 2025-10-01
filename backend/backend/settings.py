@@ -10,7 +10,7 @@ env_file_loaded = load_dotenv(BASE_DIR.parent / '.env')
 if not env_file_loaded:
     print("Did not find env file - using default values.")
 
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-change-this-key-in-production')
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', '*']
@@ -24,16 +24,18 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # Third party apps
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
+    'django_filters',
+    
+    # Custom apps - ordered by dependencies
+    'customers',
     'inventory',
-    'reports', 
-    # 'dj_rest_auth',
-    # 'dj_rest_auth.registration',
-    # 'allauth',
-    # 'allauth.account',  
-    # 'allauth.socialaccount', 
+    'sales',
+    'analytics'
 ]
 
 MIDDLEWARE = [
@@ -99,31 +101,41 @@ REST_FRAMEWORK = {
     ],
 }
 
-# CORS settings - More permissive for development
+# CORS settings needed because frontend & backend run on different ports
 if DEBUG:
+    # More permissive for development
     CORS_ALLOW_ALL_ORIGINS = True
     CORS_ALLOW_CREDENTIALS = True
 else:
     CORS_ALLOWED_ORIGINS = [
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
+        "http://localhost:3000",  # React dev server
+        "http://127.0.0.1:3000",  # Alternative localhost
+        "http://localhost:5173",  # Vite dev server
+        "http://127.0.0.1:5173",  # Alternative Vite
     ]
     CORS_ALLOW_CREDENTIALS = True
 
-# Additional CORS settings to fix frontend crashes
-# CORS_ALLOW_HEADERS = [
-#     'accept',
-#     'accept-encoding',
-#     'authorization',
-#     'content-type',
-#     'dnt',
-#     'origin',
-#     'user-agent',
-#     'x-csrftoken',
-#     'x-requested-with',
-# ]
+# Specific headers for analytics export functionality
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+    # For analytics exports:
+    'content-disposition',
+    'cache-control',
+]
+
+CORS_EXPOSE_HEADERS = [
+    'content-disposition',  # Needed for file downloads
+    'content-length',
+    'content-type',
+]
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -162,6 +174,10 @@ LOGGING = {
             'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
             'style': '{',
         },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
     },
     'handlers': {
         'console': {
@@ -184,5 +200,65 @@ LOGGING = {
             'level': 'DEBUG' if DEBUG else 'INFO',
             'propagate': False,
         },
+        'analytics': {
+            'handlers': ['console'], 
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': False,
+        },
     },
 }
+
+CACHES = {
+    'default': {
+        # For production, uncomment Redis configuration:
+        # 'BACKEND': 'django_redis.cache.RedisCache',
+        # 'LOCATION': 'redis://127.0.0.1:6379/1',
+        # 'OPTIONS': {
+        #     'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        # },
+        
+        # For development/testing, use database cache:
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'analytics_cache_table',
+        
+        # Fallback to dummy cache if database cache fails:
+        # 'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+    }
+}
+
+# Analytics Configuration
+ANALYTICS_CACHE_TIMEOUT = 60 * 60 * 2  # 2 hours default cache timeout
+ANALYTICS_MAX_DATE_RANGE_DAYS = {
+    'hourly': 7,      # Max 7 days for hourly data
+    'daily': 365,     # Max 1 year for daily data
+    'weekly': 730,    # Max 2 years for weekly data
+    'monthly': 1825,  # Max 5 years for monthly data
+    'yearly': 3650    # Max 10 years for yearly data
+}
+
+# Export file settings
+ANALYTICS_EXPORT_MAX_RECORDS = 10000  # Maximum records per export
+ANALYTICS_EXPORT_TIMEOUT = 300        # 5 minutes timeout for exports
+
+# Performance settings for analytics queries
+ANALYTICS_QUERY_BATCH_SIZE = 1000     # Batch size for large queries
+
+# File download security
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY'
+
+# Optional: Database connection optimization for analytics
+# If analytics queries are slow, uncomment and adjust these:
+
+# DATABASES['default']['OPTIONS'] = {
+#     'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+#     'charset': 'utf8mb4',
+#     'use_unicode': True,
+# }
+
+# Connection pooling for better performance (if using PostgreSQL):
+# DATABASES['default']['CONN_MAX_AGE'] = 600
+# DATABASES['default']['OPTIONS'] = {
+#     'MAX_CONNS': 20,
+#     'MIN_CONNS': 5,
+# }

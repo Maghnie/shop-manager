@@ -5,10 +5,22 @@ import ProductRow from "./ProductRow";
 interface Props {
   products: Product[];
   adminView: boolean;
-  onDelete: (id: number) => void;
+  onArchive: (id: number, forceArchive?: boolean) => void;
+  onRestore?: (id: number) => void;
+  showArchived?: boolean;
+  showingStockWarning?: number | null;
+  onHideWarning?: () => void;
 }
 
-const ProductTable: React.FC<Props> = ({ products, adminView, onDelete }) => (
+const ProductTable: React.FC<Props> = ({ 
+  products, 
+  adminView, 
+  onArchive, 
+  onRestore,
+  showArchived = false,
+  showingStockWarning,
+  onHideWarning
+}) => (
   <div className="bg-white rounded-xl shadow-lg overflow-hidden">
     <div className="overflow-x-auto">
       <table className="w-full">
@@ -32,12 +44,21 @@ const ProductTable: React.FC<Props> = ({ products, adminView, onDelete }) => (
           {products.length === 0 ? (
             <tr>
               <td colSpan={adminView ? 10 : 9} className="text-center py-8 text-gray-500">
-                لا توجد منتجات مطابقة للبحث
+                {showArchived ? "لا توجد منتجات مؤرشفة" : "لا توجد منتجات مطابقة للبحث"}
               </td>
             </tr>
           ) : (
             products.map(product => (
-              <ProductRow key={product.id} product={product} adminView={adminView} onDelete={onDelete} />
+              <ProductRow 
+                key={product.id} 
+                product={product} 
+                adminView={adminView} 
+                onArchive={onArchive}
+                onRestore={onRestore}
+                showArchived={showArchived}
+                isShowingWarning={showingStockWarning === product.id}
+                onHideWarning={onHideWarning}
+              />
             ))
           )}
         </tbody>

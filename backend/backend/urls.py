@@ -16,21 +16,22 @@ def api_root(request, format=None):
     """
     # Get the current request's scheme and host
     base_url = request.build_absolute_uri('/').rstrip('/')
-    
+    api_version = 'v1'
+
     # Build endpoints dynamically based on URL patterns
     endpoints = {
-        'version': 'v1',
+        'version': api_version,
         'endpoints': {
-            'inventory': f"{base_url}/api/v1/inventory/",
-            'reports': f"{base_url}/api/v1/reports/",
-            'users': f"{base_url}/api/v1/users/",
+            'inventory': f"{base_url}/api/{api_version}/inventory/",
+            'sales': f"{base_url}/api/{api_version}/sales/",
+            'analytics': f"{base_url}/api/{api_version}/analytics/",
             'auth': {
-                'token': f"{base_url}/api/v1/auth/token/",
+                'token': f"{base_url}/api/{api_version}/auth/token/",
                 'login': f"{base_url}/api-auth/login/",
                 'logout': f"{base_url}/api-auth/logout/",
             }
         },
-        'documentation': f"{base_url}/api/v1/docs/",  # For future API docs
+        'documentation': f"{base_url}/api/{api_version}/docs/",  # For future API docs
     }
     
     return Response(endpoints)
@@ -48,12 +49,13 @@ def home_view(request):
 
 # API v1 URL patterns - centralized for easy management
 api_v1_patterns = [
-    path('', api_root, name='api-v1-root'),    
+    path('', api_root, name='api-v1-root'),
     # Functional app groupings
+    path('', include('customers.urls')),
     path('inventory/', include('inventory.urls')),
-    path('reports/', include('reports.urls')),
-    path('users/', include('users.urls')),
-    
+    path('sales/', include('sales.urls')),
+    path('analytics/', include('analytics.urls')),
+
     # Authentication endpoints
     path('auth/token/', obtain_auth_token, name='api_v1_token_auth'),
     # path('auth/', include('dj_rest_auth.urls')), # login, logout, password reset

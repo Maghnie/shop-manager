@@ -1,11 +1,13 @@
 import React, { useState, useEffect, type ChangeEvent, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios, { AxiosError } from 'axios';
+import { Combobox, ComboboxInput, ComboboxOption, ComboboxOptions } from '@headlessui/react';
 
 // Type definitions
 interface ProductType {
   id: number;
   name_ar: string;
+  name_en: string;
 }
 
 interface Brand {
@@ -19,7 +21,8 @@ interface Material {
 }
 
 interface FormData {
-  type: string;
+  type: string; // what users type
+  typeId?: number; // optional selected ID if matched
   brand: string;
   cost_price: string;
   selling_price: string;
@@ -61,7 +64,7 @@ const ProductForm: React.FC = () => {
 
   const [formData, setFormData] = useState<FormData>({
     type: '',
-    brand: '',
+    brand: '1', // id for the default brand: "general" or "عام"
     cost_price: '',
     selling_price: '',
     size: '',
@@ -106,13 +109,53 @@ const ProductForm: React.FC = () => {
 
   const fetchProduct = async (): Promise<void> => {
     if (!id) return;
-    
+
     try {
       const response = await axios.get(`/inventory/products/${id}/`);
       const product = response.data;
-      
+
+      // // Try to find matching type name in options
+      // let typeName = '';
+      // let typeId: number | undefined = undefined;
+
+      // if (product.type) {
+      //   const matchedType = options.productTypes.find(pt => pt.id === product.type);
+      //   if (matchedType) {
+      //     typeName = matchedType.type_name_ar;
+      //     typeId = matchedType.id;
+      //   } else {
+      //     // Fallback: fetch product type by ID if not already loaded
+      //     try {
+      //       const typeRes = await axios.get(`/inventory/product-types/${product.type}/`);
+      //       typeName = typeRes.data.name_ar;
+      //       typeId = typeRes.data.id;
+
+      //       // Add it to local options so it shows up in combobox next time
+      //       setOptions(prev => ({
+      //         ...prev,
+      //         productTypes: [...prev.productTypes, typeRes.data],
+      //       }));
+      //     } catch (err) {
+      //       console.warn("Couldn't fetch product type details", err);
+      //       typeName = String(product.type); // fallback
+      //     }
+      //   }
+      // }
+
+      // setFormData({
+      //   type: typeName,
+      //   typeId: typeId,
+      //   brand: product.brand?.toString() || '',
+      //   cost_price: product.cost_price?.toString() || '',
+      //   selling_price: product.selling_price?.toString() || '',
+      //   size: product.size || '',
+      //   weight: product.weight?.toString() || '',
+      //   material: product.material?.toString() || '',
+      //   tags: product.tags || ''
+      // });
       setFormData({
-        type: product.type?.toString() || '',
+        type: product.type_name_ar || '',   // show the name in the combobox
+        typeId: product.type || undefined,  // keep the ID for backend submission
         brand: product.brand?.toString() || '',
         cost_price: product.cost_price?.toString() || '',
         selling_price: product.selling_price?.toString() || '',
@@ -126,6 +169,7 @@ const ProductForm: React.FC = () => {
       navigate('/products/');
     }
   };
+
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
     const { name, value } = e.target;
@@ -174,21 +218,37 @@ const ProductForm: React.FC = () => {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
-    
     if (!validateForm()) return;
 
     setLoading(true);
-    
+
     try {
+      let typeId = formData.typeId;
+
+      // If user typed a new type, create it first
+      if (!typeId && formData.type) {
+        const typeRes = await axios.post('/inventory/product-types/', {
+          name_ar: formData.type,
+          name_en: formData.type, // just reusing arabic name for custom entries for now
+        });
+        typeId = typeRes.data.id;
+
+        // Add new type to local options so it appears in future
+        setOptions(prev => ({
+          ...prev,
+          productTypes: [...prev.productTypes, typeRes.data],
+        }));
+      }
+
       const payload: ProductPayload = {
-        type: formData.type,
-        brand: formData.brand || null,
+        type: String(typeId), // always send ID
+        brand: formData.brand || "1", // use default brand if user didnt specify
         cost_price: parseFloat(formData.cost_price),
         selling_price: parseFloat(formData.selling_price),
         size: formData.size,
         weight: formData.weight ? parseFloat(formData.weight) : null,
         material: formData.material || null,
-        tags: formData.tags
+        tags: formData.tags,
       };
 
       if (isEditing && id) {
@@ -200,15 +260,14 @@ const ProductForm: React.FC = () => {
       navigate('/products');
     } catch (error) {
       console.error('Error saving product:', error);
-      
-      // Handle API validation errors
+
       const axiosError = error as AxiosError<ApiErrorResponse>;
       if (axiosError.response?.data) {
         const serverErrors: ValidationErrors = {};
         Object.keys(axiosError.response.data).forEach(key => {
           const errorValue = axiosError.response!.data[key];
-          serverErrors[key] = Array.isArray(errorValue) 
-            ? errorValue[0] 
+          serverErrors[key] = Array.isArray(errorValue)
+            ? errorValue[0]
             : errorValue;
         });
         setErrors(serverErrors);
@@ -217,6 +276,7 @@ const ProductForm: React.FC = () => {
       setLoading(false);
     }
   };
+
 
   const calculateProfit = (): { profit: number; profitPct: number } => {
     const cost = parseFloat(formData.cost_price) || 0;
@@ -242,25 +302,49 @@ const ProductForm: React.FC = () => {
 
       <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-lg p-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Product Type */}
+          {/* Product Type with free text + autocomplete */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               نوع المنتج *
             </label>
-            <select
-              name="type"
+            <Combobox
               value={formData.type}
-              onChange={handleChange}
-              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                errors.type ? 'border-red-300' : 'border-gray-300'
-              }`}
-              required
+              onChange={(value: string) => {
+                const matched = options.productTypes.find(pt => pt.name_ar === value);
+                setFormData(prev => ({
+                  ...prev,
+                  type: value,
+                  typeId: matched ? matched.id : undefined
+                }));
+                if (errors.type) {
+                  setErrors(prev => ({ ...prev, type: '' }));
+                }
+              }}
             >
-              <option value="">اختر نوع المنتج</option>
-              {options.productTypes.map(type => (
-                <option key={type.id} value={type.id}>{type.name_ar}</option>
-              ))}
-            </select>
+              <ComboboxInput
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  errors.type ? 'border-red-300' : 'border-gray-300'
+                }`}
+                placeholder="حدد نوع المنتج أو أضف جديد"
+                displayValue={(value: string) => value}
+                onChange={e =>
+                  setFormData(prev => ({ ...prev, type: e.target.value, typeId: undefined }))
+                }
+              />
+              <ComboboxOptions className="border mt-1 rounded-lg bg-white shadow-lg max-h-60 overflow-auto">
+                {options.productTypes
+                  .filter(pt => pt.name_ar.includes(formData.type))
+                  .map(pt => (
+                    <ComboboxOption
+                      key={pt.id}
+                      value={pt.name_ar}
+                      className="cursor-pointer px-4 py-2 hover:bg-blue-100"
+                    >
+                      {pt.name_ar}
+                    </ComboboxOption>
+                  ))}
+              </ComboboxOptions>
+            </Combobox>
             {errors.type && <p className="text-red-500 text-sm mt-1">{errors.type}</p>}
           </div>
 
@@ -272,10 +356,11 @@ const ProductForm: React.FC = () => {
             <select
               name="brand"
               value={formData.brand}
+              defaultValue="عام"
               onChange={handleChange}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="">اختر العلامة التجارية (اختياري)</option>
+              <option value="1">اختر العلامة التجارية (اختياري)</option>
               {options.brands.map(brand => (
                 <option key={brand.id} value={brand.id}>{brand.name_ar}</option>
               ))}

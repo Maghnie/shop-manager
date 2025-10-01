@@ -1,5 +1,7 @@
 .env
+.vscode
 __pycache__/
 venv/
 node_modules/
 coverage/
+.claude

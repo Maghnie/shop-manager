@@ -2,20 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Info } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { type Product } from "@/types/product";
 
-interface Product {
-  type_name_ar: string;
-  type_name_en: string;
-  brand_name_ar: string;
-  brand_name_en: string;
-  size: string;
-  id: number;
-  cost_price: number;
-  selling_price: number;
-  profit: number;
-  profit_percentage: number;
-  tags_list: string[];
-}
 
 interface ProductMaterial {
   id: number;

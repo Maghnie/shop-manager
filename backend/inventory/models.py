@@ -2,8 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator
 from decimal import Decimal
-from typing import Optional
-# from backend.settings import AUTH_USER_MODEL
+from django.core.exceptions import ValidationError
+
 
 class ProductType(models.Model):
     """Predefined product types"""
@@ -84,6 +84,10 @@ class Product(models.Model):
         verbose_name="المادة"
     )
     tags = models.TextField(blank=True, help_text="Comma-separated tags", verbose_name="العلامات")
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name="نشط"
+    )
     
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
@@ -109,10 +113,10 @@ class Product(models.Model):
         return self.selling_price - self.cost_price
     
     @property
-    def profit_percentage(self) -> float:
+    def profit_percentage(self) -> Decimal:
         """Calculate profit percentage"""
         if self.cost_price > 0:
-            return float((self.profit / self.cost_price) * 100)
+            return Decimal((self.profit / self.cost_price) * 100)
         return 0.0
     
     @property
@@ -129,3 +133,26 @@ class Product(models.Model):
             raise ValidationError("Selling price must be greater than cost price")
         super().save(*args, **kwargs)
 
+class Inventory(models.Model):
+    """Track product quantities in stock"""
+    product = models.OneToOneField(Product, on_delete=models.CASCADE, related_name='inventory')
+    quantity_in_stock = models.PositiveIntegerField(default=0, verbose_name="الكمية المتوفرة")
+    minimum_stock_level = models.PositiveIntegerField(default=5, verbose_name="الحد الأدنى للمخزون")
+    last_updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "مخزون"
+        verbose_name_plural = "المخازن"
+
+    def __str__(self):
+        return f"{self.product} - {self.quantity_in_stock} قطعة"
+
+    @property
+    def is_low_stock(self):
+        """Check if product is running low on stock"""
+        return self.quantity_in_stock <= self.minimum_stock_level
+
+    @property
+    def is_out_of_stock(self):
+        """Check if product is out of stock"""
+        return self.quantity_in_stock == 0
