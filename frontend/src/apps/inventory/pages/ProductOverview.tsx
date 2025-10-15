@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Archive, Pencil, PencilOff } from "lucide-react";
-import { useProducts } from "@/hooks/useProducts";
-import ProductFilters from "@/components/products/ProductFilters";
-import ProductTable from "@/components/products/ProductTable";
-import { toggleProductArchive } from "@/services/productService";
+import { useProducts } from "../hooks/useProducts";
+import ProductFilters from "../components/ProductFilters";
+import ProductTable from "../components/ProductTable";
+import { toggleProductArchive } from "../services/productService";
 import toast from 'react-hot-toast';
 
 const ProductOverview: React.FC = () => {

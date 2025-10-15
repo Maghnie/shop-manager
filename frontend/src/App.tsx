@@ -3,14 +3,9 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import axios from 'axios';
 import { Toaster } from 'react-hot-toast';
 
-// TODO refactor imports to the style of the analytics app further below
-
 // Existing components
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
-import ProductOverview from './pages/ProductOverview';
-import ArchivedProducts from './pages/ArchivedProducts';
-import ProductForm from './components/ProductForm';
 import Navbar from './components/Navbar';
 
 // Sales components
@@ -21,8 +16,9 @@ import InvoicesList from './components/invoices/InvoicesList';
 import InvoiceDetail from './components/invoices/InvoiceDetail';
 
 // Inventory components
-import InventoryList from './components/inventory/InventoryList';
+import { ProductOverview, ArchivedProducts, ProductForm, InventoryList } from '@/apps/inventory';
 
+// Analytics components
 import { AnalyticsDashboard } from '@/apps/analytics';
 
 import './App.css';

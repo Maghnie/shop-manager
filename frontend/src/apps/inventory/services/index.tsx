@@ -1,0 +1,1 @@
+export { toggleProductArchive } from './productService';
