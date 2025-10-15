@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Printer, Download, CheckSquare, ArrowLeft, Eye } from 'lucide-react';
 import { InvoiceService } from '@/apps/sales/services/saleService';
-import { useInvoice } from '@/hooks/useInvoices';
+import { useInvoice } from '@/apps/sales/hooks/useInvoices';
+import type { SaleItem } from '@/apps/sales/types_sales';
 
-const InvoiceDetail: React.FC = () => {
+export const InvoiceDetail: React.FC = () => {
   const { id, saleId } = useParams<{ id?: string; saleId?: string }>();
   const invoiceId = id ? parseInt(id) : undefined;
   const saleIdNum = saleId ? parseInt(saleId) : undefined;
@@ -325,7 +326,7 @@ const InvoiceDetail: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {sale.items.map((item, index) => (
+              {sale.items.map((item: SaleItem, index: number) => (
                 <tr key={index}>
                   <td className="border border-gray-300 p-3">
                     <div>
@@ -398,5 +399,3 @@ const InvoiceDetail: React.FC = () => {
     </div>
   );
 };
-
-export default InvoiceDetail;

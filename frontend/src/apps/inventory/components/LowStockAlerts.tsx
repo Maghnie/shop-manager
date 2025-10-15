@@ -2,7 +2,7 @@
 import React from 'react';
 import { AlertTriangle, PackageCheck, RefreshCw, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useLowStockAlert } from '@/hooks/useInventory';
+import { useLowStockAlert } from '@/apps/inventory/hooks/useInventory';
 
 const LowStockAlerts: React.FC = () => {
   const { lowStockItems, loading, error, refetch, count } = useLowStockAlert();

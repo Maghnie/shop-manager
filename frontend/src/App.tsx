@@ -3,22 +3,14 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import axios from 'axios';
 import { Toaster } from 'react-hot-toast';
 
-// Existing components
+// General components
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import Navbar from './components/Navbar';
 
-// Sales components
-import { SalesList, SaleForm, SaleDetail, SalesDashboard } from '@/apps/sales';
-
-// Invoice components
-import InvoicesList from './components/invoices/InvoicesList';
-import InvoiceDetail from './components/invoices/InvoiceDetail';
-
-// Inventory components
+// Specialized components
+import { SalesList, SaleForm, SaleDetail, SalesDashboard, InvoicesList, InvoiceDetail } from '@/apps/sales';
 import { ProductOverview, ArchivedProducts, ProductForm, InventoryList } from '@/apps/inventory';
-
-// Analytics components
 import { AnalyticsDashboard } from '@/apps/analytics';
 
 import './App.css';

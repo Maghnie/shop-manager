@@ -21,9 +21,9 @@ import {
 } from 'lucide-react';
 
 // Import the new components
-import LowStockAlerts from './inventory/LowStockAlerts';
+import { LowStockAlerts } from '@/apps/inventory/';
 import { useSalesStats } from '@/apps/sales/hooks/useSales';
-import { useLowStockAlert } from '@/hooks/useInventory';
+import { useLowStockAlert } from '@/apps/inventory/hooks/useInventory';
 
 const Dashboard: React.FC = () => {
   const { stats: salesStats, loading: salesLoading } = useSalesStats();

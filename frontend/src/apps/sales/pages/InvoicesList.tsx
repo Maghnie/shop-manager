@@ -1,13 +1,9 @@
-// src/components/invoices/InvoicesList.tsx
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Eye, Search } from 'lucide-react';
-import { useInvoices } from '../../hooks/useInvoices';
-import { InvoiceService } from '@/apps/sales/services/saleService';
-import type { InvoiceListItem, Invoice } from '@/types/product';
+import { useInvoices } from '../hooks/useInvoices';
 
-const InvoicesList: React.FC = () => {
+export const InvoicesList: React.FC = () => {
   const { invoices, loading } = useInvoices();
   const [filters, setFilters] = useState({
     search: '',
@@ -184,5 +180,3 @@ const InvoicesList: React.FC = () => {
     </div>
   );
 };
-
-export default InvoicesList;

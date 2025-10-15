@@ -17,4 +17,4 @@ export { useProducts } from './hooks';
 
 export { toggleProductArchive } from './services';
 
-export type * from './types/product';
+export type * from '../../types/product';

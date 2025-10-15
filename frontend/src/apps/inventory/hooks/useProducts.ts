@@ -1,7 +1,7 @@
 // This hook manages product data and filtering functionality
 
 import { useState, useEffect } from "react";
-import type { Product, ProductType, ProductBrand, ProductMaterial, Filters } from "../types/product";
+import type { Product, ProductType, ProductBrand, ProductMaterial, Filters } from "../../../types/product";
 import { fetchProducts, fetchTypes, fetchBrands, fetchMaterials } from "../services/productService";
 
 export const useProducts = () => {

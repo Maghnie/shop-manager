@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { AlertTriangle, Package, Edit2, Search, Filter, Save, X } from 'lucide-react';
-import { useInventory } from '@/hooks/useInventory';
+import { useInventory } from '@/apps/inventory/hooks/useInventory';
 import type { Inventory } from '@/types/product';
 import toast from 'react-hot-toast';
 
