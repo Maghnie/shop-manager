@@ -180,7 +180,6 @@ export const BreakevenChart: React.FC = () => {
             min="100"
             max="10000"
             step="50"
-            dir="ltr"
           />
         </div>
 

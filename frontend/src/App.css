@@ -29,8 +29,11 @@ body {
   --tw-space-x-reverse: 1;
 }
 
-/* Input number styling for RTL */
-input[type="number"] {
+/* Input number and tel styling for RTL - numbers should be LTR */
+input[type="number"],
+input[type="tel"],
+.ltr-numbers {
+  direction: ltr;
   text-align: left;
 }
 

@@ -26,7 +26,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   };
 
   return (
-    <div className={`max-w-7xl mx-auto px-4 py-8 ${className}`} dir="rtl">
+    <div className={`max-w-7xl mx-auto px-4 py-8 ${className}`}>
       {/* Header */}
       <div className="flex justify-between items-start mb-8">
         <div>

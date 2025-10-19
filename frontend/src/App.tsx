@@ -45,7 +45,7 @@ const App: React.FC = () => {
 
   if (loading) {
     return (
-      <div dir="rtl" className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-xl text-gray-600">جاري التحميل...</div>
       </div>
     );
@@ -53,7 +53,7 @@ const App: React.FC = () => {
 
   return (
     <Router>
-      <div className="min-h-screen w-full bg-gray-50 " dir="rtl">
+      <div className="min-h-screen w-full bg-gray-50">
         {isAuthenticated && <Navbar onLogout={handleLogout} />}
 
         <div className={isAuthenticated ? 'pt-16' : ''}>

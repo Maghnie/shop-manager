@@ -383,7 +383,6 @@ const ProductForm: React.FC = () => {
                 errors.cost_price ? 'border-red-300' : 'border-gray-300'
               }`}
               required
-              dir="ltr"
             />
             {errors.cost_price && <p className="text-red-500 text-sm mt-1">{errors.cost_price}</p>}
           </div>
@@ -404,7 +403,6 @@ const ProductForm: React.FC = () => {
                 errors.selling_price ? 'border-red-300' : 'border-gray-300'
               }`}
               required
-              dir="ltr"
             />
             {errors.selling_price && <p className="text-red-500 text-sm mt-1">{errors.selling_price}</p>}
           </div>
@@ -437,7 +435,6 @@ const ProductForm: React.FC = () => {
               step="0.1"
               min="0"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              dir="ltr"
             />
           </div>
 
