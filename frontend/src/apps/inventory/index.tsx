@@ -1,7 +1,7 @@
 export {
-  default as ProductOverview,
-  default as ArchivedProducts,
-  default as ProductForm
+  ProductOverview,
+  ArchivedProducts,
+  ProductForm
 } from './pages';
 
 export {
