@@ -1,7 +1,6 @@
-/* Arabic font optimization */
+/* Arabic font optimization - font-family managed in tailwind.config.js */
 body {
-  font-family: 'Segoe UI', 'Tahoma', 'Arial', 'Helvetica Neue', sans-serif;
-  direction: rtl;   
+  direction: rtl;
 }
 
 /* Custom scrollbar for RTL */
