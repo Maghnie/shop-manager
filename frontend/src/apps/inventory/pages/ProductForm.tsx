@@ -1,25 +1,11 @@
 import React, { useState, useEffect, type ChangeEvent, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios, { AxiosError } from 'axios';
+import { AxiosError } from 'axios';
 import { Combobox, ComboboxInput, ComboboxOption, ComboboxOptions } from '@headlessui/react';
+import { fetchTypes, fetchBrands, fetchMaterials, getProduct, createProduct, updateProduct, createProductType, type ProductPayload } from '../services/productService';
+import type { ProductType, ProductBrand, ProductMaterial } from '@/types/product';
 
-// Type definitions
-interface ProductType {
-  id: number;
-  name_ar: string;
-  name_en: string;
-}
-
-interface Brand {
-  id: number;
-  name_ar: string;
-}
-
-interface Material {
-  id: number;
-  name_ar: string;
-}
-
+// Local type definitions
 interface FormData {
   type: string; // what users type
   typeId?: number; // optional selected ID if matched
@@ -34,23 +20,12 @@ interface FormData {
 
 interface Options {
   productTypes: ProductType[];
-  brands: Brand[];
-  materials: Material[];
+  brands: ProductBrand[];
+  materials: ProductMaterial[];
 }
 
 interface ValidationErrors {
   [key: string]: string;
-}
-
-interface ProductPayload {
-  type: string;
-  brand: string | null;
-  cost_price: number;
-  selling_price: number;
-  size: string;
-  weight: number | null;
-  material: string | null;
-  tags: string;
 }
 
 interface ApiErrorResponse {
@@ -92,9 +67,9 @@ const ProductForm: React.FC = () => {
   const fetchOptions = async (): Promise<void> => {
     try {
       const [typesRes, brandsRes, materialsRes] = await Promise.all([
-        axios.get<{ results: ProductType[] }>('/inventory/product-types/'),
-        axios.get<{ results: Brand[] }>('/inventory/brands/'),
-        axios.get<{ results: Material[] }>('/inventory/materials/')
+        fetchTypes(),
+        fetchBrands(),
+        fetchMaterials()
       ]);
 
       setOptions({
@@ -111,8 +86,7 @@ const ProductForm: React.FC = () => {
     if (!id) return;
 
     try {
-      const response = await axios.get(`/inventory/products/${id}/`);
-      const product = response.data;
+      const product = await getProduct(Number(id));
 
       // // Try to find matching type name in options
       // let typeName = '';
@@ -227,16 +201,16 @@ const ProductForm: React.FC = () => {
 
       // If user typed a new type, create it first
       if (!typeId && formData.type) {
-        const typeRes = await axios.post('/inventory/product-types/', {
+        const newType = await createProductType({
           name_ar: formData.type,
           name_en: formData.type, // just reusing arabic name for custom entries for now
         });
-        typeId = typeRes.data.id;
+        typeId = newType.id;
 
         // Add new type to local options so it appears in future
         setOptions(prev => ({
           ...prev,
-          productTypes: [...prev.productTypes, typeRes.data],
+          productTypes: [...prev.productTypes, newType],
         }));
       }
 
@@ -252,9 +226,9 @@ const ProductForm: React.FC = () => {
       };
 
       if (isEditing && id) {
-        await axios.put(`/inventory/products/${id}/`, payload);
+        await updateProduct(Number(id), payload);
       } else {
-        await axios.post('/inventory/products/', payload);
+        await createProduct(payload);
       }
 
       navigate('/products');
