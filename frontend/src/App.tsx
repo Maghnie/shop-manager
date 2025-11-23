@@ -16,7 +16,7 @@ import { AnalyticsDashboard } from '@/apps/analytics';
 import './App.css';
 
 // Configure axios defaults
-axios.defaults.baseURL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api/v1/';
+axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 
 const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true); // TODO: Set to false in production
