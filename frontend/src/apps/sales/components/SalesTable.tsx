@@ -40,7 +40,6 @@ export const SalesTable: React.FC<SalesTableProps> = ({
                 value={item.quantity}
                 onChange={(e) => onUpdateQuantity(index, parseInt(e.target.value, 10) || 1)}
                 className="w-16 border rounded p-1 text-center"
-                dir="ltr" 
               />
             </td>
             <td className="px-4 py-2 border">
@@ -49,7 +48,6 @@ export const SalesTable: React.FC<SalesTableProps> = ({
                 value={item.unit_price}
                 onChange={(e) => onUpdatePrice(index, parseFloat(e.target.value) || 0)}
                 className="w-20 border rounded p-1 text-center"
-                dir="ltr" 
               />
             </td>
             <td className="px-4 py-2 border">{(item.quantity * item.unit_price).toFixed(2)}</td>

@@ -7,7 +7,8 @@ export default defineConfig({
   plugins: [react()],
   server: {
     host: true, // Allows access from other devices on the local network
-    port: 5173, // Optional: specify a custom port
+    port: parseInt(process.env.VITE_PORT || '5173'), // Configurable port with fallback
+    strictPort: false, // Allow Vite to use a different port if the specified one is busy
   },
   resolve: {
     alias: {

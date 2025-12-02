@@ -1,22 +1,34 @@
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-*.sqlite3
-*.log
-.env
-.claude
-.env.*
-.vscode/
-.idea/
-*.db
-*.DS_Store
-node_modules/
-frontend/node_modules/
-frontend/build/
-static/
-media/
+# Git & docker stuff
+.github
 tests/
-coverage/
 .dockerignore
 Dockerfile
+
+# Environment files 
+.env
+.env.*
+!.env.example
+secrets/
+
+# IDE
+.vscode
+.claude
+
+# Python
+__pycache__/
+venv/
+
+# Node
+node_modules/
+
+# Build artifacts
+tsconfig.tsbuildinfo
+
+# Testing
+coverage/
+
+# Database backups 
+backups/
+*.sql
+backup_*.sql
+backup_migration.log

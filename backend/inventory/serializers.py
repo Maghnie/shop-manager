@@ -29,6 +29,7 @@ class ProductSerializer(serializers.ModelSerializer):
     
     # Computed properties
     profit = serializers.ReadOnlyField()
+    profit_margin= serializers.ReadOnlyField()
     profit_percentage = serializers.ReadOnlyField()
     tags_list = serializers.ReadOnlyField()
 
@@ -45,7 +46,7 @@ class ProductSerializer(serializers.ModelSerializer):
             'is_active',
             # Computed fields
             'type_name_ar', 'type_name_en', 'brand_name_ar', 'brand_name_en',
-            'material_name_ar', 'material_name_en', 'profit', 'profit_percentage', 'tags_list',
+            'material_name_ar', 'material_name_en', 'profit', 'profit_margin', 'profit_percentage', 'tags_list',
             # Inventory fields
             'available_stock', 'is_low_stock',
         ]

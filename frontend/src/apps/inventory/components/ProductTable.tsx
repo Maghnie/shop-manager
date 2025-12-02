@@ -33,7 +33,8 @@ const ProductTable: React.FC<Props> = ({
             <th className="text-right py-4 px-6 font-semibold text-gray-700">سعر التكلفة</th>
             <th className="text-right py-4 px-6 font-semibold text-gray-700 bg-yellow-200">سعر البيع</th>
             <th className="text-right py-4 px-6 font-semibold text-gray-700">الربح</th>
-            <th className="text-right py-4 px-6 font-semibold text-gray-700">نسبة الربح</th>
+            <th className="text-right py-4 px-6 font-semibold text-gray-700">هامش الربح</th>
+            <th className="text-right py-4 px-6 font-semibold text-gray-700">عائد الاستثمار</th>
             <th className="text-right py-4 px-6 font-semibold text-gray-700">الوسوم</th>
             {adminView && (
               <th className="text-center py-4 px-6 font-semibold text-gray-700">الإجراءات</th>

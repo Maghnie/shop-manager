@@ -1,25 +1,11 @@
 import React, { useState, useEffect, type ChangeEvent, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios, { AxiosError } from 'axios';
+import { AxiosError } from 'axios';
 import { Combobox, ComboboxInput, ComboboxOption, ComboboxOptions } from '@headlessui/react';
+import { fetchTypes, fetchBrands, fetchMaterials, getProduct, createProduct, updateProduct, createProductType, type ProductPayload } from '../services/productService';
+import type { ProductType, ProductBrand, ProductMaterial } from '@/types/product';
 
-// Type definitions
-interface ProductType {
-  id: number;
-  name_ar: string;
-  name_en: string;
-}
-
-interface Brand {
-  id: number;
-  name_ar: string;
-}
-
-interface Material {
-  id: number;
-  name_ar: string;
-}
-
+// Local type definitions
 interface FormData {
   type: string; // what users type
   typeId?: number; // optional selected ID if matched
@@ -34,23 +20,12 @@ interface FormData {
 
 interface Options {
   productTypes: ProductType[];
-  brands: Brand[];
-  materials: Material[];
+  brands: ProductBrand[];
+  materials: ProductMaterial[];
 }
 
 interface ValidationErrors {
   [key: string]: string;
-}
-
-interface ProductPayload {
-  type: string;
-  brand: string | null;
-  cost_price: number;
-  selling_price: number;
-  size: string;
-  weight: number | null;
-  material: string | null;
-  tags: string;
 }
 
 interface ApiErrorResponse {
@@ -92,9 +67,9 @@ const ProductForm: React.FC = () => {
   const fetchOptions = async (): Promise<void> => {
     try {
       const [typesRes, brandsRes, materialsRes] = await Promise.all([
-        axios.get<{ results: ProductType[] }>('/inventory/product-types/'),
-        axios.get<{ results: Brand[] }>('/inventory/brands/'),
-        axios.get<{ results: Material[] }>('/inventory/materials/')
+        fetchTypes(),
+        fetchBrands(),
+        fetchMaterials()
       ]);
 
       setOptions({
@@ -111,8 +86,7 @@ const ProductForm: React.FC = () => {
     if (!id) return;
 
     try {
-      const response = await axios.get(`/inventory/products/${id}/`);
-      const product = response.data;
+      const product = await getProduct(Number(id));
 
       // // Try to find matching type name in options
       // let typeName = '';
@@ -227,16 +201,16 @@ const ProductForm: React.FC = () => {
 
       // If user typed a new type, create it first
       if (!typeId && formData.type) {
-        const typeRes = await axios.post('/inventory/product-types/', {
+        const newType = await createProductType({
           name_ar: formData.type,
           name_en: formData.type, // just reusing arabic name for custom entries for now
         });
-        typeId = typeRes.data.id;
+        typeId = newType.id;
 
         // Add new type to local options so it appears in future
         setOptions(prev => ({
           ...prev,
-          productTypes: [...prev.productTypes, typeRes.data],
+          productTypes: [...prev.productTypes, newType],
         }));
       }
 
@@ -252,9 +226,9 @@ const ProductForm: React.FC = () => {
       };
 
       if (isEditing && id) {
-        await axios.put(`/inventory/products/${id}/`, payload);
+        await updateProduct(Number(id), payload);
       } else {
-        await axios.post('/inventory/products/', payload);
+        await createProduct(payload);
       }
 
       navigate('/products');
@@ -277,17 +251,18 @@ const ProductForm: React.FC = () => {
     }
   };
 
-
-  const calculateProfit = (): { profit: number; profitPct: number } => {
+  //TODO just use an API endpoint?
+  const calculateProfit = (): { profit: number; profitMgn: number; profitPct: number } => {
     const cost = parseFloat(formData.cost_price) || 0;
     const selling = parseFloat(formData.selling_price) || 0;
     const profit = selling - cost;
+    const profitMgn = cost > 0 ? (profit / selling) * 100 : 0;
     const profitPct = cost > 0 ? (profit / cost) * 100 : 0;
     
-    return { profit, profitPct };
+    return { profit, profitMgn, profitPct };
   };
 
-  const { profit, profitPct } = calculateProfit();
+  const { profit, profitMgn, profitPct } = calculateProfit();
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
@@ -383,7 +358,6 @@ const ProductForm: React.FC = () => {
                 errors.cost_price ? 'border-red-300' : 'border-gray-300'
               }`}
               required
-              dir="ltr"
             />
             {errors.cost_price && <p className="text-red-500 text-sm mt-1">{errors.cost_price}</p>}
           </div>
@@ -404,7 +378,6 @@ const ProductForm: React.FC = () => {
                 errors.selling_price ? 'border-red-300' : 'border-gray-300'
               }`}
               required
-              dir="ltr"
             />
             {errors.selling_price && <p className="text-red-500 text-sm mt-1">{errors.selling_price}</p>}
           </div>
@@ -437,7 +410,6 @@ const ProductForm: React.FC = () => {
               step="0.1"
               min="0"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              dir="ltr"
             />
           </div>
 
@@ -488,7 +460,13 @@ const ProductForm: React.FC = () => {
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">نسبة الربح</p>
+                <p className="text-sm text-gray-600">هامش الربح</p>
+                <p className={`text-2xl font-bold ${profitMgn >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {profitMgn.toFixed(1)}%
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">عائد الاستثمار</p>
                 <p className={`text-2xl font-bold ${profitPct >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                   {profitPct.toFixed(1)}%
                 </p>

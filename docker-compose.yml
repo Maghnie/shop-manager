@@ -1,33 +1,104 @@
-version: '3.8'
-
 services:
-  web:
+  # PostgreSQL Database
+  db:
+    image: postgres:17-alpine
+    container_name: shop-manager-db
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-shop_db}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-super}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+    networks:
+      - shop-manager-network
+    secrets:
+      - db_password
+
+  # Django Backend (Development mode)
+  backend:
     build:
       context: .
-      dockerfile: Dockerfile
-    restart: always
+      dockerfile: backend/Dockerfile
+    container_name: shop-manager-backend
+    restart: unless-stopped
+    command: sh -c "echo '🚀 Starting Django backend on port 8000 (exposed as host port ${BACKEND_PORT:-8000})' && python manage.py runserver 0.0.0.0:8000"
     volumes:
-      - static_data:/app/static
+      - ./backend:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
     ports:
-      - "8000:8000"
+      - "${BACKEND_PORT:-8000}:8000"
+    environment:
+      - DEBUG=${DEBUG:-True}
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - POSTGRES_DB=${POSTGRES_DB:-shop_db}
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-super}
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_PASSWORD=${DB_PASSWORD:-super}
+      - SECRET_KEY_FILE=/run/secrets/django_secret_key
+      - DJANGO_SUPERUSER_USERNAME=${DJANGO_SUPERUSER_USERNAME:-admin}
+      - DJANGO_SUPERUSER_EMAIL=${DJANGO_SUPERUSER_EMAIL:-admin@example.com}
+      - DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD:-admin123}
+      - BACKEND_PORT=${BACKEND_PORT:-8000}
+    secrets:
+      - db_password
+      - django_secret_key
     depends_on:
-      - db
-      - redis
-    env_file:
-      - .env
+      db:
+        condition: service_healthy
+    networks:
+      - shop-manager-network
 
-  db:
-    image: postgres:15
-    restart: always
+  # React Frontend (Development mode with Vite)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: shop-manager-frontend
+    restart: unless-stopped
+    command: sh -c "echo '🚀 Starting Vite dev server on port 5173 (exposed as host port ${FRONTEND_PORT:-5173})' && npm run dev"
     volumes:
-      - postgres_data:/var/lib/postgresql/data/
-    env_file:
-      - .env
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "${FRONTEND_PORT:-5173}:5173"
+    environment:
+      - VITE_API_URL=http://localhost:${BACKEND_PORT:-8000}/api/v1
+      - VITE_PORT=5173
+      - FRONTEND_PORT=${FRONTEND_PORT:-5173}
+    depends_on:
+      - backend
+    networks:
+      - shop-manager-network
 
-  redis:
-    image: redis:7-alpine
-    restart: always
+
+secrets:
+  db_password:
+    file: ./secrets/db_password.txt
+  django_secret_key:
+    file: ./secrets/django_secret_key.txt
 
 volumes:
   postgres_data:
-  static_data:
+    name: shop-manager-postgres-data
+  static_volume:
+    name: shop-manager-static
+  media_volume:
+    name: shop-manager-media
+
+networks:
+  shop-manager-network:
+    name: shop-manager-network
+    driver: bridge

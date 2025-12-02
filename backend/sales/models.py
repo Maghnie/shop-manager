@@ -144,6 +144,13 @@ class Sale(models.Model):
     def net_profit(self):
         """Calculate net profit after discount and tax"""
         return self.final_total - self.total_cost
+    
+    @property
+    def profit_margin(self) -> Decimal:
+        """Calculate profit margin per sale"""
+        if self.total_cost > 0:
+            return Decimal((self.net_profit / self.final_total) * 100)
+        return 0.0
 
     @property
     def profit_percentage(self):
@@ -187,6 +194,13 @@ class SaleItem(models.Model):
     def total_profit(self):
         """Calculate total profit for this item"""
         return self.profit_per_item * self.quantity
+    
+    @property
+    def profit_margin(self):
+        """Calculate profit margin for this item"""
+        if self.product.cost_price > 0:
+            return (self.profit_per_item / self.product.selling_price) * 100
+        return 0.0
 
     @property
     def profit_percentage(self):

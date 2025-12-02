@@ -120,6 +120,13 @@ class Product(models.Model):
         return 0.0
     
     @property
+    def profit_margin(self) -> Decimal:
+        """Calculate profit margin"""
+        if self.cost_price > 0:
+            return Decimal((self.profit / self.selling_price) * 100)
+        return 0.0
+    
+    @property
     def tags_list(self) -> list[str]:
         """Return tags as a list"""
         if not self.tags:

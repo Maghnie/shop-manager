@@ -1,11 +1,6 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* Arabic font optimization */
+/* Arabic font optimization - font-family managed in tailwind.config.js */
 body {
-  font-family: 'Segoe UI', 'Tahoma', 'Arial', 'Helvetica Neue', sans-serif;
-  direction: rtl; 
+  direction: rtl;
 }
 
 /* Custom scrollbar for RTL */
@@ -33,8 +28,11 @@ body {
   --tw-space-x-reverse: 1;
 }
 
-/* Input number styling for RTL */
-input[type="number"] {
+/* Input number and tel styling for RTL - numbers should be LTR */
+input[type="number"],
+input[type="tel"],
+.ltr-numbers {
+  direction: ltr;
   text-align: left;
 }
 
@@ -50,73 +48,7 @@ table {
   width: 100%;
 }
 
-/* Loading animation */
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: .5;
-  }
-}
 
-.animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-/* Smooth transitions */
-.transition-all {
-  transition-property: all;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 300ms;
-}
-
-/* Custom button styles */
-.btn-primary {
-  @apply bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition duration-200 font-semibold;
-}
-
-.btn-secondary {
-  @apply bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition duration-200 font-semibold;
-}
-
-.btn-success {
-  @apply bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition duration-200 font-semibold;
-}
-
-.btn-danger {
-  @apply bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-600 transition duration-200 font-semibold;
-}
-
-/* Custom card styles */
-.card {
-  @apply bg-white rounded-xl shadow-lg p-6;
-}
-
-.card-header {
-  @apply border-b border-gray-200 pb-4 mb-6;
-}
-
-/* Form styles */
-.form-group {
-  @apply mb-6;
-}
-
-.form-label {
-  @apply block text-sm font-medium text-gray-700 mb-2;
-}
-
-.form-input {
-  @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200;
-}
-
-.form-input:focus {
-  @apply outline-none ring-2 ring-blue-500 border-transparent;
-}
-
-.form-error {
-  @apply text-red-500 text-sm mt-1;
-}
 
 /* Table styles */
 .table {
@@ -135,76 +67,5 @@ table {
   @apply bg-gray-50;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .container {
-    @apply px-4;
-  }
-  
-  .grid-responsive {
-    @apply grid-cols-1;
-  }
-  
-  .text-responsive {
-    @apply text-lg;
-  }
-}
 
-/* Print styles */
-@media print {
-  .no-print {
-    display: none !important;
-  }
-  
-  .chart-container {
-    break-inside: avoid;
-    page-break-inside: avoid;
-  }
-}
 
-/* Accessibility improvements */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-/* Focus styles for better accessibility */
-.focus-visible:focus {
-  @apply outline-none ring-2 ring-blue-500 ring-offset-2;
-}
-
-/* Custom animations */
-@keyframes slideInRight {
-  from {
-    opacity: 0;
-    transform: translateX(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.animate-slide-in-right {
-  animation: slideInRight 0.3s ease-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.5s ease-out;
-}

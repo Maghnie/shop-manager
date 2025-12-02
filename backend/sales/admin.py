@@ -8,8 +8,8 @@ from .models import Sale, SaleItem, Invoice
 class SaleItemInline(admin.TabularInline):
     model = SaleItem
     extra = 0
-    readonly_fields = ('total_price', 'profit_per_item', 'total_profit', 'profit_percentage')
-    fields = ('product', 'quantity', 'unit_price', 'total_price', 'profit_per_item', 'total_profit', 'profit_percentage')
+    readonly_fields = ('total_price', 'profit_per_item', 'total_profit', 'profit_margin', 'profit_percentage')
+    fields = ('product', 'quantity', 'unit_price', 'total_price', 'profit_per_item', 'total_profit', 'profit_margin', 'profit_percentage')
 
 
 @admin.register(Sale)
@@ -17,7 +17,7 @@ class SaleAdmin(admin.ModelAdmin):
     list_display = ('sale_number', 'customer_display', 'sale_date', 'payment_method', 'status', 'final_total', 'net_profit', 'created_by')
     list_filter = ('status', 'payment_method', 'sale_date', 'created_by')
     search_fields = ('sale_number', 'customer_name', 'customer_phone', 'notes')
-    readonly_fields = ('sale_number', 'subtotal', 'total_cost', 'gross_profit', 'discount_applied', 'tax_amount', 'final_total', 'net_profit', 'profit_percentage', 'created_at', 'updated_at')
+    readonly_fields = ('sale_number', 'subtotal', 'total_cost', 'gross_profit', 'discount_applied', 'tax_amount', 'final_total', 'net_profit', 'profit_margin', 'profit_percentage', 'created_at', 'updated_at')
     inlines = [SaleItemInline]
 
     fieldsets = (
@@ -31,7 +31,7 @@ class SaleAdmin(admin.ModelAdmin):
             'fields': ('payment_method', 'discount_amount', 'tax_percentage', 'notes')
         }),
         ('الحسابات', {
-            'fields': ('subtotal', 'discount_applied', 'tax_amount', 'final_total', 'total_cost', 'gross_profit', 'net_profit', 'profit_percentage'),
+            'fields': ('subtotal', 'discount_applied', 'tax_amount', 'final_total', 'total_cost', 'gross_profit', 'net_profit', 'profit_margin', 'profit_percentage'),
             'classes': ('collapse',)
         }),
         ('معلومات النظام', {

@@ -6,9 +6,10 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Load environment variables from the root .env file
-env_file_loaded = load_dotenv(BASE_DIR.parent / '.env')
+env_file_path = Path('.env')
+env_file_loaded = load_dotenv(env_file_path)
 if not env_file_loaded:
-    print("Did not find env file - using default values.")
+    print(f'Did not find env file from {env_file_path} - using default values.')
 
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
@@ -210,19 +211,8 @@ LOGGING = {
 
 CACHES = {
     'default': {
-        # For production, uncomment Redis configuration:
-        # 'BACKEND': 'django_redis.cache.RedisCache',
-        # 'LOCATION': 'redis://127.0.0.1:6379/1',
-        # 'OPTIONS': {
-        #     'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-        # },
-        
-        # For development/testing, use database cache:
         'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
         'LOCATION': 'analytics_cache_table',
-        
-        # Fallback to dummy cache if database cache fails:
-        # 'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
     }
 }
 

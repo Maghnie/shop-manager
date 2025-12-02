@@ -1,5 +1,3 @@
-# management/commands/populate_inventory.py
-
 import random
 from django.core.management.base import BaseCommand
 from inventory.models import Product, Inventory

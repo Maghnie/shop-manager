@@ -3,32 +3,20 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import axios from 'axios';
 import { Toaster } from 'react-hot-toast';
 
-// TODO refactor imports to the style of the analytics app further below
-
-// Existing components
+// General components
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
-import ProductList from './pages/ProductOverview';
-import ArchivedProducts from './pages/ArchivedProducts';
-import ProductForm from './components/ProductForm';
 import Navbar from './components/Navbar';
 
-// Sales components
-import { SalesList, SaleForm, SaleDetail, SalesDashboard } from '@/apps/sales';
-
-// Invoice components
-import InvoicesList from './components/invoices/InvoicesList';
-import InvoiceDetail from './components/invoices/InvoiceDetail';
-
-// Inventory components
-import InventoryList from './components/inventory/InventoryList';
-
+// Specialized components
+import { SalesList, SaleForm, SaleDetail, SalesDashboard, InvoicesList, InvoiceDetail } from '@/apps/sales';
+import { ProductOverview, ArchivedProducts, ProductForm, InventoryList } from '@/apps/inventory';
 import { AnalyticsDashboard } from '@/apps/analytics';
 
 import './App.css';
 
 // Configure axios defaults
-axios.defaults.baseURL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api/v1/';
+axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 
 const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true); // TODO: Set to false in production
@@ -57,7 +45,7 @@ const App: React.FC = () => {
 
   if (loading) {
     return (
-      <div dir="rtl" className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-xl text-gray-600">جاري التحميل...</div>
       </div>
     );
@@ -65,7 +53,7 @@ const App: React.FC = () => {
 
   return (
     <Router>
-      <div className="min-h-screen w-full bg-gray-50 " dir="rtl">
+      <div className="min-h-screen w-full bg-gray-50">
         {isAuthenticated && <Navbar onLogout={handleLogout} />}
 
         <div className={isAuthenticated ? 'pt-16' : ''}>
@@ -95,7 +83,7 @@ const App: React.FC = () => {
               <Route
                 path="/products"
                 element={
-                  isAuthenticated ? <ProductList /> : <Navigate to="/login" />
+                  isAuthenticated ? <ProductOverview /> : <Navigate to="/login" />
                 }
               />
               <Route

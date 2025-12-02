@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-import ProductTable from "@/components/products/ProductTable";
-import { fetchArchivedProducts, toggleProductArchive } from "@/services/productService";
-import { type Product } from "@/types/product";
+import ProductTable from "../components/ProductTable";
+import { fetchArchivedProducts, toggleProductArchive } from "../services/productService";
+import { type Product } from "../../../types/product";
 import toast from 'react-hot-toast';
 
 

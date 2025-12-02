@@ -63,6 +63,7 @@ const ProductRow: React.FC<Props> = ({
         <td className="py-4 px-6 text-gray-700">{formatCurrency(product.cost_price)}</td>
         <td className="py-4 px-6 text-gray-900 font-semibold bg-yellow-50">{formatCurrency(product.selling_price)}</td>
         <td className="py-4 px-6 text-green-600 font-medium">{formatCurrency(product.profit)}</td>
+        <td className="py-4 px-6 text-green-600 font-medium">{Number(product.profit_margin).toFixed(1)}%</td>
         <td className="py-4 px-6 text-green-600 font-medium">{Number(product.profit_percentage).toFixed(1)}%</td>
         <td className="py-4 px-6">
           <div className="flex flex-wrap gap-1">

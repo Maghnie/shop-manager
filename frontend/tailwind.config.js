@@ -5,7 +5,20 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        sans: [
+          'Cairo',
+          'Tahoma',
+          'Segoe UI',
+          'Droid Arabic Naskh',
+          'Simplified Arabic',
+          'Traditional Arabic',
+          'Arial',
+          'sans-serif'
+        ],
+      },
+    },
   },
   plugins: [
     require('@tailwindcss/typography'),

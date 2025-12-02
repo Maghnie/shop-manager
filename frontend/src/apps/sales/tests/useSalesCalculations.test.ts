@@ -3,6 +3,8 @@ import { renderHook } from '@testing-library/react';
 import { useSalesCalculations } from '../hooks/useSalesCalculations';
 import type { Sale, Product } from '@/types/product';
 
+//TODO check math
+
 describe('useSalesCalculations', () => {
   const mockProducts: Product[] = [
     {

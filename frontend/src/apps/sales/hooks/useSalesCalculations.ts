@@ -8,6 +8,7 @@ interface SalesCalculations {
   taxAmount: number;
   finalTotal: number;
   netProfit: number;
+  profitMargin: number;
   profitPercentage: number;
 }
 
@@ -26,6 +27,7 @@ export const useSalesCalculations = (
         taxAmount: 0,
         finalTotal: 0,
         netProfit: 0,
+        profitMargin: 0,
         profitPercentage: 0
       };
     }
@@ -57,6 +59,7 @@ export const useSalesCalculations = (
     const finalTotal = subtotal - discountAmount + taxAmount;
     const netProfit = finalTotal - totalCost;
     
+    const profitMargin = totalCost > 0 ? (netProfit / finalTotal) * 100 : 0;
     const profitPercentage = totalCost > 0 ? (netProfit / totalCost) * 100 : 0;
 
     return {
@@ -66,6 +69,7 @@ export const useSalesCalculations = (
       taxAmount,
       finalTotal,
       netProfit,
+      profitMargin,
       profitPercentage
     };
   }, [formData, products]);
