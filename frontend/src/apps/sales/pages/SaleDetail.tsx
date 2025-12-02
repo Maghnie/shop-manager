@@ -278,7 +278,8 @@ export const SaleDetail: React.FC = () => {
                   <>
                     <th className="text-center py-3 px-4 font-semibold text-gray-700 bg-green-100">الربح/الوحدة</th>
                     <th className="text-center py-3 px-4 font-semibold text-gray-700 bg-green-100">إجمالي الربح</th>
-                    <th className="text-center py-3 px-4 font-semibold text-gray-700 bg-green-100">نسبة الربح</th>
+                    <th className="text-center py-3 px-4 font-semibold text-gray-700 bg-green-100">هامش الربح</th>
+                    <th className="text-center py-3 px-4 font-semibold text-gray-700 bg-green-100">عائد الاستثمار</th>
                   </>
                 )}
               </tr>
@@ -304,6 +305,9 @@ export const SaleDetail: React.FC = () => {
                       </td>
                       <td className="py-3 px-4 text-center text-green-600 font-semibold bg-green-50">
                         {formatCurrency(item.total_profit!)}
+                      </td>
+                      <td className="py-3 px-4 text-center text-green-600 font-medium bg-green-50">
+                        {item.profit_margin!.toFixed(1)}%
                       </td>
                       <td className="py-3 px-4 text-center text-green-600 font-medium bg-green-50">
                         {item.profit_percentage!.toFixed(1)}%
@@ -372,7 +376,11 @@ export const SaleDetail: React.FC = () => {
                 <span className="font-semibold text-green-600">{formatCurrency(sale.net_profit!)}</span>
               </div>
               <div className="flex justify-between text-lg font-bold border-t pt-3 border-green-300">
-                <span className="text-green-800">نسبة الربح:</span>
+                <span className="text-green-800">هامش الربح:</span>
+                <span className="text-green-600">{sale.profit_margin!.toFixed(1)}%</span>
+              </div>
+              <div className="flex justify-between text-lg font-bold border-t pt-3 border-green-300">
+                <span className="text-green-800">عائد الاستثمار:</span>
                 <span className="text-green-600">{sale.profit_percentage!.toFixed(1)}%</span>
               </div>
             </div>

@@ -7,6 +7,7 @@ interface SaleSummaryProps {
   finalTotal: number;
   totalCost: number;
   netProfit: number;
+  profitMargin: number;
   profitPercentage: number;
 }
 
@@ -17,6 +18,7 @@ export const SaleSummary: React.FC<SaleSummaryProps> = ({
   finalTotal,
   totalCost,
   netProfit,
+  profitMargin,
   profitPercentage
 }) => {
   const formatCurrency = (amount: number) => {
@@ -60,7 +62,13 @@ export const SaleSummary: React.FC<SaleSummaryProps> = ({
             </span>
           </div>
           <div className="flex justify-between text-sm">
-            <span>نسبة الربح:</span>
+            <span>هامش الربح:</span>
+            <span className={`font-semibold ${profitMargin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {profitMargin.toFixed(1)}%
+            </span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span>عائد الاستثمار:</span>
             <span className={`font-semibold ${profitPercentage >= 0 ? 'text-green-600' : 'text-red-600'}`}>
               {profitPercentage.toFixed(1)}%
             </span>

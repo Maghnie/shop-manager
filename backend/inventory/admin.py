@@ -30,10 +30,10 @@ class InventoryInline(admin.TabularInline):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('__str__', 'type', 'brand', 'cost_price', 'selling_price', 'profit', 'profit_percentage', 'get_stock_level', 'created_by', 'created_at')
+    list_display = ('__str__', 'type', 'brand', 'cost_price', 'selling_price', 'profit', 'profit_margin', 'profit_percentage', 'get_stock_level', 'created_by', 'created_at')
     list_filter = ('type', 'brand', 'material', 'created_at')
     search_fields = ('type__name_ar', 'brand__name_ar', 'size', 'tags')
-    readonly_fields = ('profit', 'profit_percentage', 'tags_list', 'created_at', 'updated_at')
+    readonly_fields = ('profit', 'profit_margin', 'profit_percentage', 'tags_list', 'created_at', 'updated_at')
     inlines = [InventoryInline]
 
     fieldsets = (
@@ -41,7 +41,7 @@ class ProductAdmin(admin.ModelAdmin):
             'fields': ('type', 'brand', 'material')
         }),
         ('أسعار', {
-            'fields': ('cost_price', 'selling_price', 'profit', 'profit_percentage')
+            'fields': ('cost_price', 'selling_price', 'profit', 'profit_margin', 'profit_percentage')
         }),
         ('تفاصيل إضافية', {
             'fields': ('size', 'weight', 'tags', 'tags_list'),

@@ -14,6 +14,7 @@ interface Sale {
   items_count: number;
   final_total: number;
   net_profit: number;
+  profit_margin: number;
   profit_percentage: number;
 }
 
@@ -251,7 +252,8 @@ export const SalesList: React.FC = () => {
                 {showOptionalColumns && <th className="text-right py-4 px-6 font-semibold text-gray-700">طريقة الدفع</th>}
                 <th className="text-right py-4 px-6 font-semibold text-gray-700">الإجمالي</th>
                 <th className="text-right py-4 px-6 font-semibold text-gray-700 bg-green-100">الربح</th>
-                <th className="text-right py-4 px-6 font-semibold text-gray-700">نسبة الربح</th>
+                <th className="text-right py-4 px-6 font-semibold text-gray-700 bg-green-100">هامش الربح</th>
+                <th className="text-right py-4 px-6 font-semibold text-gray-700">عائد الاستثمار</th>
                 {showOptionalColumns && <th className="text-center py-4 px-6 font-semibold text-gray-700">الحالة</th>}
                 <th className="text-center py-4 px-6 font-semibold text-gray-700">الإجراءات</th>
               </tr>
@@ -282,6 +284,9 @@ export const SalesList: React.FC = () => {
                     <td className="py-4 px-6 font-semibold">{formatCurrency(sale.final_total)}</td>
                     <td className="py-4 px-6 text-green-600 font-semibold bg-green-50">
                       {formatCurrency(sale.net_profit)}
+                    </td>
+                    <td className="py-4 px-6 text-green-600 font-semibold">
+                      {sale.profit_margin.toFixed(1)}%
                     </td>
                     <td className="py-4 px-6 text-green-600 font-semibold">
                       {sale.profit_percentage.toFixed(1)}%

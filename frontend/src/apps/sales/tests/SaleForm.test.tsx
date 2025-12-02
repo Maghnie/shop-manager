@@ -4,6 +4,8 @@ import { BrowserRouter } from 'react-router-dom';
 import { SaleForm } from '../pages/SaleForm';
 import type { Product } from '@/types/product';
 
+//TODO check math
+
 // Mock the services
 vi.mock('../services/saleService', () => ({
   SalesService: {
@@ -128,6 +130,7 @@ describe('SaleForm', () => {
       taxAmount: 0,
       finalTotal: 0,
       netProfit: 0,
+      profitMargin: 0,
       profitPercentage: 0,
     });
   });

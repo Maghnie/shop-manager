@@ -10,6 +10,7 @@ export interface SaleItem {
   total_price?: number;
   profit_per_item?: number;
   total_profit?: number;
+  profit_margin?: number;
   profit_percentage?: number;
 }
 
@@ -38,6 +39,7 @@ export interface Sale {
   tax_amount?: number;
   final_total?: number;
   net_profit?: number;
+  profit_margin?: number;
   profit_percentage?: number;
 }
 
@@ -52,6 +54,7 @@ export interface SaleListItem {
   items_count: number;
   final_total: number;
   net_profit: number;
+  profit_margin: number;
   profit_percentage: number;
 }
 

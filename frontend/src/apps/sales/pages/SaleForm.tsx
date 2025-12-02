@@ -46,6 +46,7 @@ export const SaleForm: React.FC = () => {
     taxAmount, 
     finalTotal, 
     netProfit, 
+    profitMargin,
     profitPercentage 
   } = useSalesCalculations(formData, products);
 
@@ -363,6 +364,7 @@ export const SaleForm: React.FC = () => {
                     finalTotal={finalTotal}
                     totalCost={totalCost}
                     netProfit={netProfit}
+                    profitMargin={profitMargin}
                     profitPercentage={profitPercentage}
                   />
                 ) : (

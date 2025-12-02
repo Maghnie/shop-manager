@@ -13,6 +13,7 @@ class SaleItemSerializer(serializers.ModelSerializer):
     total_price = serializers.ReadOnlyField()
     profit_per_item = serializers.ReadOnlyField()
     total_profit = serializers.ReadOnlyField()
+    profit_margin = serializers.ReadOnlyField()
     profit_percentage = serializers.ReadOnlyField()
 
     class Meta:
@@ -20,7 +21,7 @@ class SaleItemSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'product', 'quantity', 'unit_price',
             'product_name_ar', 'product_brand_ar', 'available_stock',
-            'total_price', 'profit_per_item', 'total_profit', 'profit_percentage'
+            'total_price', 'profit_per_item', 'total_profit', 'profit_margin', 'profit_percentage'
         ]
 
     def validate(self, data):
@@ -49,6 +50,7 @@ class SaleSerializer(serializers.ModelSerializer):
     tax_amount = serializers.ReadOnlyField()
     final_total = serializers.ReadOnlyField()
     net_profit = serializers.ReadOnlyField()
+    profit_margin = serializers.ReadOnlyField()
     profit_percentage = serializers.ReadOnlyField()
 
     class Meta:
@@ -60,7 +62,7 @@ class SaleSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at', 'items',
             # Computed fields
             'subtotal', 'total_cost', 'gross_profit', 'discount_applied',
-            'tax_amount', 'final_total', 'net_profit', 'profit_percentage'
+            'tax_amount', 'final_total', 'net_profit', 'profit_margin', 'profit_percentage'
         ]
         read_only_fields = ['sale_number', 'created_by', 'created_at', 'updated_at']
 
@@ -137,6 +139,7 @@ class SaleListSerializer(serializers.ModelSerializer):
     # Key computed fields only
     final_total = serializers.ReadOnlyField()
     net_profit = serializers.ReadOnlyField()
+    profit_margin = serializers.ReadOnlyField()
     profit_percentage = serializers.ReadOnlyField()
 
     class Meta:
@@ -144,7 +147,7 @@ class SaleListSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'sale_number', 'sale_date', 'customer_name', 'payment_method',
             'status', 'created_by_name', 'items_count', 'final_total',
-            'net_profit', 'profit_percentage'
+            'net_profit', 'profit_margin', 'profit_percentage'
         ]
 
 

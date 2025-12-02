@@ -59,6 +59,7 @@ class SaleModelTestCase(TestCase):
 
     def test_sale_calculations_no_discount_no_tax(self):
         """
+        #TODO fix math
         Test: Basic sales calculation without discount or tax
 
         Given: A sale with 2 items:
@@ -118,6 +119,9 @@ class SaleModelTestCase(TestCase):
 
         # Net profit: 60 - 40 = 20
         self.assertEqual(sale.net_profit, Decimal('20.00'))
+
+        # Profit percentage: (20 / 40) * 100 = 50%
+        self.assertEqual(sale.profit_margin, Decimal('50.00'))
 
         # Profit percentage: (20 / 40) * 100 = 50%
         self.assertEqual(sale.profit_percentage, Decimal('50.00'))

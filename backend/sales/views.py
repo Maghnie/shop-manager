@@ -280,13 +280,13 @@ class InvoiceViewSet(ModelViewSet):
         sale_data = invoice_data['sale_details']
 
         # Remove profit-related fields from the response
-        profit_fields = ['total_cost', 'gross_profit', 'net_profit', 'profit_percentage']
+        profit_fields = ['total_cost', 'gross_profit', 'net_profit', 'profit_margin', 'profit_percentage']
         for field in profit_fields:
             sale_data.pop(field, None)
 
         # Remove profit fields from items
         for item in sale_data['items']:
-            item_profit_fields = ['profit_per_item', 'total_profit', 'profit_percentage']
+            item_profit_fields = ['profit_per_item', 'total_profit', 'profit_margin', 'profit_percentage']
             for field in item_profit_fields:
                 item.pop(field, None)
 

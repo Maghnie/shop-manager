@@ -18,6 +18,7 @@ export interface Product {
   tags: string;
   tags_list: string[];
   profit: number;
+  profit_margin: number;
   profit_percentage: number;
   created_at: string;
   updated_at: string;

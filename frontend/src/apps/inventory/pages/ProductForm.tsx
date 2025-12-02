@@ -251,17 +251,18 @@ const ProductForm: React.FC = () => {
     }
   };
 
-
-  const calculateProfit = (): { profit: number; profitPct: number } => {
+  //TODO just use an API endpoint?
+  const calculateProfit = (): { profit: number; profitMgn: number; profitPct: number } => {
     const cost = parseFloat(formData.cost_price) || 0;
     const selling = parseFloat(formData.selling_price) || 0;
     const profit = selling - cost;
+    const profitMgn = cost > 0 ? (profit / selling) * 100 : 0;
     const profitPct = cost > 0 ? (profit / cost) * 100 : 0;
     
-    return { profit, profitPct };
+    return { profit, profitMgn, profitPct };
   };
 
-  const { profit, profitPct } = calculateProfit();
+  const { profit, profitMgn, profitPct } = calculateProfit();
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
@@ -459,7 +460,13 @@ const ProductForm: React.FC = () => {
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">نسبة الربح</p>
+                <p className="text-sm text-gray-600">هامش الربح</p>
+                <p className={`text-2xl font-bold ${profitMgn >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {profitMgn.toFixed(1)}%
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">عائد الاستثمار</p>
                 <p className={`text-2xl font-bold ${profitPct >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                   {profitPct.toFixed(1)}%
                 </p>
