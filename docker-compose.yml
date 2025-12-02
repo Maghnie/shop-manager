@@ -6,7 +6,6 @@ services:
     restart: unless-stopped
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./db_backups/backup_20251114_144619_FIXED.sql:/docker-entrypoint-initdb.d/backup.sql
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-shop_db}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}

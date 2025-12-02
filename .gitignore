@@ -19,6 +19,7 @@ node_modules/
 tsconfig.tsbuildinfo
 deployments/
 slides/
+*.log
 
 # Testing
 coverage/

@@ -194,7 +194,7 @@ clean:
 
 clean-all:
 	docker-compose down -v --rmi all
-	docker system prune -f
+	docker system prune -a --volumes -f
 
 # Production commands
 prod-build:
